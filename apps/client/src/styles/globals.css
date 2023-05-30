@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+	min-width: 360px;
+	scroll-behavior: smooth;
+}
+
+#__next {
+	@apply bg-gray-50 dark:bg-gray-900;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+html {
+	box-sizing: border-box;
+	scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+	background-color: #f3f3f3;
+}
+
+::-webkit-scrollbar {
+	display: none;
+}
+
+pre {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.bg-linear-suface--dark-path {
+	background: linear-gradient(
+			0deg,
+			rgba(208, 188, 255, 0.11),
+			rgba(208, 188, 255, 0.11)
+		),
+		#1c1b1f;
+}
+
+.bg-linear-suface--dark-btn {
+	background: linear-gradient(
+			0deg,
+			rgba(208, 188, 255, 0.11),
+			rgba(208, 188, 255, 0.11)
+		),
+		#1c1b1f;
+}
+.bg-linear-suface--dark-btn:hover {
+	background: linear-gradient(
+			0deg,
+			rgba(208, 188, 255, 0.12),
+			rgba(208, 188, 255, 0.12)
+		),
+		#1c1b1f;
+}
+.bg-linear-suface--dark-btn:focus {
+	background: linear-gradient(
+			0deg,
+			rgba(208, 188, 255, 0.11),
+			rgba(208, 188, 255, 0.11)
+		),
+		#1c1b1f;
+}
+.bg-linear-suface--light-btn {
+	background: linear-gradient(
+			0deg,
+			rgba(103, 80, 164, 0.11),
+			rgba(103, 80, 164, 0.11)
+		),
+		#fffbfe;
+}
+.bg-linear-suface--light-btn:hover {
+	background: linear-gradient(
+			0deg,
+			rgba(103, 80, 164, 0.12),
+			rgba(103, 80, 164, 0.12)
+		),
+		#fffbfe;
+}
+.bg-linear-suface--light-btn:focus {
+	background: linear-gradient(
+			0deg,
+			rgba(103, 80, 164, 0.11),
+			rgba(103, 80, 164, 0.11)
+		),
+		#fffbfe;
+}
+.bgcard-linear-suface-1-v2--dark {
+	background: linear-gradient(
+			0deg,
+			rgba(208, 188, 255, 0.05),
+			rgba(208, 188, 255, 0.05)
+		),
+		#1c1b1f;
+}
