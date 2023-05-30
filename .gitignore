@@ -1,6 +1,5 @@
 .git
 _draft/
-.docker/
 
 # Dependencies
 node_modules
@@ -48,7 +47,6 @@ node_modules
 coverage
 lib
 .commitlintrc*
-.docker
 .DS_Store
 .editorconfig
 .eslintcache
