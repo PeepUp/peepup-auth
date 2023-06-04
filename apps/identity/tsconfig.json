@@ -1,0 +1,56 @@
+{
+   "compilerOptions": {
+      "target": "ES2017",
+      "lib": ["ES2017"],
+      "allowSyntheticDefaultImports": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "forceConsistentCasingInFileNames": true,
+      "moduleResolution": "node",
+      "module": "commonjs",
+      "pretty": true,
+      "explainFiles": true,
+      "sourceMap": true,
+      "declaration": true,
+      "allowJs": true,
+      "noEmit": false,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "importHelpers": true,
+      "outDir": "./build",
+      "isolatedModules": true,
+      "types": ["node"],
+      "removeComments": true,
+      "listEmittedFiles": false,
+      "listFiles": false,
+      "traceResolution": false,
+      "strict": true,
+      "alwaysStrict": true,
+      "strictPropertyInitialization": false,
+      "strictNullChecks": true,
+      "noUnusedLocals": false,
+      "noUnusedParameters": true,
+      "noImplicitReturns": true,
+      "noFallthroughCasesInSwitch": true,
+      "skipLibCheck": true,
+      "skipDefaultLibCheck": true,
+      "baseUrl": ".",
+      "paths": {
+         "*": ["src/*"],
+         "domain/*": ["src/domain/*"],
+         "common/*": ["src/common/*"],
+         "config/*": ["src/config/*"],
+         "application/*": ["src/application/*"],
+         "adapter/*": ["src/adapter/*"],
+         "infrastructure/*": ["src/infrastructure/*"]
+      },
+      "plugins": [
+         {
+            "name": "@rollup/plugin-typescript"
+         }
+      ]
+   },
+   "include": ["./src/**/*.ts"],
+   "compileOnSave": true,
+   "exclude": ["node_modules"]
+}

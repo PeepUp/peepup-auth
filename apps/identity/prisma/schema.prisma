@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relation fields
+  tokens Token[]
+
+  user       User?
+  provider   Provider? @relation(fields: [providerId], references: [id])
+  roles      Role[]
+  providerId Int?
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  type        UserRoleEnum @default(VOLUNTEER)
+  permissions Permission[]
+
+  // relation fields
+  userId Int?     @unique
+  user   Account? @relation(fields: [userId], references: [id])
+}
+
+model Permission {
+  id        Int   @id @default(autoincrement())
+  attribute Json?
+  roleId    Int?
+  role      Role? @relation(fields: [roleId], references: [id])
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String?
+  emailVerified DateTime?
+  image         String?
+  username      String    @unique
+  email         String?   @unique
+  password      String
+  phone         String    @unique
+
+  // relation fields
+  accountID Int?       @unique
+  account   Account?   @relation(fields: [accountID], references: [id])
+  Provider  Provider[]
+  Token     Token[]
+}
+
+model Provider {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  userProviderId      String
+  type                String
+  slug                String
+  tokenUrl            String
+  authUrl             String
+  clientId            String
+  clientSecret        String
+  scope               String
+  callbackUrl         String
+  state               String
+  nonce               String
+  params              String
+  version             String
+  accessToken         String
+  accessTokenExpires  DateTime?
+  refreshToken        String
+  refreshTokenExpires DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // relation fields
+  UserId  Int?
+  user    User?     @relation(fields: [UserId], references: [id])
+  Account Account[]
+}
+
+model Token {
+  id            Int       @id @default(autoincrement())
+  expires_at    DateTime?
+  access_token  String
+  refresh_token String
+
+  // relation fields
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  Account   Account? @relation(fields: [accountId], references: [id])
+  accountId Int?
+
+  @@index([userId], name: "userId")
+}
+
+enum UserRoleEnum {
+  ADMIN
+  VOLUNTEER
+  ORGANIZATION
+}
