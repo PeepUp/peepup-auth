@@ -22,6 +22,8 @@ model Account {
   provider   Provider? @relation(fields: [providerId], references: [id])
   roles      Role[]
   providerId Int?
+
+  @@map(name: "accounts")
 }
 
 model Role {
@@ -39,6 +41,8 @@ model Permission {
   attribute Json?
   roleId    Int?
   role      Role? @relation(fields: [roleId], references: [id])
+
+  @@map(name: "permissions")
 }
 
 model User {
@@ -56,6 +60,8 @@ model User {
   account   Account?   @relation(fields: [accountID], references: [id])
   Provider  Provider[]
   Token     Token[]
+
+  @@map(name: "users")
 }
 
 model Provider {
@@ -85,6 +91,8 @@ model Provider {
   UserId  Int?
   user    User?     @relation(fields: [UserId], references: [id])
   Account Account[]
+
+  @@map(name: "provider")
 }
 
 model Token {
@@ -100,6 +108,7 @@ model Token {
   accountId Int?
 
   @@index([userId], name: "userId")
+  @@map(name: "tokens")
 }
 
 enum UserRoleEnum {

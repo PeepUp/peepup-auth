@@ -4,13 +4,8 @@
  *
  */
 
-export interface BaseEntity {
-   readonly id: number;
-}
-
-export interface CompactEntity extends BaseEntity {
-   readonly createdAt: Date;
-   readonly updatedAt: Date;
+export interface EntityProps<T> {
+   props: T;
 }
 
 /*
@@ -26,10 +21,21 @@ export enum Role {
    ORGANIZATION,
 }
 
-export interface Account extends BaseEntity {
+export type Account = {
    readonly roles: Role;
    providerId: Date;
    readonly permissions: Permission[];
+};
+
+export interface UserProps {
+   id: number;
+   name: string;
+   username: string;
+   email: string;
+   emailVerified: Date;
+   password: string;
+   phone: string;
+   image: string;
 }
 
 export interface UserRole extends Permission {
@@ -37,9 +43,9 @@ export interface UserRole extends Permission {
    roleId: number;
 }
 
-export interface Permission extends BaseEntity {
-   readonly attributes: string[];
-}
+// export interface Permission extends BaseEntity {
+//    readonly attributes: string[];
+// }
 
 export enum PERMISSIONS {
    // ALL_PERMISSION

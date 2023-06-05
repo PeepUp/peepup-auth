@@ -1,6 +1,4 @@
 import { Config } from "jest";
-import { pathsToModuleNameMapper } from "ts-jest";
-import { compilerOptions } from "./tsconfig.json";
 
 const config: Config = {
    /* Preference settings */
@@ -17,9 +15,10 @@ const config: Config = {
    clearMocks: true,
    coveragePathIgnorePatterns: ["/node_modules"],
    collectCoverage: true,
-   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
-      prefix: "<rootDir>/src/**/*.ts",
-   }),
+   moduleNameMapper: {
+      "/^(.*)$/":
+         "/home/tortuga/Documents/project/doFavour/apps/identity/src/lib/$1",
+   },
 };
 
 export default config;

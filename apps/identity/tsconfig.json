@@ -2,7 +2,7 @@
    "compilerOptions": {
       "target": "esnext",
       "lib": ["esnext"],
-      "typeRoots": ["node_modules/@types"],
+      "typeRoots": ["node_modules/@types", "types/*.d.ts", "src/**/*.d.ts"],
       "allowSyntheticDefaultImports": true,
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
@@ -36,16 +36,16 @@
       "skipDefaultLibCheck": true,
       "baseUrl": ".",
       "paths": {
-         "/*": ["*"],
-         "config/*": ["src/config"],
-         "common/*": ["src/common/*"],
-         "application/*": ["src/application/*"],
+         "*": ["src/*"],
          "domain/*": ["src/domain/*"],
-         "adapter/*": ["src/adapter/*"],
-         "infrastructure/*": ["src/infrastructure/*"]
+         "tests/*": ["tests/*"],
+         "config/*": ["src/domain/*"],
+         "application/*": ["src/application/*"],
+         "infrastructure/*": ["src/infrastructure/*"],
+         "interfaces/*": ["src/adapter/*"]
       }
    },
-   "include": ["src/**/*.ts"],
+   "include": ["./src/**/*.ts", "./tests/**/*.ts"],
    "compileOnSave": false,
-   "exclude": ["node_modules"]
+   "exclude": ["node_modules", "**/*.js"]
 }

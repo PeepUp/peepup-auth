@@ -22,13 +22,15 @@ const asyncRoutes: FastifyPluginAsync = async (
    server.route({
       method: "GET",
       url: "/check-health",
+
       handler: async (
          _request: FastifyRequest,
          reply: FastifyReply
       ): Promise<unknown> => {
          return reply.send({
             code: 200,
-            result: "ok",
+            status: "up",
+            ok: true,
             type: "application/json",
             location: "http://localhost:4334/check-health",
             url: "http://localhost:4334/check-health",
@@ -43,8 +45,6 @@ const asyncRoutes: FastifyPluginAsync = async (
                '{"group":"default","max_age":31536000,"endpoints":[{"url":"https://localhost:4334/report"}],"include_subdomains":true}',
             path: "/check-health",
             allow: "GET, POST, PUT, DELETE",
-            qwerty: "qwerty",
-            status: "ok",
             message: "server is running",
             timestamp: Date.now(),
             level: "info",

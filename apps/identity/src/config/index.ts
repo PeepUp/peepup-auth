@@ -1,10 +1,11 @@
-const env: NodeJS.ProcessEnv = process.env;
-export const node_env = env.NODE_ENV ?? "development";
-
 const schema = {
    type: "object",
    required: [],
    properties: {
+      WHITE_LISTED_DOMAINS: {
+         type: "array",
+         default: ["http://localhost:3000"],
+      },
       PORT: {
          type: "number",
          default: 4334,
@@ -58,11 +59,9 @@ const schema = {
 
 const environment = {
    confKey: "config",
-   schema: schema,
-   dotenv: {
-      path: `${__dirname}/.env`,
-      debug: node_env === "development",
-   },
+   dotenv: true,
+   schema,
+   data: process.env,
 };
 
 export default environment;
