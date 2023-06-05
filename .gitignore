@@ -1,6 +1,7 @@
 .git
 _draft/
-
+postgres-data/
+data/
 # Dependencies
 node_modules
 .pnp

@@ -1,7 +1,8 @@
 {
    "compilerOptions": {
-      "target": "ES2017",
-      "lib": ["ES2017"],
+      "target": "esnext",
+      "lib": ["esnext"],
+      "typeRoots": ["node_modules/@types"],
       "allowSyntheticDefaultImports": true,
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
@@ -9,7 +10,6 @@
       "moduleResolution": "node",
       "module": "commonjs",
       "pretty": true,
-      "explainFiles": true,
       "sourceMap": true,
       "declaration": true,
       "allowJs": true,
@@ -17,9 +17,9 @@
       "esModuleInterop": true,
       "resolveJsonModule": true,
       "importHelpers": true,
-      "outDir": "./build",
+      "outDir": "./dist",
       "isolatedModules": true,
-      "types": ["node"],
+      "types": ["node", "jest"],
       "removeComments": true,
       "listEmittedFiles": false,
       "listFiles": false,
@@ -36,21 +36,16 @@
       "skipDefaultLibCheck": true,
       "baseUrl": ".",
       "paths": {
-         "*": ["src/*"],
-         "domain/*": ["src/domain/*"],
+         "/*": ["*"],
+         "config/*": ["src/config"],
          "common/*": ["src/common/*"],
-         "config/*": ["src/config/*"],
          "application/*": ["src/application/*"],
+         "domain/*": ["src/domain/*"],
          "adapter/*": ["src/adapter/*"],
          "infrastructure/*": ["src/infrastructure/*"]
-      },
-      "plugins": [
-         {
-            "name": "@rollup/plugin-typescript"
-         }
-      ]
+      }
    },
-   "include": ["./src/**/*.ts"],
-   "compileOnSave": true,
+   "include": ["src/**/*.ts"],
+   "compileOnSave": false,
    "exclude": ["node_modules"]
 }

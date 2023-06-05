@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+   auth-service-database:
+      container_name: postgres
+      image: "postgres:latest"
+      restart: always
+      ports:
+         - 15432:5432
+      env_file:
+         - ./apps/identity/.env
+      networks:
+         - auth-service-network
+      volumes:
+         - ./data/:/var/lib/postgresql/data/
+      logging:
+         options:
+            max-size: 10m
+            max-file: "3"
+
+networks:
+   auth-service-network:
+      driver: bridge

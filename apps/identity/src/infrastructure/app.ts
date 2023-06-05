@@ -10,6 +10,6 @@ import type { FastifyInstance } from "fastify";
 const server: FastifyInstance<Server, IncomingMessage, ServerResponse> =
    fastify({ logger: node_env === "test" ? false : true });
 
-async () => await server.register(fastifyEnv, environment).after(() => {});
+async () => await server.register(fastifyEnv, environment);
 
 export { server };
