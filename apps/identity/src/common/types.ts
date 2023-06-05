@@ -22,9 +22,15 @@ export enum Role {
 }
 
 export type Account = {
-   readonly roles: Role;
+   roles: Role[];
    providerId: Date;
-   readonly permissions: Permission[];
+   permissions: Permission[];
+   tokens: string[];
+};
+
+export type Tokens = {
+   accessToken: string;
+   refreshToken: string;
 };
 
 export interface UserProps {

@@ -3,18 +3,32 @@ title: Home
 description: The DoFavour API is a 
 ---
 
-import { React } from 'nextra/ssg'
+import {useEffect, useState} from "react";
  
 export const Home = () => {
+  const [data, setData] = useState(null);
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:4334/check-health')
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setData(JSON.stringify(data));
+        setLoading(false);
+      });
+  }, []);
   return (
 
     <>
     <div>
       <h1>
         <strong>Hii, </strong>
-        Welcome to DoFavour API!
+        Welcome to DoFavour API! 
       </h1>
-    </div>
+      <span>{data}</span>
+      </div>
     </>
   )
 }
