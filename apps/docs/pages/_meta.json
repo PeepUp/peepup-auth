@@ -1,0 +1,30 @@
+{
+   "index": {
+      "title": "Home",
+      "type": "page",
+      "hidden": true,
+      "theme": {
+         "sidebar": {
+            "background": "#f3f3f3",
+            "textColor": "#000",
+            "activeTextColor": "#000",
+            "width": "auto",
+            "depth": 1,
+            "sidebar": false,
+            "toc": false,
+            "footer": true,
+            "pagination": true,
+            "breadcrumb": false
+         }
+      }
+   },
+   "docs": {
+      "type": "page"
+   },
+   "contacts": {
+      "type": "page",
+      "theme": {
+         "layout": "raw"
+      }
+   }
+}
