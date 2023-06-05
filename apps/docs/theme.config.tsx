@@ -1,13 +1,8 @@
-import React from "react";
 import { useRouter } from "next/router";
+import React from "react";
 
 const config = {
    repository: "https://github.com/kbgjtn/doFavour",
-   search: true,
-   titleSuffix: "",
-   unstable_flexsearch: true,
-   unstable_faviconGlyph: "⚫️",
-   floatTOC: true,
    project: {
       link: "https://github.com/kbgjtn/doFavour",
       icon: (

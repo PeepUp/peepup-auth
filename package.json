@@ -7,7 +7,13 @@
       "dev": "turbo dev",
       "lint": "turbo lint",
       "clean": "turbo clean",
-      "format": "prettier --write \"**/*.{ts,tsx,md}\""
+      "test": "turbo test",
+      "migrate": "turbo db:migrate",
+      "format": "turbo db:format",
+      "seed": "turbo db:seed",
+      "generate": "turbo db:generate",
+      "studio": "turbo db:studio",
+      "prettier": "prettier --write \"**/*.{ts,tsx,md}\""
    },
    "devDependencies": {
       "eslint": "^8.42.0",

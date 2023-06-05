@@ -12,6 +12,10 @@
          "cache": false,
          "persistent": true
       },
+      "test": {
+         "cache": false,
+         "outputs": ["^test"]
+      },
       "clean": {
          "cache": false
       },
@@ -30,6 +34,10 @@
       "db:seed": {
          "cache": false,
          "outputs": ["^seed"]
+      },
+      "db:studio": {
+         "cache": false,
+         "outputs": ["^studio"]
       }
    }
 }

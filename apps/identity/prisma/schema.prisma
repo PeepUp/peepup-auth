@@ -56,10 +56,10 @@ model User {
   phone         String    @unique
 
   // relation fields
-  accountID Int?       @unique
-  account   Account?   @relation(fields: [accountID], references: [id])
-  Provider  Provider[]
-  Token     Token[]
+  accountId Int?       @unique
+  account   Account?   @relation(fields: [accountId], references: [id])
+  provider  Provider[]
+  tokens    Token[]
 
   @@map(name: "users")
 }
@@ -88,9 +88,9 @@ model Provider {
   updatedAt           DateTime  @updatedAt
 
   // relation fields
-  UserId  Int?
-  user    User?     @relation(fields: [UserId], references: [id])
-  Account Account[]
+  userId  Int?
+  user    User?     @relation(fields: [userId], references: [id])
+  account Account[]
 
   @@map(name: "provider")
 }
@@ -104,7 +104,7 @@ model Token {
   // relation fields
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
-  Account   Account? @relation(fields: [accountId], references: [id])
+  account   Account? @relation(fields: [accountId], references: [id])
   accountId Int?
 
   @@index([userId], name: "userId")
