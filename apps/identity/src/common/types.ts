@@ -4,9 +4,13 @@
  *
  */
 
-export interface EntityProps<T> {
-   props: T;
+export type ID = number | string;
+
+export interface Serializable {
+   id?: ID;
 }
+
+export interface Entity extends Serializable {}
 
 /*
  * @Enum Role
@@ -16,15 +20,41 @@ export interface EntityProps<T> {
  *
  * */
 export enum Role {
-   ADMIN,
-   VOLUNTEER,
-   ORGANIZATION,
+   ADMIN = "ADMIN",
+   VOLUNTEER = "VOLUNTEER",
+   ORGANIZATION = "ORGANIZATION",
 }
 
-export type Account = {
+export enum Resource {
+   ACCOUNT,
+   POST,
+   EVENT,
+   ORGANIZATION,
+   CAMPAIGN,
+}
+
+export interface UseCase {
+   execute(): Promise<Entity | Entity[] | string | number | boolean>;
+}
+
+export enum VolunteerResource {
+   ACCOUNT = "ACCOUNT",
+   POST = "POST",
+   EVENT = "EVENT",
+   ORGANIZATION = "ORGANIZATION",
+   CAMPAIGN = "CAMPAIGN",
+}
+
+export interface IVolunteerPolicy {
+   getVolunteerPolicy<T>(role: Role): T;
+   getPermission(role: Role): boolean;
+}
+
+export type AccountProps = {
    roles: Role[];
-   providerId: Date;
+   providerId: number;
    permissions: Permission[];
+   profile: UserProps;
    tokens: string[];
 };
 
@@ -33,8 +63,7 @@ export type Tokens = {
    refreshToken: string;
 };
 
-export interface UserProps {
-   id: number;
+export type UserProps = {
    name: string;
    username: string;
    email: string;
@@ -42,7 +71,7 @@ export interface UserProps {
    password: string;
    phone: string;
    image: string;
-}
+};
 
 export interface UserRole extends Permission {
    type: Role;

@@ -1,2 +1,3 @@
-export * from "./profile.js";
-export * from "./account.js";
+export * from "./profile";
+export * from "./account";
+export * from "./policy";

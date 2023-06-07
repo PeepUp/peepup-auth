@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { UUID, randomUUID } from "crypto";
 import { server } from "./infrastructure/app";
 const prisma = new PrismaClient({ log: ["query"] });
 
@@ -15,9 +14,6 @@ async function main() {
 
    await server.ready();
 }
-
-const a = randomUUID();
-console.log(a);
 
 server.addHook("onClose", (instance, done) => {
    instance.log.info("Server is shutting down...");

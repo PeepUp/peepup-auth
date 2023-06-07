@@ -1,5 +1,6 @@
-import { UserProps } from "common/types";
-import { UserProfile } from "../../../src/domain/entities/profile";
+/* import { UserProfile } from "../../../src/domain/entities/profile";
+
+import type { UserProps } from "../../../src/common/types";
 
 describe("Entity", () => {
    describe("create()", () => {
@@ -29,3 +30,4 @@ describe("Entity", () => {
       it("should throw an error if the email address is invalid format", () => {});
    });
 });
+ */

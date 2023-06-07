@@ -1,7 +1,6 @@
 import type { UserRole } from "./types";
 
 export function userRole(_value: UserRole) {
-   console.log("UserRole: ", _value);
    return function (target: {}, propertyKey: string) {
       let value: string;
 

@@ -1,10 +1,16 @@
 {
-	"name": "@tsconfig",
-	"version": "0.0.0",
-	"private": true,
-	"main": "index.js",
-	"license": "MIT",
-	"publishConfig": {
-		"access": "public"
-	}
+   "name": "@doFavour/tsconfig",
+   "version": "0.0.0",
+   "private": true,
+   "main": "index.js",
+   "license": "MIT",
+   "files": [
+      "base.json",
+      "common.json",
+      "nextjs.json",
+      "react-library.json"
+   ],
+   "publishConfig": {
+      "access": "public"
+   }
 }
