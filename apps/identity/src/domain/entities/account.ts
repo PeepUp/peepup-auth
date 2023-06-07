@@ -1,12 +1,27 @@
-import { Account, Permission, Provider, Role, User } from "@prisma/client";
-import { Entity } from "domain/base/entity";
+import {
+   AccountProps,
+   Entity,
+   ID,
+   Permission,
+   Role,
+   UserProps,
+} from "common/types";
 
-export class AccountEntity extends Entity<Account> {
-   private constructor({ props }: { props: Account }) {
-      super(props);
-   }
+import type { Account as AccountSchema, User } from "@prisma/client";
 
-   public equals(props: Entity<Account>): boolean {
-      return props.equals(props);
+export type AccountEntityTypes = Entity & AccountProps;
+
+export class AccountEntity implements AccountEntityTypes {
+   constructor(
+      public roles: Role[] = [],
+      public permissions: Permission[] = [],
+      public tokens: string[] = [],
+      public profile: UserProps = <UserProps>{},
+      public providerId: number = 0,
+      public createdAt: Date = new Date()
+   ) {}
+
+   set id(id: ID) {
+      this.id = id;
    }
 }

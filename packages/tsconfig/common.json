@@ -1,0 +1,25 @@
+{
+   "$schema": "http://json.schemastore.org/tsconfig",
+   "display": "Node.js",
+   "extends": "./base.json",
+   "compilerOptions": {
+      "module": "commonjs",
+      "lib": ["esnext"],
+      "target": "esnext",
+      "noImplicitAny": true,
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "removeComments": true,
+      "sourceMap": true,
+      "noFallthroughCasesInSwitch": true,
+      "emitDecoratorMetadata": true,
+      "pretty": true,
+      "allowJs": true,
+      "allowSyntheticDefaultImports": true,
+      // deploy set true
+      "noEmit": false,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "importHelpers": true
+   }
+}

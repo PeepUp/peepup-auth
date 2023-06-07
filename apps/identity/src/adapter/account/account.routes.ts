@@ -5,7 +5,7 @@ import type {
    FastifyRequest,
 } from "fastify";
 
-const asyncRoutes: FastifyPluginAsync = async (
+const accountRoutes: FastifyPluginAsync = async (
    server: FastifyInstance
 ): Promise<void> => {
    const path = "/account";
@@ -26,4 +26,4 @@ const asyncRoutes: FastifyPluginAsync = async (
    });
 };
 
-export default asyncRoutes;
+export { accountRoutes };

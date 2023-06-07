@@ -1,65 +1,19 @@
-import { Entity } from "../base/entity";
+import { Entity } from "common/types";
+
 import type { UserProps } from "common/types";
 
-export type UserPropsWithId = UserProps & { id: number };
+export type UserEntityTypes = Entity & UserProps;
 
-export class UserProfile extends Entity<Readonly<UserProps>> {
-   constructor(data: UserProps) {
-      super(data);
-   }
+export class UserProfile implements UserEntityTypes {
+   id?: number;
 
-   public static create({
-      email,
-      emailVerified,
-      image,
-      name,
-      password,
-      phone,
-      username,
-      id,
-   }: UserProps): Readonly<UserProps> {
-      const data = new UserProfile({
-         email,
-         emailVerified,
-         image,
-         name,
-         password,
-         phone,
-         username,
-         id,
-      });
-
-      return data.props;
-   }
-
-   get id(): number {
-      return this.id;
-   }
-
-   get email(): string {
-      return this.email;
-   }
-
-   set setemail(email: Required<UserProps["email"]>) {
-      this.email = email;
-   }
-   set emailVerified(date: Required<Date>) {
-      this.emailVerified = date;
-   }
-
-   set username(user_name: Required<UserProps["username"]>) {
-      this.username = user_name;
-   }
-
-   set email(email: Required<UserProps["email"]>) {
-      this.email = email;
-   }
-
-   get user(): Readonly<UserProfile> {
-      return this;
-   }
-
-   public equals(props: UserProfile): boolean {
-      return super.equals(props);
-   }
+   constructor(
+      public name: string,
+      public username: string,
+      public email: string,
+      public emailVerified: Date,
+      public password: string,
+      public phone: string,
+      public image: string
+   ) {}
 }
