@@ -28,7 +28,7 @@ model Account {
 
 model Role {
   id          Int          @id @default(autoincrement())
-  type        UserRoleEnum @default(VOLUNTEER)
+  type        UserRoleEnum @default(volunteer)
   permissions Permission[]
 
   // relation fields
@@ -37,12 +37,28 @@ model Role {
 }
 
 model Permission {
-  id        Int   @id @default(autoincrement())
-  attribute Json?
+  id       Int     @id @default(autoincrement())
+  action   String?
+  resource String?
+
   roleId    Int?
-  role      Role? @relation(fields: [roleId], references: [id])
+  role      Role?       @relation(fields: [roleId], references: [id])
+  attributes Attribute[]
 
   @@map(name: "permissions")
+}
+
+model Attribute {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relation fields
+  permissionId Int?
+  permission   Permission? @relation(fields: [permissionId], references: [id])
+  @@map("attributes")
 }
 
 model User {
@@ -112,7 +128,7 @@ model Token {
 }
 
 enum UserRoleEnum {
-  ADMIN
-  VOLUNTEER
-  ORGANIZATION
+  admin
+  volunteer
+  organization
 }

@@ -14,6 +14,6 @@ export class UserProfile implements UserEntityTypes {
       public emailVerified: Date,
       public password: string,
       public phone: string,
-      public image: string
+      public avatar: string
    ) {}
 }

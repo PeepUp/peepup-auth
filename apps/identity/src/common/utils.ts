@@ -1,24 +1,28 @@
-import type { UserRole } from "./types";
-
-export function userRole(_value: UserRole) {
-   return function (target: {}, propertyKey: string) {
-      let value: string;
-
-      const getter = function () {
-         return value;
-      };
-
-      const setter = function (newVal: string) {
-         if (newVal === undefined) {
-            value = value;
-         } else {
-            value = newVal;
+export const utils = {
+   type(o: unknown): string {
+      if (o === null) {
+         return "null";
+      }
+      if (o === undefined) {
+         return "undefined";
+      }
+      return (
+         Object.prototype.toString
+            .call(o)
+            .match(/\s(\w+)/i)?.[1]
+            .toLowerCase() ?? ""
+      );
+   },
+   deepFreeze(o: any): any {
+      if (utils.type(o) !== "object") return;
+      const props = Object.getOwnPropertyNames(o);
+      props.forEach((key: string) => {
+         let sub = o[key];
+         if (Array.isArray(sub)) Object.freeze(sub);
+         if (utils.type(sub) === "object") {
+            utils.deepFreeze(sub);
          }
-      };
-
-      Object.defineProperty(target, propertyKey, {
-         get: getter,
-         set: setter,
       });
-   };
-}
+      return Object.freeze(o);
+   },
+};
