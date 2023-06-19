@@ -1,6 +1,7 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
 const account: Prisma.AccountCreateInput = {
    user: {
       create: {
@@ -18,18 +19,23 @@ const account: Prisma.AccountCreateInput = {
          permissions: {
             create: [
                {
-                  attribute: {
-                     canCreateUser: true,
-                     canDeleteUser: true,
-                     canInviteUser: true,
-                     canUpdateUser: true,
+                  action: "create",
+                  resource: "account",
+                  attributes: {
+                     create: {
+                        name: "subject",
+                        value: "volunteer",
+                     },
                   },
                },
                {
-                  attribute: {
-                     canDeleteOrganization: true,
-                     canUpdateOrganization: true,
-                     canInviteUser: true,
+                  action: "block",
+                  resource: "account",
+                  attributes: {
+                     create: {
+                        name: "subject",
+                        value: "volunteer",
+                     },
                   },
                },
             ],

@@ -4,6 +4,8 @@
  *
  */
 
+import Role from "@/domain/entities/role";
+
 export type ID = number | string;
 
 export interface Serializable {
@@ -16,110 +18,115 @@ export interface Entity extends Serializable {}
  * @Enum Role
  * @Purpose: for roles of an account (ADMIN, VOLUNTEER, ORGANIZATION)
  * @Usage: Role.VOLUNTEER
- * @Default: MUST BE Role.VOLUNTEER
  *
  * */
-export enum Role {
-   ADMIN = "ADMIN",
-   VOLUNTEER = "VOLUNTEER",
-   ORGANIZATION = "ORGANIZATION",
-}
-
-export enum Resource {
-   ACCOUNT,
-   POST,
-   EVENT,
-   ORGANIZATION,
-   CAMPAIGN,
+export enum RoleType {
+   ADMIN = "admin",
+   VOLUNTEER = "volunteer",
+   ORGANIZATION = "Organization",
 }
 
 export interface UseCase {
    execute(): Promise<Entity | Entity[] | string | number | boolean>;
 }
 
-export enum VolunteerResource {
-   ACCOUNT = "ACCOUNT",
-   POST = "POST",
-   EVENT = "EVENT",
-   ORGANIZATION = "ORGANIZATION",
-   CAMPAIGN = "CAMPAIGN",
-}
-
-export interface IVolunteerPolicy {
-   getVolunteerPolicy<T>(role: Role): T;
-   getPermission(role: Role): boolean;
-}
-
-export type AccountProps = {
-   roles: Role[];
+export interface AccountProps {
+   roles: UserRole[];
    providerId: number;
-   permissions: Permission[];
    profile: UserProps;
    tokens: string[];
-};
+}
 
-export type Tokens = {
+export interface Tokens {
    accessToken: string;
    refreshToken: string;
-};
+}
 
-export type UserProps = {
+export interface UserProps {
    name: string;
    username: string;
    email: string;
    emailVerified: Date;
    password: string;
    phone: string;
-   image: string;
-};
-
-export interface UserRole extends Permission {
-   type: Role;
-   roleId: number;
+   avatar: string;
 }
 
-// export interface Permission extends BaseEntity {
-//    readonly attributes: string[];
-// }
-
-export enum PERMISSIONS {
-   // ALL_PERMISSION
-   CREATE_ACCOUNT = "ALL_PERMISSION",
-   READ_ACCOUNT = "ALL_PERMISSION",
-   UPDATE_ACCOUNT = "ALL_PERMISSION",
-   DELETE_ACCOUNT = "ALL_PERMISSION",
-   CREATE_POST = "ALL_PERMISSION",
-   READ_POST = "ALL_PERMISSION",
-   UPDATE_POST = "ALL_PERMISSION",
-   DELETE_POST = "ALL_PERMISSION",
-   READ_EVENT = "ALL_PERMISSION",
-   READ_ORGANIZATION = "ALL_PERMISSION",
-   JOIN_ORGANIZATION = "ALL_PERMISSION",
-   LEAVE_ORGANIZATION = "ALL_PERMISSION",
-   JOIN_CAMPIGN = "ALL_PERMISSION",
-   LEAVE_CAMPIGN = "ALL_PERMISSION",
-   JOIN_EVENT = "ALL_PERMISSION",
-   LEAVE_EVENT = "ALL_PERMISSION",
-
-   // ONLY ORGANIZATION
-   CREATE_ORGANIZATION = "ORGANIZATION_PERMISSION",
-   UPDATE_ORGANIZATION = "ORGANIZATION_PERMISSION",
-   DELETE_ORGANIZATION = "ORGANIZATION_PERMISSION",
-   CREATE_EVENT = "ORGANIZATION_PERMISSION",
-   UPDATE_EVENT = "ORGANIZATION_PERMISSION",
-   DELETE_EVENT = "ORGANIZATION_PERMISSION",
+export interface UserRole extends Entity {
+   type: RoleType;
+   permissions: AccessInfo[];
 }
 
-export interface Permission {
-   readonly attributes: string[];
+export interface AccessInfo extends Entity {
+   action: string;
+   scope: string;
+   resource: string;
+   possession?: string;
+   attributes?: { [key: string]: string };
+}
 
-   setAdminPermission(): string;
-   setVolunteerPermission(): string;
-   setOrganizationPermission(): string;
+export interface AccessControl {
+   canAccess(roles: Role[]): Promise<boolean>;
+   extendRole(role: Role, extendRole: Role): Promise<void>;
+   extendPermission(): Promise<void>;
+   grant(role: Role, access: AccessInfo): Promise<void>;
+}
 
-   hasPermissionByAction(permission: PERMISSIONS): boolean;
-   getPermission(): boolean;
-   setPermission(permission: PERMISSIONS): void;
-   deletePermission(permission: PERMISSIONS): void;
-   updatedPermission(permission: PERMISSIONS): void;
+export interface RoleAccessor {
+   createRole(): Promise<void>;
+   updateRole(role: Role, data: Role): Promise<void>;
+   upsertRole(role: Role, data: Role): Promise<void>;
+   deleteRole(roleId: number): Promise<void>;
+   getRole(roleId: number): Promise<UserRole>;
+   getRole(roles: Role): Promise<UserRole>;
+   getRoles(): Promise<UserRole[]>;
+}
+
+export interface RoleDataSource {
+   create(roleType: Role, access: AccessInfo): Promise<void>;
+   findById(accessId: number): Promise<AccessInfo>;
+   find(query: AccessInfo): Promise<AccessInfo>;
+   findAll(): Promise<AccessInfo[]>;
+   updateById(accessId: number, data: AccessInfo): Promise<void>;
+   update(query: AccessInfo, data: AccessInfo): Promise<void>;
+   deleteById(accessId: number): Promise<void>;
+   delete(query: AccessInfo): Promise<void>;
+}
+
+export interface AccessControlAccessor {
+   createAccess(role: Role, access: AccessInfo): Promise<void>;
+   getAccessById(accessId: number): Promise<AccessInfo>;
+   getAccess(access: AccessInfo): Promise<AccessInfo>;
+   getAllAccess(): Promise<AccessInfo[]>;
+   updateAccess(accessId: number, data: AccessInfo): Promise<void>;
+   deleteAccess(accessId: number): Promise<void>;
+}
+
+export interface AccessControlDataSource {
+   create(role: Role): Promise<void>;
+   findById(roleId: number): Promise<Role>;
+   find(query: Partial<Role>): Promise<Role>;
+   findAll(): Promise<Role[]>;
+   updateById(roleId: number, data: Role): Promise<void>;
+   update(query: Role, data: Role): Promise<void>;
+   deleteById(roleId: number): Promise<void>;
+   delete(query: Partial<Role>): Promise<void>;
+}
+
+export enum Action {
+   Creat = "create",
+   Read = "read",
+   Update = "update",
+   Delete = "delete",
+}
+
+export enum Possession {
+   Any = "any",
+   Own = "own",
+}
+
+export enum Scope {
+   Any = "any",
+   Own = "own",
+   OwnOrAny = "ownOrAny",
 }

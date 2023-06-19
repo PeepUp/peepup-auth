@@ -1,23 +1,28 @@
-import fastifyEnv from "@fastify/env";
+import autoload from "@fastify/autoload";
+import cors from "@fastify/cors";
 import fastify, { errorCodes } from "fastify";
 
 import { accountRoutes } from "../adapter/account/account.routes";
 import mainRoutes from "../adapter/home";
-import environment from "../config";
-import openapi from "../config/openapi.json";
+import * as config from "../application/config";
+import openapi from "../application/config/openapi.json";
+import * as plugins from "../application/plugins";
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { IncomingMessage, Server, ServerResponse } from "http";
 
 const server: FastifyInstance<Server, IncomingMessage, ServerResponse> =
-   fastify({ logger: process.env["NODE_ENV"] === "test" ? false : true });
+   fastify({
+      logger: process.env["NODE_ENV"] === "test" ? false : true,
+      ignoreTrailingSlash: true,
+   });
 
 async function initialize() {
-   server.register(fastifyEnv, environment);
-   await server.after();
+   await server.register(plugins.config);
+   await server.register(plugins.resources);
+   await server.register(cors, config.fastify.cors);
 
-   server.register(import("@fastify/cors"), {
-      // @ts-ignore
+   /* server.register(import("@fastify/cors"), {
       origin: server.config.WHITE_LISTED_DOMAINS,
       methods: ["POST", "GET", "PUT", "DELETE", "PATCH"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -28,14 +33,13 @@ async function initialize() {
       optionsSuccessStatus: 204,
       logLevel: "warn",
       hideOptionsRoute: true,
-   });
+   }); */
 
-   server.addHook("onRequest", async (request: any, _reply: FastifyReply) => {
-      request["startTime"] = Date.now();
-   });
+   // server.addHook("onRequest", async (request: any, _reply: FastifyReply) => {
+   //    request["startTime"] = Date.now();
+   // });
 
-   server.register(accountRoutes, { prefix: "/api/v1" });
-   server.register(mainRoutes, { prefix: "/" });
+   await server.register(mainRoutes, { prefix: "/" });
    server.get(
       "/api-docs",
       async (_request: FastifyRequest, reply: FastifyReply) => {
@@ -43,29 +47,31 @@ async function initialize() {
       }
    );
 
-   server.setNotFoundHandler((_request, reply) => {
-      reply.code(404).send({
-         ok: false,
-         message: "Not Found",
-         docs: "http://localhost:3000",
-      });
-   });
+   // server.setNotFoundHandler((_request, reply) => {
+   //    reply.code(404).send({
+   //       ok: false,
+   //       message: "Not Found",
+   //       docs: "http://localhost:3000",
+   //    });
+   // });
+   await server.register(autoload, config.fastify.routes);
 
-   server.addHook(
-      "onSend",
-      (
-         _request: FastifyRequest,
-         reply: FastifyReply,
-         _payload: unknown,
-         done
-      ) => {
-         reply.headers({
-            Server: "e6167e18-b68e-4949-9cac-f7bd8e827102",
-         });
 
-         done();
-      }
-   );
+   // server.addHook(
+   //    "onSend",
+   //    (
+   //       _request: FastifyRequest,
+   //       reply: FastifyReply,
+   //       _payload: unknown,
+   //       done
+   //    ) => {
+   //       reply.headers({
+   //          Server: "e6167e18-b68e-4949-9cac-f7bd8e827102",
+   //       });
+
+   //       done();
+   //    }
+   // );
 
    server.setErrorHandler(function (error, _request, reply) {
       if (error instanceof errorCodes.FST_ERR_BAD_STATUS_CODE) {

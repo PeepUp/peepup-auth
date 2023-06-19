@@ -1,4 +1,4 @@
-import { AccountEntity } from "domain/entities/account";
+import { Account } from "domain/entities/account";
 
 import type { AccountProps, UserProps } from "common/types";
 import { UserProfile } from "domain/entities";
@@ -13,7 +13,7 @@ describe("Account Entity", () => {
             emailVerified: new Date(),
             password: "password",
             phone: "123-456-7890",
-            image: "image.png",
+            avatar: "image.png",
          };
 
          const userProfile = new UserProfile(
@@ -28,23 +28,15 @@ describe("Account Entity", () => {
 
          const userAccountProps: AccountProps = {
             roles: [],
-            permissions: [],
             tokens: [],
             profile: userProfile,
             providerId: 1,
          };
 
-         const userAccount = new AccountEntity(
-            userAccountProps.roles,
-            userAccountProps.permissions,
-            userAccountProps.tokens,
-            userProfile,
-            userAccountProps.providerId
-         );
+         const userAccount = new Account(userAccountProps);
 
          expect(userAccount.profile).toEqual(userProfileProps);
          expect(userAccount.roles).toEqual(userAccountProps.roles);
-         expect(userAccount.permissions).toEqual(userAccountProps.permissions);
          expect(userAccount.tokens).toEqual(userAccountProps.tokens);
          expect(userAccount.providerId).toEqual(userAccountProps.providerId);
       });

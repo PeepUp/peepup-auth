@@ -4,6 +4,7 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 async function main() {
    await server.ready();
+
    server.listen({ port: 4334 }, function (err, address) {
       if (err) {
          server.log.error(err);
@@ -14,12 +15,6 @@ async function main() {
 
    await server.ready();
 }
-
-server.addHook("onClose", (instance, done) => {
-   instance.log.info("Server is shutting down...");
-   // Perform any necessary cleanup tasks here
-   done();
-});
 
 process.on("uncaughtException", (error: Error): void => {
    console.error("uncaughtException");

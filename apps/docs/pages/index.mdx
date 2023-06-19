@@ -3,34 +3,22 @@ title: Home
 description: The DoFavour API is a 
 ---
 
-import {useEffect, useState} from "react";
+import checkhealth from "./check-health.json";
  
-export const Home = () => {
-  const [data, setData] = useState(null);
-  const [isLoading, setLoading] = useState(false);
+export default function JobSchema() {
+    return (
 
-  useEffect(() => {
-    setLoading(true);
-    fetch('http://localhost:4334/check-health')
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setData(JSON.stringify(data));
-        setLoading(false);
-      });
-  }, []);
-  return (
-
-    <>
-    <div>
-      <h1>
-        <strong>Hii, </strong>
-        Welcome to DoFavour API! 
-      </h1>
-      <span>{data}</span>
-      </div>
-    </>
-  )
+        <>
+            <pre>
+            {
+                JSON.stringify(checkhealth)
+            }
+            </pre>
+        </>
+    )
 }
- 
-<Home />
+
+
+<JobSchema />
+
+## HI There! 
