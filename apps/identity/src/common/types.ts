@@ -62,41 +62,42 @@ export interface AccessControl {
 }
 
 export interface RoleAccessor {
-   createRole(role: Role): Promise<void>;
-   updateRole(role: Role, data: Role): Promise<void>;
-   upsertRole(role: Role, data: Role): Promise<void>;
-   deleteRole(role: Role): Promise<void>;
-   getRole(roles: Role): Promise<UserRole>;
+   createRole(role: UserRole): Promise<void>;
+   updateRole(role: UserRole, data: UserRole): Promise<void>;
+   upsertRole(role: UserRole, data: UserRole): Promise<void>;
+   deleteRole(role: UserRole): Promise<void>;
+   getRole(roles: UserRole): Promise<UserRole>;
    getRoles(): Promise<UserRole[]>;
 }
 
 export interface RoleDataSource {
-   create(roleType: Role): Promise<void>;
+   create(roleType: UserRole): Promise<void>;
    findById(accessId: number): Promise<AccessInfo>;
-   find(query: Role): Promise<Role>;
-   findAll(): Promise<Role[]>;
-   update(role: Role, data: Role): Promise<void>;
-   upsert(role: Role, data: Role): Promise<void>;
+   find(query: UserRole): Promise<UserRole>;
+   findAll(): Promise<UserRole[]>;
+   update(role: UserRole, data: UserRole): Promise<void>;
+   upsert(role: UserRole, data: UserRole): Promise<void>;
    deleteById(accessId: number): Promise<void>;
-   delete(role: Role): Promise<void>;
+   delete(role: UserRole): Promise<void>;
 }
 
 export interface AccessControlAccessor {
-   createAccess(role: Role, access: AccessInfo): Promise<void>;
-   getAccess(access: AccessInfo): Promise<Role>;
-   getAllAccess(): Promise<Role[]>;
+   createAccess(role: UserRole, access: AccessInfo): Promise<void>;
+   updateAccess(accessId: number, access: AccessInfo): Promise<void>;
+   getAccess(access: AccessInfo): Promise<UserRole>;
+   getAllAccess(): Promise<UserRole[]>;
    deleteAccess(accessId: number): Promise<void>;
 }
 
 export interface AccessControlDataSource {
-   create(role: Role, access: AccessInfo): Promise<void>;
-   findById(roleId: number): Promise<Role>;
-   find(query: Partial<Role>): Promise<Role>;
-   findAll(): Promise<Role[]>;
-   updateById(roleId: number, data: Role): Promise<void>;
-   update(query: Role, data: Role): Promise<void>;
+   create(role: UserRole, access: AccessInfo): Promise<void>;
+   findById(roleId: number): Promise<UserRole>;
+   find(query: Partial<UserRole>): Promise<UserRole>;
+   findAll(): Promise<UserRole[]>;
+   updateById(roleId: number, data: AccessInfo): Promise<void>;
+   update(query: UserRole, data: UserRole): Promise<void>;
    deleteById(roleId: number): Promise<void>;
-   delete(query: Partial<Role>): Promise<void>;
+   delete(query: Partial<UserRole>): Promise<void>;
 }
 
 export interface AccountAccessor {

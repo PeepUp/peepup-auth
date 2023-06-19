@@ -26,6 +26,7 @@ describe("RBAC implements AccessControlAccessor", () => {
       // Create a mock access control repository
       accessControlRepository = {
          getAccess: jest.fn(),
+         updateAccess: jest.fn(),
          getAllAccess: jest.fn(),
          createAccess: jest.fn(),
          deleteAccess: jest.fn(),

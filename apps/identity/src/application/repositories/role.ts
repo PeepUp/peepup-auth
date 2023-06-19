@@ -1,30 +1,29 @@
 import { RoleAccessor, RoleDataSource, UserRole } from "@/common/types";
-import Role from "@/domain/entities/role";
 
 class RoleRepository implements RoleAccessor {
-   constructor(private readonly dataSource: RoleDataSource) {}
+   constructor(private readonly roleDataSource: RoleDataSource) {}
 
-   async createRole(role: Role): Promise<void> {
-      return await this.dataSource.create(role);
+   async createRole(role: UserRole): Promise<void> {
+      return await this.roleDataSource.create(role);
    }
 
-   async updateRole(role: Role, data: Role): Promise<void> {
-      return await this.dataSource.update(role, data);
+   async updateRole(role: UserRole, data: UserRole): Promise<void> {
+      return await this.roleDataSource.update(role, data);
    }
 
-   async upsertRole(role: Role, data: Role): Promise<void> {
-      return await this.dataSource.upsert(role, data);
+   async upsertRole(role: UserRole, data: UserRole): Promise<void> {
+      return await this.roleDataSource.upsert(role, data);
    }
 
-   async deleteRole(role: Role): Promise<void> {
-      return await this.dataSource.delete(role);
+   async deleteRole(role: UserRole): Promise<void> {
+      return await this.roleDataSource.delete(role);
    }
 
-   async getRole(role: Role): Promise<Role> {
-      return await this.dataSource.find(role);
+   async getRole(role: UserRole): Promise<UserRole> {
+      return await this.roleDataSource.find(role);
    }
 
-   async getRoles(): Promise<Role[]> {
-      return await this.dataSource.findAll();
+   async getRoles(): Promise<UserRole[]> {
+      return await this.roleDataSource.findAll();
    }
 }

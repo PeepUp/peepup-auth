@@ -3,9 +3,6 @@ import { Account } from "domain/entities/account";
 
 class AccountRepository implements AccountAccessor {
    constructor(private readonly accountDataSource: AccountDataSource) {}
-   createUsers(users: Account[]): Promise<Account[]> {
-      throw new Error("Method not implemented.");
-   }
 
    async getUsers(): Promise<Account[]> {
       return await this.accountDataSource.findAll();

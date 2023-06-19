@@ -2,23 +2,23 @@ import {
    AccessControlAccessor,
    AccessControlDataSource,
    AccessInfo,
+   UserRole,
 } from "@/common";
-import Role from "@/domain/entities/role";
 
 class AccessControlRepository implements AccessControlAccessor {
    constructor(
       private readonly accessControlDataSource: AccessControlDataSource
    ) {}
 
-   updateAccess(accessId: number, data: Role): Promise<void> {
-      return this.accessControlDataSource.updateById(accessId, data);
+   async updateAccess(accessId: number, data: AccessInfo): Promise<void> {
+      return await this.accessControlDataSource.updateById(accessId, data);
    }
 
-   async getAccess(access: AccessInfo): Promise<Role> {
+   async getAccess(access: AccessInfo): Promise<UserRole> {
       return await this.accessControlDataSource.find({ permissions: [access] });
    }
 
-   async getAllAccess(): Promise<Role[]> {
+   async getAllAccess(): Promise<UserRole[]> {
       return await this.accessControlDataSource.findAll();
    }
 
@@ -26,7 +26,7 @@ class AccessControlRepository implements AccessControlAccessor {
       return await this.accessControlDataSource.deleteById(accessId);
    }
 
-   async createAccess(role: Role, access: AccessInfo): Promise<void> {
+   async createAccess(role: UserRole, access: AccessInfo): Promise<void> {
       return await this.accessControlDataSource.create(role, access);
    }
 }
