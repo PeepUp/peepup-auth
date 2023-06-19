@@ -1,11 +1,11 @@
-import RBAC from "@/domain/access-control";
-import Role from "@/domain/entities/role";
 import {
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
    RoleType,
 } from "@/common/types";
+import RBAC from "@/domain/access-control";
+import Role from "@/domain/entities/role";
 
 describe("RBAC implements AccessControlAccessor", () => {
    let roleRepository: RoleAccessor;
@@ -25,10 +25,8 @@ describe("RBAC implements AccessControlAccessor", () => {
 
       // Create a mock access control repository
       accessControlRepository = {
-         getAccessById: jest.fn(),
          getAccess: jest.fn(),
          getAllAccess: jest.fn(),
-         updateAccess: jest.fn(),
          createAccess: jest.fn(),
          deleteAccess: jest.fn(),
       };
@@ -46,7 +44,7 @@ describe("RBAC implements AccessControlAccessor", () => {
          };
 
          const access: AccessInfo = {
-            id: 1,
+            _id: 1,
             action: "create",
             resource: "user",
             possession: "any",

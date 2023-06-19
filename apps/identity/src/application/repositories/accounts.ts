@@ -1,10 +1,29 @@
+import { AccountAccessor, AccountDataSource } from "@/common";
 import { Account } from "domain/entities/account";
 
-export interface AccountRepository {
-   getUsers(): Promise<Account[]>;
-   getUserById(id: number): Promise<Account>;
-   createUser(user: Account): Promise<Account>;
-   createUsers(users: Account[]): Promise<Account[]>;
-   updateUser(user: Account): Promise<Account>;
-   deleteUser(id: number): Promise<boolean>;
+class AccountRepository implements AccountAccessor {
+   constructor(private readonly accountDataSource: AccountDataSource) {}
+   createUsers(users: Account[]): Promise<Account[]> {
+      throw new Error("Method not implemented.");
+   }
+
+   async getUsers(): Promise<Account[]> {
+      return await this.accountDataSource.findAll();
+   }
+
+   async getUserById(id: number): Promise<Account> {
+      return await this.accountDataSource.find(id);
+   }
+
+   async createUser(user: Account): Promise<Account> {
+      return await this.accountDataSource.insert(user);
+   }
+
+   async updateUser(user: Account): Promise<Account> {
+      return await this.accountDataSource.update(user);
+   }
+
+   async deleteUser(id: number): Promise<boolean> {
+      return await this.accountDataSource.delete(id);
+   }
 }

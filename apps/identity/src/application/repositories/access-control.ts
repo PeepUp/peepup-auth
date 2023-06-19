@@ -10,20 +10,16 @@ class AccessControlRepository implements AccessControlAccessor {
       private readonly accessControlDataSource: AccessControlDataSource
    ) {}
 
-   async getAccessById(accessId: number): Promise<AccessInfo> {
-      return await this.accessControlDataSource.findById(accessId);
+   updateAccess(accessId: number, data: Role): Promise<void> {
+      return this.accessControlDataSource.updateById(accessId, data);
    }
 
-   async getAccess(access: AccessInfo): Promise<AccessInfo> {
-      return await this.accessControlDataSource.find(access);
+   async getAccess(access: AccessInfo): Promise<Role> {
+      return await this.accessControlDataSource.find({ permissions: [access] });
    }
 
-   async getAllAccess(): Promise<AccessInfo[]> {
+   async getAllAccess(): Promise<Role[]> {
       return await this.accessControlDataSource.findAll();
-   }
-
-   async updateAccess(accessId: number, data: AccessInfo): Promise<void> {
-      return await this.accessControlDataSource.updateById(accessId, data);
    }
 
    async deleteAccess(accessId: number): Promise<void> {
