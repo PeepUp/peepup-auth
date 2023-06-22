@@ -1,10 +1,11 @@
 import RBAC from "@/domain/access-control";
-import Role from "@/domain/entities/role";
+
 import {
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
    RoleType,
+   UserRole,
 } from "@/common/types";
 
 describe("RBAC implements AccessControlAccessor", () => {
@@ -25,10 +26,9 @@ describe("RBAC implements AccessControlAccessor", () => {
 
       // Create a mock access control repository
       accessControlRepository = {
-         getAccessById: jest.fn(),
          getAccess: jest.fn(),
-         getAllAccess: jest.fn(),
          updateAccess: jest.fn(),
+         getAllAccess: jest.fn(),
          createAccess: jest.fn(),
          deleteAccess: jest.fn(),
       };
@@ -39,14 +39,13 @@ describe("RBAC implements AccessControlAccessor", () => {
 
    describe("Grant", () => {
       it("should create a new access control if permission doesn't exist", async () => {
-         const role: Role = {
-            id: 1,
+         const role: UserRole = {
             type: RoleType.ADMIN,
             permissions: [],
          };
 
          const access: AccessInfo = {
-            id: 1,
+            _id: 1,
             action: "create",
             resource: "user",
             possession: "any",

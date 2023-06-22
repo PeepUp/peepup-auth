@@ -1,11 +1,10 @@
-import {
+import type {
    AccessControl,
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
+   UserRole,
 } from "common/types";
-
-import Role from "./entities/role";
 
 class RBAC implements AccessControl {
    constructor(
@@ -13,7 +12,7 @@ class RBAC implements AccessControl {
       private readonly accessControlRepository: AccessControlAccessor
    ) {}
 
-   async grant(role: Role, access: AccessInfo): Promise<void> {
+   async grant(role: UserRole, access: AccessInfo): Promise<void> {
       try {
          const existRole = await this.roleRepository.getRole(role);
 
@@ -38,7 +37,7 @@ class RBAC implements AccessControl {
                };
 
                await this.accessControlRepository.updateAccess(
-                  <number>existPermission.id,
+                  <number>existPermission._id,
                   updatedPermission
                );
             }
@@ -53,7 +52,7 @@ class RBAC implements AccessControl {
       }
    }
 
-   async canAccess(roles: Role[]): Promise<boolean> {
+   async canAccess(roles: UserRole[]): Promise<boolean> {
       if (Array.isArray(roles) && roles.length === 0) {
          return false;
       }
@@ -86,7 +85,7 @@ class RBAC implements AccessControl {
       return false;
    }
 
-   private async getRolePermissions(role: Role): Promise<AccessInfo[]> {
+   private async getRolePermissions(role: UserRole): Promise<AccessInfo[]> {
       if (Array.isArray(role) && role.length === 0) {
          return [];
       }
@@ -133,7 +132,7 @@ class RBAC implements AccessControl {
       return true;
    }
 
-   async extendRole(role: Role, extendRole: Role): Promise<void> {
+   async extendRole(role: UserRole, extendRole: UserRole): Promise<void> {
       const roleData = await this.getRolePermissions(extendRole);
       const extendedRolePermissions = roleData.map((permission) => ({
          action: permission.action,
@@ -150,8 +149,8 @@ class RBAC implements AccessControl {
             : undefined,
       }));
 
-      const updatedRole: Role = {
-         id: role.id,
+      const updatedRole: UserRole = {
+         _id: role._id,
          type: role.type,
          permissions: [...role.permissions, ...extendedRolePermissions],
       };

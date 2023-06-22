@@ -1,11 +1,7 @@
-import { Entity } from "common/types";
+import type { ID, UserProfile } from "common/types";
 
-import type { UserProps } from "common/types";
-
-export type UserEntityTypes = Entity & UserProps;
-
-export class UserProfile implements UserEntityTypes {
-   id?: number;
+export class User implements UserProfile {
+   readonly _id?: ID | undefined;
 
    constructor(
       public name: string,
@@ -16,4 +12,8 @@ export class UserProfile implements UserEntityTypes {
       public phone: string,
       public avatar: string
    ) {}
+
+   get id(): ID | undefined {
+      return this._id ? this._id : undefined;
+   }
 }

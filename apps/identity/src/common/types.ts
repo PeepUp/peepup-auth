@@ -4,36 +4,44 @@
  *
  */
 
-import Role from "@/domain/entities/role";
+import Account from "@/domain/entity/account";
+import Role from "@/domain/entity/role";
 
 export type ID = number | string;
 
 export interface Serializable {
+   _id?: ID;
+}
+
+export interface UserQuery {
    id?: ID;
+   email?: string;
+   username?: string;
+   name?: string;
+   phone?: string;
+   providerId?: number;
+   roles?: Role[];
+   profile?: UserProfile;
+   tokens?: string[];
+   include?: {
+      roles?: boolean;
+      profile?: boolean;
+      tokens?: boolean;
+   };
 }
 
 export interface Entity extends Serializable {}
 
-/*
- * @Enum Role
- * @Purpose: for roles of an account (ADMIN, VOLUNTEER, ORGANIZATION)
- * @Usage: Role.VOLUNTEER
- *
- * */
-export enum RoleType {
-   ADMIN = "admin",
-   VOLUNTEER = "volunteer",
-   ORGANIZATION = "Organization",
+export interface UseCase<T> {
+   execute(
+      props?: T
+   ): Promise<Entity | Entity[] | string | number | boolean | T>;
 }
 
-export interface UseCase {
-   execute(): Promise<Entity | Entity[] | string | number | boolean>;
-}
-
-export interface AccountProps {
+export interface UserAccount extends Entity {
    roles: UserRole[];
    providerId: number;
-   profile: UserProps;
+   profile: UserProfile;
    tokens: string[];
 }
 
@@ -42,7 +50,7 @@ export interface Tokens {
    refreshToken: string;
 }
 
-export interface UserProps {
+export interface UserProfile extends Entity {
    name: string;
    username: string;
    email: string;
@@ -50,6 +58,14 @@ export interface UserProps {
    password: string;
    phone: string;
    avatar: string;
+}
+
+export interface DataSourceSQL<T> {
+   name: string;
+   create(data: T): Promise<T | null>;
+   read(id: string): Promise<T | null>;
+   update(data: T): Promise<T | null>;
+   delete(id: string): Promise<boolean>;
 }
 
 export interface UserRole extends Entity {
@@ -73,60 +89,90 @@ export interface AccessControl {
 }
 
 export interface RoleAccessor {
-   createRole(): Promise<void>;
-   updateRole(role: Role, data: Role): Promise<void>;
-   upsertRole(role: Role, data: Role): Promise<void>;
-   deleteRole(roleId: number): Promise<void>;
-   getRole(roleId: number): Promise<UserRole>;
-   getRole(roles: Role): Promise<UserRole>;
+   createRole(role: UserRole): Promise<void>;
+   updateRole(role: UserRole, data: UserRole): Promise<void>;
+   upsertRole(role: UserRole, data: UserRole): Promise<void>;
+   deleteRole(role: UserRole): Promise<void>;
+   getRole(roles: UserRole): Promise<UserRole>;
    getRoles(): Promise<UserRole[]>;
 }
 
 export interface RoleDataSource {
-   create(roleType: Role, access: AccessInfo): Promise<void>;
-   findById(accessId: number): Promise<AccessInfo>;
-   find(query: AccessInfo): Promise<AccessInfo>;
-   findAll(): Promise<AccessInfo[]>;
-   updateById(accessId: number, data: AccessInfo): Promise<void>;
-   update(query: AccessInfo, data: AccessInfo): Promise<void>;
-   deleteById(accessId: number): Promise<void>;
-   delete(query: AccessInfo): Promise<void>;
+   create(roleType: UserRole): Promise<void>;
+   findById(accessId: ID): Promise<AccessInfo>;
+   find(query: UserRole): Promise<UserRole>;
+   findAll(): Promise<UserRole[]>;
+   update(role: UserRole, data: UserRole): Promise<void>;
+   upsert(role: UserRole, data: UserRole): Promise<void>;
+   deleteById(accessId: ID): Promise<void>;
+   delete(role: UserRole): Promise<void>;
 }
 
 export interface AccessControlAccessor {
-   createAccess(role: Role, access: AccessInfo): Promise<void>;
-   getAccessById(accessId: number): Promise<AccessInfo>;
-   getAccess(access: AccessInfo): Promise<AccessInfo>;
-   getAllAccess(): Promise<AccessInfo[]>;
-   updateAccess(accessId: number, data: AccessInfo): Promise<void>;
-   deleteAccess(accessId: number): Promise<void>;
+   createAccess(role: UserRole, access: AccessInfo): Promise<void>;
+   updateAccess(accessId: ID, access: AccessInfo): Promise<void>;
+   getAccess(access: AccessInfo): Promise<UserRole>;
+   getAllAccess(): Promise<UserRole[]>;
+   deleteAccess(accessId: ID): Promise<void>;
 }
 
 export interface AccessControlDataSource {
-   create(role: Role): Promise<void>;
-   findById(roleId: number): Promise<Role>;
-   find(query: Partial<Role>): Promise<Role>;
-   findAll(): Promise<Role[]>;
-   updateById(roleId: number, data: Role): Promise<void>;
-   update(query: Role, data: Role): Promise<void>;
-   deleteById(roleId: number): Promise<void>;
-   delete(query: Partial<Role>): Promise<void>;
+   create(role: UserRole, access: AccessInfo): Promise<void>;
+   findById(roleId: ID): Promise<UserRole>;
+   find(query: Partial<UserRole>): Promise<UserRole>;
+   findAll(): Promise<UserRole[]>;
+   updateById(roleId: ID, data: AccessInfo): Promise<void>;
+   update(query: UserRole, data: UserRole): Promise<void>;
+   deleteById(roleId: ID): Promise<void>;
+   delete(query: Partial<UserRole>): Promise<void>;
+}
+
+export interface AccountAccessor {
+   getAllUsers(): Promise<UserAccount[]>;
+   getUserById(id: ID): Promise<UserAccount>;
+   createUser(user: UserAccount): Promise<UserAccount>;
+   updateUser(user: UserAccount): Promise<UserAccount>;
+   deleteUser(id: ID): Promise<boolean>;
+}
+
+export interface AccountDataSource {
+   insert(user: UserAccount): Promise<UserAccount>;
+   update(user: UserAccount): Promise<UserAccount>;
+   delete(id: ID): Promise<boolean>;
+   findById(id: ID): Promise<UserAccount>;
+   find(user: UserAccount): Promise<UserAccount>;
+   findByEmail(email: string): Promise<UserAccount>;
+   query<Q>(query?: Q): Promise<UserAccount[]>;
+   updateById(id: ID, data: UserAccount): Promise<void>;
+}
+
+/*
+ * @Enum Role
+ * @Purpose: for roles of an account (ADMIN, VOLUNTEER, ORGANIZATION)
+ * @Usage: Role.VOLUNTEER
+ *
+ * */
+export enum RoleType {
+   ADMIN = "admin",
+   VOLUNTEER = "volunteer",
+   ORGANIZATION = "Organization",
 }
 
 export enum Action {
-   Creat = "create",
-   Read = "read",
-   Update = "update",
-   Delete = "delete",
+   CREATE = "create",
+   READ = "read",
+   UPDATE = "update",
+   DELETE = "delete",
 }
 
 export enum Possession {
-   Any = "any",
-   Own = "own",
+   ANY = "any",
+   OWN = "own",
 }
 
 export enum Scope {
-   Any = "any",
-   Own = "own",
-   OwnOrAny = "ownOrAny",
+   ANY = "any",
+   OWN = "own",
+   OWN_OR_ANY = "ownOrAny",
 }
+

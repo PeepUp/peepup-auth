@@ -1,14 +1,15 @@
-/*
- * API Configuration
- *
- *
- * */
+import dotenv from "dotenv";
+
+dotenv.config({
+   path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+});
 
 const env = process.env;
+
 export const config: Auth.Config.Api = {
    environment: {
       env: env.NODE_ENV,
-      port: parseInt(<Awaited<string>>env.PORT),
+      port: parseInt(<string>env.PORT),
       host: env.HOST,
       whiteListClient: env.WHITE_LISTED_DOMAINS?.split(","),
    },
@@ -22,6 +23,6 @@ export const config: Auth.Config.Api = {
       url: <Awaited<string>>env.SWAGGER_URL,
    },
    api: {
-      prefix: "v1",
+      prefix: "/v1",
    },
 };

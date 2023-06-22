@@ -5,9 +5,8 @@
    "compilerOptions": {
       "module": "commonjs",
       "lib": ["esnext"],
-      "target": "esnext",
+      "target": "ESNext",
       "noImplicitAny": true,
-      "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "removeComments": true,
       "sourceMap": true,
@@ -16,7 +15,7 @@
       "pretty": true,
       "allowJs": true,
       "allowSyntheticDefaultImports": true,
-      // deploy set true
+      "moduleResolution": "node",
       "noEmit": false,
       "forceConsistentCasingInFileNames": true,
       "resolveJsonModule": true,
