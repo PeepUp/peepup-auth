@@ -1,5 +1,6 @@
 import { routes } from "./adapter";
 import { accountSchema } from "./adapter/schema/account.schema";
+import { passwordUtils } from "./common";
 import { server } from "./infrastructure/app";
 
 async function main() {

@@ -1,10 +1,10 @@
 import type { ID, UserAccount, UserProfile, UserRole } from "common/types";
 
 class Account implements UserAccount {
-   public roles: UserRole[] = [];
-   public tokens: string[] = [];
-   public profile: UserProfile = (<UserProfile>{}) as UserProfile;
-   public providerId: number = 0;
+   public roles?: UserRole[] = [];
+   public tokens?: string[] = [];
+   public profile: Partial<UserProfile> = {};
+   public providerId?: number = 0;
    public readonly createdAt: Date = new Date();
    readonly _id?: ID | undefined;
 
@@ -13,10 +13,10 @@ class Account implements UserAccount {
    }
 
    private initializeAccount(props: UserAccount): void {
-      this.roles = props.roles;
-      this.tokens = props.tokens;
-      this.profile = props.profile;
-      this.providerId = props.providerId;
+      this.roles = props?.roles;
+      this.tokens = props?.tokens;
+      this.profile = props?.profile;
+      this.providerId = props?.providerId;
    }
 
    public get id(): ID | undefined {

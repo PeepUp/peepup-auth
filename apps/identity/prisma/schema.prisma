@@ -41,8 +41,8 @@ model Permission {
   action   String?
   resource String?
 
-  roleId    Int?
-  role      Role?       @relation(fields: [roleId], references: [id])
+  roleId     Int?
+  role       Role?       @relation(fields: [roleId], references: [id])
   attributes Attribute[]
 
   @@map(name: "permissions")
@@ -58,6 +58,7 @@ model Attribute {
   // relation fields
   permissionId Int?
   permission   Permission? @relation(fields: [permissionId], references: [id])
+
   @@map("attributes")
 }
 
@@ -65,11 +66,11 @@ model User {
   id            Int       @id @default(autoincrement())
   name          String?
   emailVerified DateTime?
-  image         String?
-  username      String    @unique
-  email         String?   @unique
+  avatar        String?
+  username      String?   @unique
+  email         String    @unique
   password      String
-  phone         String    @unique
+  phone         String?   @unique
 
   // relation fields
   accountId Int?       @unique

@@ -51,7 +51,7 @@ describe("Account Entity", () => {
       expect(account.tokens).toEqual([]);
 
       const newToken = "token123";
-      account.tokens.push(newToken);
+      account.tokens?.push(newToken);
 
       expect(account.tokens).toContain(newToken);
    });

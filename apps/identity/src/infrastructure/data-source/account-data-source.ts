@@ -2,6 +2,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 import type {
    AccountDataSource,
+   CreateAccountInput,
    DataSourceSQL,
    ID,
    UserAccount,
@@ -29,37 +30,22 @@ class PrismaAccountDataSourceAdapter
       await this.db.$disconnect();
    }
 
-   async insert(user: UserAccount): Promise<UserAccount> {
-      const newUser = await this.db.account.create({
+   async insert(user: CreateAccountInput): Promise<UserAccount> {
+      const newuser = await this.db.account.create({
          data: {
             user: {
                create: {
-                  phone: user.profile.phone,
-                  username: user.profile.username,
-                  emailVerified: user.profile.emailVerified,
-                  password: user.profile.password,
-                  image: user.profile.avatar,
-                  name: user.profile.name,
                   email: user.profile.email,
+                  password: user.profile.password,
+                  name: user.profile.name,
                },
             },
-            roles: {
-               create: [
-                  {
-                     permissions: {
-                        create: [user.roles.map((role) => role.permissions)],
-                     },
-                     type: user.roles.map((role) => role.type),
-                  },
-               ],
-            },
-            providerId: user.providerId ? user.providerId : null,
             updatedAt: new Date(),
             createdAt: new Date(),
          },
       });
 
-      return newUser as unknown as UserAccount;
+      return newuser as unknown as UserAccount;
    }
 
    async update(user: UserAccount): Promise<UserAccount> {
@@ -83,7 +69,7 @@ class PrismaAccountDataSourceAdapter
                   email: true,
                   username: true,
                   phone: true,
-                  image: true,
+                  avatar: true,
                   emailVerified: true,
                },
             },
@@ -93,14 +79,7 @@ class PrismaAccountDataSourceAdapter
 
       if (data?.user) {
          return {
-            profile: {
-               name: data.user.name,
-               email: data.user.email,
-               username: data.user.username,
-               phone: data.user.phone,
-               avatar: data.user.image,
-               emailVerified: data.user.emailVerified,
-            },
+            profile: data.user,
          } as UserAccount;
       }
 
@@ -108,6 +87,26 @@ class PrismaAccountDataSourceAdapter
    }
 
    async find(user: UserAccount): Promise<UserAccount> {
+      const data = await this.db.account.findFirst({
+         include: {
+            user: true,
+         },
+         where: {
+            user: {
+               username: user.profile.username,
+               email: user.profile.email,
+            },
+         },
+      });
+
+      console.log({ data });
+      if (data) {
+         return {
+            profile: data.user,
+         } as UserAccount;
+      }
+
+      return {} as UserAccount;
       throw new Error("Method not implemented.");
    }
 

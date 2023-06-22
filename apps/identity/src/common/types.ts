@@ -39,10 +39,10 @@ export interface UseCase<T> {
 }
 
 export interface UserAccount extends Entity {
-   roles: UserRole[];
-   providerId: number;
-   profile: UserProfile;
-   tokens: string[];
+   roles?: UserRole[];
+   providerId?: number;
+   profile: Partial<UserProfile>;
+   tokens?: string[];
 }
 
 export interface Tokens {
@@ -56,6 +56,7 @@ export interface UserProfile extends Entity {
    email: string;
    emailVerified: Date;
    password: string;
+   salt?: string;
    phone: string;
    avatar: string;
 }
@@ -130,13 +131,17 @@ export interface AccessControlDataSource {
 export interface AccountAccessor {
    getAllAccount(): Promise<UserAccount[]>;
    getAccountById(id: ID): Promise<UserAccount>;
-   createAccount(user: UserAccount): Promise<UserAccount>;
+   createAccount(user: CreateAccountInput): Promise<UserAccount>;
    updateAccount(user: UserAccount): Promise<UserAccount>;
    deleteAccount(id: ID): Promise<boolean>;
 }
 
+export type CreateAccountInput = {
+   profile: Pick<UserProfile, "email" | "name" | "password">;
+};
+
 export interface AccountDataSource {
-   insert(user: UserAccount): Promise<UserAccount>;
+   insert(user: CreateAccountInput): Promise<UserAccount>;
    update(user: UserAccount): Promise<UserAccount>;
    delete(id: ID): Promise<boolean>;
    findById(id: ID): Promise<UserAccount>;

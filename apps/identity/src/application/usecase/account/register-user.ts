@@ -10,7 +10,7 @@ export class RegisterUser implements UseCase<UserAccount> {
 
    async execute(data: UserAccount): Promise<Account> {
       try {
-         return <Account>await this.repository.createAccount(data);
+         throw new Error("Not implemented");
       } catch (error: unknown) {
          if (error instanceof Error) throw new Error(error.message);
          return <Account>{};
