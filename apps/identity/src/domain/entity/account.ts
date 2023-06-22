@@ -1,6 +1,6 @@
-import { ID, UserAccount, UserProfile, UserRole } from "common/types";
+import type { ID, UserAccount, UserProfile, UserRole } from "common/types";
 
-export class Account implements UserAccount {
+class Account implements UserAccount {
    public roles: UserRole[] = [];
    public tokens: string[] = [];
    public profile: UserProfile = (<UserProfile>{}) as UserProfile;
@@ -19,7 +19,9 @@ export class Account implements UserAccount {
       this.providerId = props.providerId;
    }
 
-   public get id(): ID {
-      return <ID>this._id;
+   public get id(): ID | undefined {
+      return this._id ? <ID>this._id : undefined;
    }
 }
+
+export default Account;

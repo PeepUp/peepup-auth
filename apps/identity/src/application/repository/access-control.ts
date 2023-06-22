@@ -2,6 +2,7 @@ import {
    AccessControlAccessor,
    AccessControlDataSource,
    AccessInfo,
+   ID,
    UserRole,
 } from "@/common";
 
@@ -10,7 +11,7 @@ class AccessControlRepository implements AccessControlAccessor {
       private readonly accessControlDataSource: AccessControlDataSource
    ) {}
 
-   async updateAccess(accessId: number, data: AccessInfo): Promise<void> {
+   async updateAccess(accessId: ID, data: AccessInfo): Promise<void> {
       return await this.accessControlDataSource.updateById(accessId, data);
    }
 
@@ -22,7 +23,7 @@ class AccessControlRepository implements AccessControlAccessor {
       return await this.accessControlDataSource.findAll();
    }
 
-   async deleteAccess(accessId: number): Promise<void> {
+   async deleteAccess(accessId: ID): Promise<void> {
       return await this.accessControlDataSource.deleteById(accessId);
    }
 

@@ -1,5 +1,4 @@
 import { join } from "path";
-
 import { config } from "./api.config";
 
 import type { AutoloadPluginOptions } from "@fastify/autoload";
@@ -8,8 +7,19 @@ import { __metadata } from "tslib";
 
 const cors: FastifyCorsOptions = {
    origin: config.environment.whiteListClient,
-   methods: ["POST", "GET", "PUT", "DELETE", "PATCH"],
-   allowedHeaders: ["Content-Type", "Authorization"],
+   methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
+   allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "origin",
+      "Accept",
+      "x-requested-with",
+   ],
+   exposedHeaders: [
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+   ],
    credentials: true,
    maxAge: 86400,
    preflight: true,
@@ -21,9 +31,8 @@ const cors: FastifyCorsOptions = {
 const routes: AutoloadPluginOptions = {
    dir: join(__dirname, "../../"),
    dirNameRoutePrefix: false,
-   matchFilter: (path) => path.includes(".adaptor."),
-   indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/,
-   ignorePattern: /.*(test|spec).ts/,
+   matchFilter: (path) => path.includes(".adapter."),
+   indexPattern: /.*adapter(\.ts|\.js|\.cjs|\.mjs)$/,
    routeParams: false,
    forceESM: true,
    maxDepth: 3,

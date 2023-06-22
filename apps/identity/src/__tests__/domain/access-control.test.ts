@@ -1,11 +1,12 @@
+import RBAC from "@/domain/access-control";
+
 import {
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
    RoleType,
+   UserRole,
 } from "@/common/types";
-import RBAC from "@/domain/access-control";
-import Role from "@/domain/entities/role";
 
 describe("RBAC implements AccessControlAccessor", () => {
    let roleRepository: RoleAccessor;
@@ -38,8 +39,7 @@ describe("RBAC implements AccessControlAccessor", () => {
 
    describe("Grant", () => {
       it("should create a new access control if permission doesn't exist", async () => {
-         const role: Role = {
-            id: 1,
+         const role: UserRole = {
             type: RoleType.ADMIN,
             permissions: [],
          };

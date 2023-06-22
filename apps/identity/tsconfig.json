@@ -21,5 +21,5 @@
          "interfaces/*": ["src/adapter/*"]
       }
    },
-   "include": ["src/**/*.ts", "src/__tests__/domain/entities/.old_profile.test.ts"]
+   "include": ["src/**/*", "types/**/*"]
 }

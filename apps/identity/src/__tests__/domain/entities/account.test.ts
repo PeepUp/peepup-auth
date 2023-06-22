@@ -1,4 +1,4 @@
-import { Account } from "domain/entities/account";
+import Account from "@/domain/entity/account";
 
 import type { UserAccount, UserProfile } from "common/types";
 
