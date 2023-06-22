@@ -1,6 +1,7 @@
 import type {
    AccountAccessor,
    AccountDataSource,
+   CreateAccountInput,
    ID,
    UserAccount,
 } from "@/common";
@@ -24,7 +25,7 @@ export class AccountRepository implements AccountAccessor {
       return await this.accountDataSource.findByEmail(email);
    }
 
-   async createAccount(user: UserAccount): Promise<UserAccount> {
+   async createAccount(user: CreateAccountInput): Promise<UserAccount> {
       return await this.accountDataSource.insert(user);
    }
 

@@ -5,10 +5,12 @@ import {
    getUserById,
    getUserByUserName,
    getUserProfileByUsername,
+   registerAccount,
 } from "../controller/account.controller";
 
 import type { Routes } from "./root";
 import type {
+   CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE,
 } from "../schema/account.schema";
@@ -63,11 +65,16 @@ export default (accountService: AccountService): { routes: Routes } => ({
       },
       {
          method: "POST",
-         url: "/accounts",
-         handler: async () => {},
+         url: "/accounts/register",
+         handler: async (
+            request: FastifyRequest<{
+               Body: CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE;
+            }>,
+            reply: FastifyReply
+         ) => registerAccount(request, reply, accountService),
          schema: {
             describe: "[ POST /account ] create user",
-            body: $ref("create_account_body_schema"),
+            body: $ref("create_account_request_body_schema"),
             response: {
                201: $ref("create_account_response_schema"),
             },

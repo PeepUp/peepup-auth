@@ -9,7 +9,7 @@ const account: Prisma.AccountCreateInput = {
          username: "john123",
          emailVerified: new Date(),
          password: "$john123",
-         image: "https://www.google.com",
+         avatar: "https://www.google.com",
          name: "John Doe",
          email: "john@gmail.com",
       },

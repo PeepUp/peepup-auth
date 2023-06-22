@@ -35,6 +35,12 @@ export const get_account_response_schema = z.object({
    }),
 });
 
+export const create_account_request_body_schema = z.object({
+   name: z.string().max(35).min(0),
+   email: z.string().email().max(35).min(0),
+   password: z.string().min(8).max(72),
+});
+
 export const create_account_response_schema = z.object({
    data: z.object({
       code: z.number().or(z.string()),
@@ -64,6 +70,10 @@ export type GET_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<
    typeof get_account_response_schema
 >;
 
+export type CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE = z.infer<
+   typeof create_account_request_body_schema
+>;
+
 export const { schemas: accountSchema, $ref } = buildJsonSchemas({
    account_schema,
    create_account_body_schema,
@@ -73,4 +83,5 @@ export const { schemas: accountSchema, $ref } = buildJsonSchemas({
    get_account_response_schema,
    create_account_response_schema,
    get_user_profile_response_schema,
+   create_account_request_body_schema,
 });
