@@ -33,7 +33,9 @@
       "@prisma/client": "4.16.0",
       "fastify": "4.18.0",
       "fastify-plugin": "4.5.0",
-      "fastify-zod": "1.3.2"
+      "fastify-zod": "1.3.2",
+      "inversify": "6.0.1",
+      "reflect-metadata": "0.1.13"
    },
    "devDependencies": {
       "@doFavour/tsconfig": "workspace:*",
@@ -51,6 +53,7 @@
       "eslint-plugin-import": "^2.27.5",
       "fastify-type-provider-zod": "1.1.9",
       "jest": "^29.5.0",
+      "libphonenumber-js": "1.10.36",
       "nodemon": "2.0.22",
       "prisma": "4.16.0",
       "supertest": "^6.3.3",

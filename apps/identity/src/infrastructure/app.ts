@@ -1,17 +1,15 @@
 import cors from "@fastify/cors";
-import fastify, { errorCodes } from "fastify";
+import fastify from "fastify";
+import type http from "http";
+import openapi from "../application/config/openapi.json";
+import { fastify as config } from "../application/config/fastify.config";
+import { configPlugin } from "../application/plugin";
 import {
    serializerCompiler,
    validatorCompiler,
 } from "fastify-type-provider-zod";
-import type http from "http";
-import openapi from "../application/config/openapi.json";
 
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-
-import { routes } from "@/adapter";
-import { fastify as config } from "../application/config/fastify.config";
-import { configPlugin } from "../application/plugin";
+import type { FastifyInstance } from "fastify";
 
 const server: FastifyInstance<
    http.Server,

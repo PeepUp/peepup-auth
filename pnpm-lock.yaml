@@ -18,8 +18,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0(prettier@2.8.8)
       turbo:
-        specifier: ^1.10.3
-        version: 1.10.3
+        specifier: ^1.10.4
+        version: 1.10.4
 
   apps/docs:
     dependencies:
@@ -72,6 +72,12 @@ importers:
       fastify-zod:
         specifier: 1.3.2
         version: 1.3.2(fastify@4.18.0)
+      inversify:
+        specifier: 6.0.1
+        version: 6.0.1
+      reflect-metadata:
+        specifier: 0.1.13
+        version: 0.1.13
     devDependencies:
       '@doFavour/tsconfig':
         specifier: workspace:*
@@ -118,6 +124,9 @@ importers:
       jest:
         specifier: ^29.5.0
         version: 29.5.0(@types/node@20.3.1)(ts-node@10.9.1)
+      libphonenumber-js:
+        specifier: 1.10.36
+        version: 1.10.36
       nodemon:
         specifier: 2.0.22
         version: 2.0.22
@@ -4412,6 +4421,10 @@ packages:
     resolution: {integrity: sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg==}
     dev: false
 
+  /inversify@6.0.1:
+    resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==}
+    dev: false
+
   /ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
@@ -5218,6 +5231,10 @@ packages:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  /libphonenumber-js@1.10.36:
+    resolution: {integrity: sha512-NCPWES1poiS4NSzIS49mxHM5hCkSWov8wFICRKfL9narzimqAXlnAgNloHCt0BukZHbWt8TIStCdzLy7LXBYpQ==}
+    dev: true
 
   /light-my-request@5.10.0:
     resolution: {integrity: sha512-ZU2D9GmAcOUculTTdH9/zryej6n8TzT+fNGdNtm6SDp5MMMpHrJJkvAdE3c6d8d2chE9i+a//dS9CWZtisknqA==}
@@ -6878,6 +6895,10 @@ packages:
     resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
     engines: {node: '>= 12.13.0'}
 
+  /reflect-metadata@0.1.13:
+    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
+
   /regenerator-runtime@0.13.11:
     resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
     dev: false
@@ -7716,65 +7737,65 @@ packages:
       tslib: 1.14.1
       typescript: 5.1.3
 
-  /turbo-darwin-64@1.10.3:
-    resolution: {integrity: sha512-IIB9IomJGyD3EdpSscm7Ip1xVWtYb7D0x7oH3vad3gjFcjHJzDz9xZ/iw/qItFEW+wGFcLSRPd+1BNnuLM8AsA==}
+  /turbo-darwin-64@1.10.4:
+    resolution: {integrity: sha512-oAILq0QZUvOxYZU71SXRsL7DFpqZutPl9CX7+rD48tReHrmhcm3HMeuAFY0S5FD/9fKub04UfAQwVtJSlhvISg==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64@1.10.3:
-    resolution: {integrity: sha512-SBNmOZU9YEB0eyNIxeeQ+Wi0Ufd+nprEVp41rgUSRXEIpXjsDjyBnKnF+sQQj3+FLb4yyi/yZQckB+55qXWEsw==}
+  /turbo-darwin-arm64@1.10.4:
+    resolution: {integrity: sha512-N0XPFLXsZRLE6gKDa5MREpPQp0drOz9PrADaaMXTlspxWS/tmmxyH+ZQ/uGqKC/0mqsNIhZuSFsEVZe1PGaqxw==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64@1.10.3:
-    resolution: {integrity: sha512-kvAisGKE7xHJdyMxZLvg53zvHxjqPK1UVj4757PQqtx9dnjYHSc8epmivE6niPgDHon5YqImzArCjVZJYpIGHQ==}
+  /turbo-linux-64@1.10.4:
+    resolution: {integrity: sha512-S8ZVNCPnrBU+GMKKUWcgg4MaTOdL1reOU1XQtDiHfEPskXjLE+10vr65xJJQb6CqO8ARFXUlFSAUfxZRX6WVNA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64@1.10.3:
-    resolution: {integrity: sha512-Qgaqln0IYRgyL0SowJOi+PNxejv1I2xhzXOI+D+z4YHbgSx87ox1IsALYBlK8VRVYY8VCXl+PN12r1ioV09j7A==}
+  /turbo-linux-arm64@1.10.4:
+    resolution: {integrity: sha512-/C6vpo7kd2ae6dR0iZyRuvfjijuixidhwLzV026A+/1gmAMRXYkslBfgOGfoOquHmvqjCeDVTsMWwCY2NRQqtw==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64@1.10.3:
-    resolution: {integrity: sha512-rbH9wManURNN8mBnN/ZdkpUuTvyVVEMiUwFUX4GVE5qmV15iHtZfDLUSGGCP2UFBazHcpNHG1OJzgc55GFFrUw==}
+  /turbo-windows-64@1.10.4:
+    resolution: {integrity: sha512-fh6X/fJl9gNTu3r7zMmwCychxMlpQMFn32bpioPNIBxrTHCbQYeGSQuw2XWa/RswgNzCY3Xo34emYAKu9btrsw==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64@1.10.3:
-    resolution: {integrity: sha512-ThlkqxhcGZX39CaTjsHqJnqVe+WImjX13pmjnpChz6q5HHbeRxaJSFzgrHIOt0sUUVx90W/WrNRyoIt/aafniw==}
+  /turbo-windows-arm64@1.10.4:
+    resolution: {integrity: sha512-KzcKGl+bjwaSkxMNTutuoIM+xPuTBA13zJiC2vFM7fQ6XYM0/ZmUekfoxpMnWgSav8vlTk5tRYaPniLcVzLnTQ==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo@1.10.3:
-    resolution: {integrity: sha512-U4gKCWcKgLcCjQd4Pl8KJdfEKumpyWbzRu75A6FCj6Ctea1PIm58W6Ltw1QXKqHrl2pF9e1raAskf/h6dlrPCA==}
+  /turbo@1.10.4:
+    resolution: {integrity: sha512-EVBt762wVGyZAXtp1UWQptRG2N/9TThUJ1tRawvt/pmB62VmdzgDuz80SQYXK5U5yKEID6OJdqAzq8HnIQVA6g==}
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      turbo-darwin-64: 1.10.3
-      turbo-darwin-arm64: 1.10.3
-      turbo-linux-64: 1.10.3
-      turbo-linux-arm64: 1.10.3
-      turbo-windows-64: 1.10.3
-      turbo-windows-arm64: 1.10.3
+      turbo-darwin-64: 1.10.4
+      turbo-darwin-arm64: 1.10.4
+      turbo-linux-64: 1.10.4
+      turbo-linux-arm64: 1.10.4
+      turbo-windows-64: 1.10.4
+      turbo-windows-arm64: 1.10.4
     dev: true
 
   /type-check@0.4.0:

@@ -8,7 +8,7 @@ class GetUserByEmail implements UseCase<string> {
 
    async execute(email: string): Promise<Account> {
       try {
-         return <Account>await this.repository.getUserByEmail(email);
+         return <Account>await this.repository.getAccountByEmail(email);
       } catch (error: unknown) {
          if (error instanceof Error) throw new Error(error.message);
          return <Account>{};

@@ -1,1 +1,1 @@
-export * from "./route/root";
+export * from "./router/root";

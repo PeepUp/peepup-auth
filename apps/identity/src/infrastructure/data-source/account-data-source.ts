@@ -1,11 +1,11 @@
-import Account from "@/domain/entity/account";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 import type {
    AccountDataSource,
    DataSourceSQL,
    ID,
    UserAccount,
+   UserProfile,
 } from "@/common/types";
 
 class PrismaAccountDataSourceAdapter
@@ -30,7 +30,7 @@ class PrismaAccountDataSourceAdapter
    }
 
    async insert(user: UserAccount): Promise<UserAccount> {
-      const newUser: UserAccount = await this.db.account.create({
+      const newUser = await this.db.account.create({
          data: {
             user: {
                create: {
@@ -53,14 +53,13 @@ class PrismaAccountDataSourceAdapter
                   },
                ],
             },
-            providerId: user.providerId ? user.providerId : undefined,
-            tokens: {},
+            providerId: user.providerId ? user.providerId : null,
             updatedAt: new Date(),
             createdAt: new Date(),
          },
       });
 
-      return newUser;
+      return newUser as unknown as UserAccount;
    }
 
    async update(user: UserAccount): Promise<UserAccount> {
@@ -75,8 +74,37 @@ class PrismaAccountDataSourceAdapter
       throw new Error("Method not implemented.");
    }
 
-   async findById(id: ID): Promise<Account> {
-      throw new Error("Method not implemented.");
+   async findById(id: ID): Promise<UserAccount> {
+      const data = await this.db.account.findUnique({
+         include: {
+            user: {
+               select: {
+                  name: true,
+                  email: true,
+                  username: true,
+                  phone: true,
+                  image: true,
+                  emailVerified: true,
+               },
+            },
+         },
+         where: { id: <number>id },
+      });
+
+      if (data?.user) {
+         return {
+            profile: {
+               name: data.user.name,
+               email: data.user.email,
+               username: data.user.username,
+               phone: data.user.phone,
+               avatar: data.user.image,
+               emailVerified: data.user.emailVerified,
+            },
+         } as UserAccount;
+      }
+
+      return {} as UserAccount;
    }
 
    async find(user: UserAccount): Promise<UserAccount> {
