@@ -128,11 +128,11 @@ export interface AccessControlDataSource {
 }
 
 export interface AccountAccessor {
-   getAllUsers(): Promise<UserAccount[]>;
-   getUserById(id: ID): Promise<UserAccount>;
-   createUser(user: UserAccount): Promise<UserAccount>;
-   updateUser(user: UserAccount): Promise<UserAccount>;
-   deleteUser(id: ID): Promise<boolean>;
+   getAllAccount(): Promise<UserAccount[]>;
+   getAccountById(id: ID): Promise<UserAccount>;
+   createAccount(user: UserAccount): Promise<UserAccount>;
+   updateAccount(user: UserAccount): Promise<UserAccount>;
+   deleteAccount(id: ID): Promise<boolean>;
 }
 
 export interface AccountDataSource {
@@ -175,4 +175,3 @@ export enum Scope {
    OWN = "own",
    OWN_OR_ANY = "ownOrAny",
 }
-

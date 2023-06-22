@@ -7,7 +7,7 @@ class GetUserById implements UseCase<ID> {
 
    async execute(id: ID): Promise<UserAccount> {
       try {
-         return <UserAccount>await this.repository.getUserById(id);
+         return <UserAccount>await this.repository.getAccountById(id);
       } catch (error: unknown) {
          if (error instanceof Error) throw new Error(error.message);
          return <UserAccount>{};

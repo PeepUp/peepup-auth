@@ -10,7 +10,7 @@ export class GetUsersUseCase implements UseCase<UserAccount> {
 
    async execute(user: UserAccount): Promise<Account> {
       try {
-         return <Account>await this.repository.getUser(user);
+         return <Account>await this.repository.getAccount(user);
       } catch (error: unknown) {
          if (error instanceof Error) throw new Error(error.message);
          return <Account>{};

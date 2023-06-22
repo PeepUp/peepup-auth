@@ -1,7 +1,5 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { Routes, routes } from "./adapter";
+import { routes } from "./adapter";
 import { accountSchema } from "./adapter/schema/account.schema";
-import openapi from "./application/config/openapi.json";
 import { server } from "./infrastructure/app";
 
 async function main() {
@@ -12,17 +10,18 @@ async function main() {
          server.route(route);
       });
 
-      server.get(
+      /*  server.get(
          "/api-docs",
          async (_request: FastifyRequest, reply: FastifyReply) => {
             return reply.status(200).send(openapi);
          }
-      );
+      ); */
 
       for (const schema of [...accountSchema]) {
          server.addSchema(schema);
       }
    });
+
    await server.ready();
 
    server.listen({ port: 4334 }, function (err: any, address) {

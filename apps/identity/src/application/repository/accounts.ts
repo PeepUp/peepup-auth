@@ -8,31 +8,31 @@ import type {
 export class AccountRepository implements AccountAccessor {
    constructor(private readonly accountDataSource: AccountDataSource) {}
 
-   async getAllUsers<Q>(query?: Q): Promise<UserAccount[]> {
+   async getAllAccount<Q>(query?: Q): Promise<UserAccount[]> {
       return await this.accountDataSource.query(query as UserAccount);
    }
 
-   async getUserById(id: ID): Promise<UserAccount> {
+   async getAccountById(id: ID): Promise<UserAccount> {
       return await this.accountDataSource.findById(id);
    }
 
-   async getUser(user: UserAccount): Promise<UserAccount> {
+   async getAccount(user: UserAccount): Promise<UserAccount> {
       return await this.accountDataSource.find(user);
    }
 
-   async getUserByEmail(email: string): Promise<UserAccount> {
+   async getAccountByEmail(email: string): Promise<UserAccount> {
       return await this.accountDataSource.findByEmail(email);
    }
 
-   async createUser(user: UserAccount): Promise<UserAccount> {
+   async createAccount(user: UserAccount): Promise<UserAccount> {
       return await this.accountDataSource.insert(user);
    }
 
-   async updateUser(user: UserAccount): Promise<UserAccount> {
+   async updateAccount(user: UserAccount): Promise<UserAccount> {
       return await this.accountDataSource.update(user);
    }
 
-   async deleteUser(id: ID): Promise<boolean> {
+   async deleteAccount(id: ID): Promise<boolean> {
       return await this.accountDataSource.delete(id);
    }
 }

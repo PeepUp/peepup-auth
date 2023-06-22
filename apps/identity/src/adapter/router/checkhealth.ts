@@ -1,5 +1,6 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Routes } from "./root";
+
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 export default (): { routes: Routes } => {
    return {
@@ -7,7 +8,6 @@ export default (): { routes: Routes } => {
          {
             method: "GET",
             url: "/check-health",
-
             handler: async (
                _request: FastifyRequest,
                reply: FastifyReply

@@ -11,7 +11,7 @@ export class GetUsersUseCase implements UseCase<UserQuery> {
    async execute(query?: UserQuery): Promise<Account[]> {
       try {
          return <Account[]>(
-            await this.repository.getAllUsers(query as UserQuery)
+            await this.repository.getAllAccount(query as UserQuery)
          );
       } catch (error: unknown) {
          if (error instanceof Error) throw new Error(error.message);

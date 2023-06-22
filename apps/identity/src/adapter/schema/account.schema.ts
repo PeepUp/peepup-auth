@@ -1,6 +1,9 @@
 import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
-import { user_profile_schema } from "./user-profile.schema";
+import {
+   user_profile_schema,
+   get_user_profile_response_schema,
+} from "./user-profile.schema";
 
 export const account_schema = z.object({
    profile: user_profile_schema.optional().or(z.undefined()),
@@ -69,4 +72,5 @@ export const { schemas: accountSchema, $ref } = buildJsonSchemas({
    get_account_params_username_schema,
    get_account_response_schema,
    create_account_response_schema,
+   get_user_profile_response_schema,
 });
