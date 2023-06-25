@@ -3,7 +3,6 @@
    "extends": [
       "airbnb-base",
       "airbnb-typescript/base",
-      "next",
       "turbo",
       "prettier",
       "eslint:recommended",
