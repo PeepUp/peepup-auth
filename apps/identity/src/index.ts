@@ -1,6 +1,5 @@
 import { routes } from "./adapter";
-import { accountSchema } from "./adapter/schema/account.schema";
-import { passwordUtils } from "./common";
+import { errorHandler } from "./adapter/middleware/error-handler";
 import { server } from "./infrastructure/app";
 
 async function main() {
@@ -11,54 +10,40 @@ async function main() {
          server.route(route);
       });
 
-      /*  server.get(
-         "/api-docs",
-         async (_request: FastifyRequest, reply: FastifyReply) => {
-            return reply.status(200).send(openapi);
-         }
-      ); */
-
-      for (const schema of [...accountSchema]) {
-         server.addSchema(schema);
-      }
+      server.setErrorHandler(errorHandler);
    });
 
-   await server.ready();
+   server.ready((err) => {
+      console.log("successfully booted!");
+      console.log(
+         server.printRoutes({
+            includeHooks: true,
+            includeMeta: ["errorHandler"],
+         })
+      );
 
-   server.listen({ port: 4334 }, function (err: any, address) {
+      if (err) {
+         throw err;
+      }
+
+      // console.log(server.initialConfig);
+      // console.error(server.printPlugins());
+      // console.log(server.getSchemas());
+   });
+
+   server.listen({ port: 4334 }, function (err: any) {
       if (err) {
          server.log.error(err);
-         console.log(err);
          process.exit(1);
       }
-      server.log.info(`server listening on ${address}`);
    });
 }
-
-process.on("uncaughtException", (error: Error): void => {
-   console.error("uncaughtException");
-   console.error(error);
-   process.exit(1);
-});
-
-process.on("unhandledRejection", (error: Error): void => {
-   console.error("unhandledRejection");
-   console.error(error);
-   process.exit(1);
-});
-
-process.on("SIGINT", () => {
-   server.close(() => {
-      server.log.info("Server has been shut down");
-      process.exit(0);
-   });
-});
 
 void main().catch((error) => {
    console.error(error);
    if (error) {
       server.close(() => {
-         server.log.info("Server has been shut down");
+         server.log.error("Server has been shut down");
          process.exit(0);
       });
    }

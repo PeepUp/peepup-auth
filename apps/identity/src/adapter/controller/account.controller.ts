@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
    CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
-   GET_ACCOUNT_PARAMS_EMAIL_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE,
+   LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
 } from "../schema/account.schema";
 import AccountService from "../service/account";
 
@@ -12,9 +12,10 @@ export async function getUserById(
    reply: FastifyReply,
    accountService: AccountService
 ) {
-   const { profile } = await accountService.getAccountById(
+   const profile = await accountService.getAccountById(
       request.params.accountId
    );
+   console.log({ profile });
 
    return reply.code(200).send({
       data: {
@@ -24,7 +25,9 @@ export async function getUserById(
 }
 
 export async function getUserByUserName(
-   request: FastifyRequest<{ Params: GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE }>,
+   _request: FastifyRequest<{
+      Params: GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE;
+   }>,
    reply: FastifyReply
 ) {
    return reply.code(200).send({
@@ -65,9 +68,23 @@ export async function registerAccount(
 ) {
    const { email, password, name } = request.body;
 
-   console.log({
-      request: request.body,
-   });
+   const existingAccount = await accountService.getProfileByEmail(email);
+   if (existingAccount.profile.email === email) {
+      return reply.code(409).send({
+         code: "409",
+         codeStatus: "Conflict",
+         ok: false,
+         message: "Account is already taken",
+         error: {
+            details: [
+               {
+                  message: `Account with email '${email}' is invalid or already taken`,
+               },
+            ],
+         },
+      });
+   }
+
    await accountService.registerAccount({
       name,
       email,
@@ -81,4 +98,44 @@ export async function registerAccount(
          status: "Success",
       },
    });
+}
+
+export async function loginAccount(
+   request: FastifyRequest<{ Body: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE }>,
+   reply: FastifyReply,
+   accountService: AccountService
+) {
+   const { email, password } = request.body;
+   const existingAccount = await accountService.getProfileByEmail(email);
+
+   if (existingAccount.profile.email !== email) {
+      return reply.code(404).send({
+         code: "404",
+         codeStatus: "Not Found",
+         ok: false,
+         message: "Account is not found",
+         error: {
+            details: [
+               {
+                  message: `Account with email '${email}' is not found`,
+               },
+            ],
+         },
+      });
+   }
+
+   const { profile } = await accountService.loginAccount({
+      email,
+      password,
+   });
+
+   if (profile) {
+      return reply.code(200).send({
+         data: {
+            access_token: "test",
+            refresh_token: "test",
+            token_type: "Bearer",
+         },
+      });
+   }
 }

@@ -1,7 +1,19 @@
-import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
 
 export const user_profile_schema = z.object({
+   id: z
+      .number({
+         required_error: "User ID is required",
+         invalid_type_error: "User ID must be a number",
+      })
+      .or(
+         z
+            .string({
+               required_error: "User ID is required",
+               invalid_type_error: "User ID must be a string",
+            })
+            .uuid({ message: "Invalid UUID" })
+      ),
    username: z.string().min(3).max(20),
    email: z.string().email().min(3).max(35),
    emailVerified: z.date(),

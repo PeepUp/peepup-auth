@@ -1,7 +1,6 @@
 import cors from "@fastify/cors";
 import fastify from "fastify";
 import type http from "http";
-import openapi from "../application/config/openapi.json";
 import { fastify as config } from "../application/config/fastify.config";
 import { configPlugin } from "../application/plugin";
 import {
@@ -10,14 +9,21 @@ import {
 } from "fastify-type-provider-zod";
 
 import type { FastifyInstance } from "fastify";
+import { accountSchema } from "../adapter";
 
 const server: FastifyInstance<
    http.Server,
    http.IncomingMessage,
    http.ServerResponse
 > = fastify({
-   logger: process.env["NODE_ENV"] === "test" ? false : true,
+   pluginTimeout: 10000,
+   logger: {
+      enabled: process.env["NODE_ENV"] === "test" ? false : true,
+   },
    ignoreTrailingSlash: true,
+   ajv: {
+      customOptions: {},
+   },
 });
 
 async function initialize() {
@@ -25,6 +31,10 @@ async function initialize() {
    await server.register(cors, config.cors);
    server.setValidatorCompiler(validatorCompiler);
    server.setSerializerCompiler(serializerCompiler);
+
+   for (const schema of [...accountSchema]) {
+      server.addSchema(schema);
+   }
 
    /* server.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
       reply.code(404).send({
@@ -68,7 +78,6 @@ async function initialize() {
 
 initialize().catch((error) => {
    if (error instanceof Error) {
-      console.error(error);
       process.exit(1);
    }
 });

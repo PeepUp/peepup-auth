@@ -49,15 +49,15 @@ export const passwordUtils = {
          throw new Error("Password hashing failed");
       }
    },
-   async verify(
-      password: string,
-      hashedPassword: string,
-      salt: string
-   ): Promise<boolean> {
+   async verify({
+      password,
+      hashedPassword,
+   }: {
+      password: string;
+      hashedPassword: string;
+   }): Promise<boolean> {
       try {
-         return await argon2.verify(hashedPassword, password, {
-            salt: Buffer.from(salt, "hex"),
-         });
+         return await argon2.verify(hashedPassword, password);
       } catch (error) {
          throw new Error("Password verification failed");
       }
