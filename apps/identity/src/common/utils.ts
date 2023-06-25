@@ -75,3 +75,15 @@ export const passwordUtils = {
       });
    },
 };
+
+export const environmentUtils = {
+   isProduction(): boolean {
+      return process.env.NODE_ENV === "production";
+   },
+   isDevelopment(): boolean {
+      return process.env.NODE_ENV === "development";
+   },
+   isTest(): boolean {
+      return process.env.NODE_ENV === "test";
+   },
+};

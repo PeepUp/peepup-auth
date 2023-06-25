@@ -1,23 +1,24 @@
 import { PrismaClient } from "@prisma/client";
 
 import type {
+   AccountContract,
    AccountDataSource,
    CreateAccountInput,
    DataSourceSQL,
    ID,
-   UserAccount,
 } from "@/common/types";
 
 class PrismaAccountDataSourceAdapter
-   implements AccountDataSource, DataSourceSQL<UserAccount>
+   implements AccountDataSource, DataSourceSQL<AccountContract>
 {
    public name: string = "Prisma Account Data Source Adapter";
+
    constructor(private readonly db: PrismaClient) {}
 
-   async create(_data: UserAccount): Promise<UserAccount | null> {
+   async create(_data: AccountContract): Promise<AccountContract | null> {
       throw new Error("Method not implemented.");
    }
-   async read(_id: string): Promise<UserAccount | null> {
+   async read(_id: string): Promise<AccountContract | null> {
       throw new Error("Method not implemented.");
    }
 
@@ -29,14 +30,16 @@ class PrismaAccountDataSourceAdapter
       await this.db.$disconnect();
    }
 
-   async insert(user: CreateAccountInput): Promise<UserAccount> {
+   async insert(user: CreateAccountInput): Promise<AccountContract> {
       const newuser = await this.db.account.create({
          data: {
             user: {
                create: {
                   email: user.profile.email,
+                  username: user.profile.username,
                   password: user.profile.password,
-                  name: user.profile.name,
+                  firstName: user.profile.firstName,
+                  lastName: user.profile.lastName,
                },
             },
             updatedAt: new Date(),
@@ -44,14 +47,14 @@ class PrismaAccountDataSourceAdapter
          },
       });
 
-      return newuser as unknown as UserAccount;
+      return newuser as unknown as AccountContract;
    }
 
-   async update(_user: UserAccount): Promise<UserAccount> {
+   async update(_user: AccountContract): Promise<AccountContract> {
       throw new Error("Method not implemented.");
    }
 
-   async updateById(_id: number, _data: UserAccount): Promise<void> {
+   async updateById(_id: number, _data: AccountContract): Promise<void> {
       throw new Error("Method not implemented.");
    }
 
@@ -59,12 +62,13 @@ class PrismaAccountDataSourceAdapter
       throw new Error("Method not implemented.");
    }
 
-   async findById(id: ID): Promise<UserAccount> {
+   async findById(id: ID): Promise<AccountContract> {
       const data = await this.db.account.findUnique({
          include: {
             user: {
                select: {
-                  name: true,
+                  firstName: true,
+                  lastName: true,
                   email: true,
                   username: true,
                   phone: true,
@@ -78,41 +82,40 @@ class PrismaAccountDataSourceAdapter
 
       if (data?.user) {
          return {
-            profile: data.user,
-         } as UserAccount;
+            user: data.user,
+         } as AccountContract;
       }
 
-      return {} as UserAccount;
+      return {} as AccountContract;
    }
 
-   async find(user: UserAccount): Promise<UserAccount> {
+   async find(query: AccountContract): Promise<AccountContract> {
       const data = await this.db.account.findFirst({
          include: {
             user: true,
          },
          where: {
             user: {
-               username: user.profile.username,
-               email: user.profile.email,
+               username: query.user.username,
+               email: query.user.email,
             },
          },
       });
 
       if (data) {
-         console.log({ ...data });
          return {
-            profile: data.user,
-         } as UserAccount;
+            user: data.user,
+         } as AccountContract;
       }
 
-      return {} as UserAccount;
+      return {} as AccountContract;
    }
 
-   async findByEmail(email: string): Promise<UserAccount> {
+   async findByEmail(email: string): Promise<AccountContract> {
       throw new Error("Method not implemented.");
    }
 
-   async query<Q>(query?: Q | undefined): Promise<UserAccount[]> {
+   async query<Q>(query?: Q | undefined): Promise<AccountContract[]> {
       throw new Error("Method not implemented.");
    }
 }

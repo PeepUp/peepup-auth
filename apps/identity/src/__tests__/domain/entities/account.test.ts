@@ -1,11 +1,12 @@
 import Account from "@/domain/entity/account";
 
-import type { UserAccount, UserProfile } from "common/types";
+import type { AccountContract, UserContract } from "common/types";
 
 describe("Account Entity", () => {
    let account: Account;
-   let userProfileProps: UserProfile = {
-      name: "John Doe",
+   let userProfileProps: UserContract = {
+      firstName: "John",
+      lastName: "Doe",
       username: "johndoe",
       email: "johndoe@example.com",
       emailVerified: new Date(),
@@ -15,16 +16,16 @@ describe("Account Entity", () => {
    };
 
    it("should create a new user account with the given data", () => {
-      const userAccountProps: UserAccount = {
+      const userAccountProps: AccountContract = {
          roles: [],
          tokens: [],
-         profile: userProfileProps,
+         user: userProfileProps,
          providerId: 1,
       };
 
       account = new Account(userAccountProps);
 
-      expect(account.profile).toEqual({
+      expect(account.user).toEqual({
          name: "John Doe",
          username: "johndoe",
          email: "johndoe@example.com",

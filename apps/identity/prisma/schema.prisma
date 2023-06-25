@@ -11,6 +11,7 @@ model Account {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  state     String?
 
   // relation fields
   tokens Token[]
@@ -63,7 +64,8 @@ model Attribute {
 
 model User {
   id            String    @id @default(uuid())
-  name          String?
+  firstName     String?
+  lastName      String?
   emailVerified DateTime?
   avatar        String?
   username      String?   @unique

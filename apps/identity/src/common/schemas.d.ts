@@ -2,9 +2,6 @@ declare namespace Api {
    namespace Schemas {
       namespace Application {
          namespace Root {
-            /**
-             * No Content.
-             */
             type Response204 = null;
          }
       }
@@ -15,10 +12,6 @@ declare namespace Api {
                name: string;
             }
 
-            /**
-             * OK.
-             */
-
             interface Response201 {
                id?: string;
                email?: string;
@@ -26,10 +19,6 @@ declare namespace Api {
                createdAt?: string;
                updatedAt?: string;
             }
-
-            /**
-             * Email address already exists.
-             */
 
             interface Response409 {
                statusCode?: number;

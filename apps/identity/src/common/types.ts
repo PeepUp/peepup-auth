@@ -1,10 +1,3 @@
-/*
- * @Author: Daffa R
- * @Purpose: Typescript types
- *
- */
-
-import Account from "@/domain/entity/account";
 import Role from "@/domain/entity/role";
 
 export type ID = number | string;
@@ -21,7 +14,7 @@ export interface UserQuery {
    phone?: string;
    providerId?: number;
    roles?: Role[];
-   profile?: UserProfile;
+   profile?: UserContract;
    tokens?: string[];
    include?: {
       roles?: boolean;
@@ -30,18 +23,20 @@ export interface UserQuery {
    };
 }
 
-export interface Entity extends Serializable {}
+export interface EntityContract extends Serializable {}
 
 export interface UseCase<T> {
    execute(
       props?: T
-   ): Promise<Entity | Entity[] | string | number | boolean | T>;
+   ): Promise<
+      EntityContract | EntityContract[] | string | number | boolean | T
+   >;
 }
 
-export interface UserAccount extends Entity {
-   roles?: UserRole[];
-   providerId?: number;
-   profile: Partial<UserProfile>;
+export interface AccountContract extends EntityContract {
+   roles?: RoleContract[];
+   providerId?: ID;
+   user: UserContract;
    tokens?: string[];
 }
 
@@ -50,15 +45,16 @@ export interface Tokens {
    refreshToken: string;
 }
 
-export interface UserProfile extends Entity {
-   name: string;
-   username: string;
+export interface UserContract extends EntityContract {
+   avatar?: string;
    email: string;
-   emailVerified: Date;
+   emailVerified?: Date;
+   firstName?: string;
+   lastName?: string;
+   phone?: string;
    password: string;
    salt?: string;
-   phone: string;
-   avatar: string;
+   username?: string;
 }
 
 export interface DataSourceSQL<T> {
@@ -69,12 +65,12 @@ export interface DataSourceSQL<T> {
    delete(id: string): Promise<boolean>;
 }
 
-export interface UserRole extends Entity {
+export interface RoleContract extends EntityContract {
    type: RoleType;
    permissions: AccessInfo[];
 }
 
-export interface AccessInfo extends Entity {
+export interface AccessInfo extends EntityContract {
    action: string;
    scope: string;
    resource: string;
@@ -90,65 +86,68 @@ export interface AccessControl {
 }
 
 export interface RoleAccessor {
-   createRole(role: UserRole): Promise<void>;
-   updateRole(role: UserRole, data: UserRole): Promise<void>;
-   upsertRole(role: UserRole, data: UserRole): Promise<void>;
-   deleteRole(role: UserRole): Promise<void>;
-   getRole(roles: UserRole): Promise<UserRole>;
-   getRoles(): Promise<UserRole[]>;
+   createRole(role: RoleContract): Promise<void>;
+   updateRole(role: RoleContract, data: RoleContract): Promise<void>;
+   upsertRole(role: RoleContract, data: RoleContract): Promise<void>;
+   deleteRole(role: RoleContract): Promise<void>;
+   getRole(roles: RoleContract): Promise<RoleContract>;
+   getRoles(): Promise<RoleContract[]>;
 }
 
 export interface RoleDataSource {
-   create(roleType: UserRole): Promise<void>;
+   create(roleType: RoleContract): Promise<void>;
    findById(accessId: ID): Promise<AccessInfo>;
-   find(query: UserRole): Promise<UserRole>;
-   findAll(): Promise<UserRole[]>;
-   update(role: UserRole, data: UserRole): Promise<void>;
-   upsert(role: UserRole, data: UserRole): Promise<void>;
+   find(query: RoleContract): Promise<RoleContract>;
+   findAll(): Promise<RoleContract[]>;
+   update(role: RoleContract, data: RoleContract): Promise<void>;
+   upsert(role: RoleContract, data: RoleContract): Promise<void>;
    deleteById(accessId: ID): Promise<void>;
-   delete(role: UserRole): Promise<void>;
+   delete(role: RoleContract): Promise<void>;
 }
 
 export interface AccessControlAccessor {
-   createAccess(role: UserRole, access: AccessInfo): Promise<void>;
+   createAccess(role: RoleContract, access: AccessInfo): Promise<void>;
    updateAccess(accessId: ID, access: AccessInfo): Promise<void>;
-   getAccess(access: AccessInfo): Promise<UserRole>;
-   getAllAccess(): Promise<UserRole[]>;
+   getAccess(access: AccessInfo): Promise<RoleContract>;
+   getAllAccess(): Promise<RoleContract[]>;
    deleteAccess(accessId: ID): Promise<void>;
 }
 
 export interface AccessControlDataSource {
-   create(role: UserRole, access: AccessInfo): Promise<void>;
-   findById(roleId: ID): Promise<UserRole>;
-   find(query: Partial<UserRole>): Promise<UserRole>;
-   findAll(): Promise<UserRole[]>;
+   create(role: RoleContract, access: AccessInfo): Promise<void>;
+   findById(roleId: ID): Promise<RoleContract>;
+   find(query: Partial<RoleContract>): Promise<RoleContract>;
+   findAll(): Promise<RoleContract[]>;
    updateById(roleId: ID, data: AccessInfo): Promise<void>;
-   update(query: UserRole, data: UserRole): Promise<void>;
+   update(query: RoleContract, data: RoleContract): Promise<void>;
    deleteById(roleId: ID): Promise<void>;
-   delete(query: Partial<UserRole>): Promise<void>;
+   delete(query: Partial<RoleContract>): Promise<void>;
 }
 
 export interface AccountAccessor {
-   getAllAccount(): Promise<UserAccount[]>;
-   getAccountById(id: ID): Promise<UserAccount>;
-   createAccount(user: CreateAccountInput): Promise<UserAccount>;
-   updateAccount(user: UserAccount): Promise<UserAccount>;
+   getAllAccount(): Promise<AccountContract[]>;
+   getAccountById(id: ID): Promise<AccountContract>;
+   createAccount(user: CreateAccountInput): Promise<AccountContract>;
+   updateAccount(user: AccountContract): Promise<AccountContract>;
    deleteAccount(id: ID): Promise<boolean>;
 }
 
 export type CreateAccountInput = {
-   profile: Pick<UserProfile, "email" | "name" | "password">;
+   profile: Pick<
+      UserContract,
+      "email" | "firstName" | "lastName" | "username" | "password"
+   >;
 };
 
 export interface AccountDataSource {
-   insert(user: CreateAccountInput): Promise<UserAccount>;
-   update(user: UserAccount): Promise<UserAccount>;
+   insert(user: CreateAccountInput): Promise<AccountContract>;
+   update(user: AccountContract): Promise<AccountContract>;
    delete(id: ID): Promise<boolean>;
-   findById(id: ID): Promise<UserAccount>;
-   find(user: UserAccount): Promise<UserAccount>;
-   findByEmail(email: string): Promise<UserAccount>;
-   query<Q>(query?: Q): Promise<UserAccount[]>;
-   updateById(id: ID, data: UserAccount): Promise<void>;
+   findById(id: ID): Promise<AccountContract>;
+   find(user: AccountContract): Promise<AccountContract>;
+   findByEmail(email: string): Promise<AccountContract>;
+   query<Q>(query?: Q): Promise<AccountContract[]>;
+   updateById(id: ID, data: AccountContract): Promise<void>;
 }
 
 /*

@@ -39,7 +39,7 @@ const routes: AutoloadPluginOptions = {
    options: { prefix: config.api.prefix },
 };
 
-export const fastify = {
+export const fastifyConfig = {
    cors,
    routes,
 };

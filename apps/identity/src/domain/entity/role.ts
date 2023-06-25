@@ -1,6 +1,6 @@
-import type { AccessInfo, ID, RoleType, UserRole } from "@/common";
+import type { AccessInfo, ID, RoleContract, RoleType } from "@/common";
 
-class Role implements UserRole {
+class Role implements RoleContract {
    readonly _id?: ID | undefined;
 
    constructor(public type: RoleType, public permissions: AccessInfo[]) {}

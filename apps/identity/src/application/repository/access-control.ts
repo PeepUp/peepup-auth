@@ -3,7 +3,7 @@ import {
    AccessControlDataSource,
    AccessInfo,
    ID,
-   UserRole,
+   RoleContract,
 } from "@/common";
 
 class AccessControlRepository implements AccessControlAccessor {
@@ -15,11 +15,11 @@ class AccessControlRepository implements AccessControlAccessor {
       return await this.accessControlDataSource.updateById(accessId, data);
    }
 
-   async getAccess(access: AccessInfo): Promise<UserRole> {
+   async getAccess(access: AccessInfo): Promise<RoleContract> {
       return await this.accessControlDataSource.find({ permissions: [access] });
    }
 
-   async getAllAccess(): Promise<UserRole[]> {
+   async getAllAccess(): Promise<RoleContract[]> {
       return await this.accessControlDataSource.findAll();
    }
 
@@ -27,7 +27,7 @@ class AccessControlRepository implements AccessControlAccessor {
       return await this.accessControlDataSource.deleteById(accessId);
    }
 
-   async createAccess(role: UserRole, access: AccessInfo): Promise<void> {
+   async createAccess(role: RoleContract, access: AccessInfo): Promise<void> {
       return await this.accessControlDataSource.create(role, access);
    }
 }
