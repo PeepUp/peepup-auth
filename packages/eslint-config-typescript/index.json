@@ -16,7 +16,6 @@
    },
    "parser": "@typescript-eslint/parser",
    "ignorePatterns": [
-      ".next",
       ".turbo",
       "node_modules",
       "**/*.js",
