@@ -3,7 +3,7 @@ import type {
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
-   UserRole,
+   RoleContract,
 } from "common/types";
 
 class RBAC implements AccessControl {
@@ -12,7 +12,7 @@ class RBAC implements AccessControl {
       private readonly accessControlRepository: AccessControlAccessor
    ) {}
 
-   async grant(role: UserRole, access: AccessInfo): Promise<void> {
+   async grant(role: RoleContract, access: AccessInfo): Promise<void> {
       try {
          const existRole = await this.roleRepository.getRole(role);
 
@@ -52,7 +52,7 @@ class RBAC implements AccessControl {
       }
    }
 
-   async canAccess(roles: UserRole[]): Promise<boolean> {
+   async canAccess(roles: RoleContract[]): Promise<boolean> {
       if (Array.isArray(roles) && roles.length === 0) {
          return false;
       }
@@ -85,7 +85,7 @@ class RBAC implements AccessControl {
       return false;
    }
 
-   private async getRolePermissions(role: UserRole): Promise<AccessInfo[]> {
+   private async getRolePermissions(role: RoleContract): Promise<AccessInfo[]> {
       if (Array.isArray(role) && role.length === 0) {
          return [];
       }
@@ -132,7 +132,10 @@ class RBAC implements AccessControl {
       return true;
    }
 
-   async extendRole(role: UserRole, extendRole: UserRole): Promise<void> {
+   async extendRole(
+      role: RoleContract,
+      extendRole: RoleContract
+   ): Promise<void> {
       const roleData = await this.getRolePermissions(extendRole);
       const extendedRolePermissions = roleData.map((permission) => ({
          action: permission.action,
@@ -149,7 +152,7 @@ class RBAC implements AccessControl {
             : undefined,
       }));
 
-      const updatedRole: UserRole = {
+      const updatedRole: RoleContract = {
          _id: role._id,
          type: role.type,
          permissions: [...role.permissions, ...extendedRolePermissions],

@@ -1,15 +1,20 @@
 import cors from "@fastify/cors";
 import fastify from "fastify";
-import type http from "http";
-import { fastify as config } from "../application/config/fastify.config";
+import { fastifyConfig } from "../application/config/fastify.config";
 import { configPlugin } from "../application/plugin";
+import { routes } from "../adapter";
+import { errorHandler } from "../adapter/middleware/error-handler";
+import { accountSchema } from "../adapter";
+import { environmentUtils } from "../common";
 import {
    serializerCompiler,
    validatorCompiler,
+   ZodTypeProvider,
 } from "fastify-type-provider-zod";
 
-import type { FastifyInstance } from "fastify";
-import { accountSchema } from "../adapter";
+import type http from "http";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { request } from "http";
 
 const server: FastifyInstance<
    http.Server,
@@ -18,25 +23,49 @@ const server: FastifyInstance<
 > = fastify({
    pluginTimeout: 10000,
    logger: {
-      enabled: process.env["NODE_ENV"] === "test" ? false : true,
+      enabled: environmentUtils.isDevelopment() ? true : false,
    },
    ignoreTrailingSlash: true,
+   jsonShorthand: false,
    ajv: {
-      customOptions: {},
+      customOptions: {
+         allowUnionTypes: true,
+         coerceTypes: true,
+         allErrors: false,
+         useDefaults: true,
+         removeAdditional: true,
+      },
    },
 });
 
 async function initialize() {
    await server.register(configPlugin);
-   await server.register(cors, config.cors);
+   await server.register(cors, fastifyConfig.cors);
+
    server.setValidatorCompiler(validatorCompiler);
    server.setSerializerCompiler(serializerCompiler);
 
    for (const schema of [...accountSchema]) {
       server.addSchema(schema);
    }
+}
 
-   /* server.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
+initialize().catch((error) => {
+   if (error instanceof Error) {
+      process.exit(1);
+   }
+});
+
+server.after(() => {
+   const { routes: router } = routes();
+
+   router.forEach((route) => {
+      server.withTypeProvider<ZodTypeProvider>().route(route);
+   });
+
+   server.setErrorHandler(errorHandler);
+
+   server.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
       reply.code(404).send({
          ok: false,
          message: "Resource or Service Not Found!",
@@ -45,41 +74,15 @@ async function initialize() {
          api_docs: "http://localhost:4334/api-docs",
          response_time: reply.getResponseTime(),
       });
-   }); */
+   });
+});
 
-   /*    server.addHook(
-      "onSend",
-      (
-         _request: FastifyRequest,
-         reply: FastifyReply,
-         _payload: unknown,
-         done
-      ) => {
-         reply.headers({
-            Server: "e6167e18-b68e-4949-9cac-f7bd8e827102",
-         });
-
-         done();
-      }
-   ); */
-
-   /* server.setErrorHandler(function (error, _request, reply) {
-      if (error instanceof errorCodes.FST_ERR_BAD_STATUS_CODE) {
-         // Log error
-         this.log.error(error);
-         // Send error response
-         reply.status(500).send({ ok: false });
-      } else {
-         // fastify will use parent error handler to handle this
-         reply.send(error);
-      }
-   }); */
-}
-
-initialize().catch((error) => {
-   if (error instanceof Error) {
-      process.exit(1);
+server.ready((err) => {
+   if (err) {
+      throw err;
    }
+
+   console.log("successfully booted!");
 });
 
 export { server };

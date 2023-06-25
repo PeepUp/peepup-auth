@@ -25,6 +25,10 @@
          "cache": false,
          "outputs": ["^generate"]
       },
+      "db:reset": {
+         "cache": false,
+         "outputs": ["^reset"]
+      },
       "db:format": {
          "cache": false,
          "outputs": ["^format"]

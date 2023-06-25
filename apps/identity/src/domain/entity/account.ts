@@ -1,26 +1,30 @@
-import type { ID, UserAccount, UserProfile, UserRole } from "common/types";
+import type {
+   AccountContract,
+   ID,
+   RoleContract,
+   UserContract,
+} from "common/types";
 
-class Account implements UserAccount {
-   public roles?: UserRole[] = [];
-   public tokens?: string[] = [];
-   public profile: Partial<UserProfile> = {};
-   public providerId?: number = 0;
+class Account implements AccountContract {
+   public roles?: RoleContract[];
+   public tokens?: string[];
+   public user: UserContract = <UserContract>{};
+   public providerId?: ID;
    public readonly createdAt: Date = new Date();
-   readonly _id?: ID | undefined;
+   readonly _id?: ID;
 
-   constructor(props: UserAccount) {
+   constructor(props: AccountContract) {
       this.initializeAccount(props);
    }
 
-   private initializeAccount(props: UserAccount): void {
+   private initializeAccount(props: AccountContract): void {
       this.roles = props?.roles;
       this.tokens = props?.tokens;
-      this.profile = props?.profile;
+      this.user = props.user;
       this.providerId = props?.providerId;
    }
-
    public get id(): ID | undefined {
-      return this._id ? <ID>this._id : undefined;
+      return this._id;
    }
 }
 

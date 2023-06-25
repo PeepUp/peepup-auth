@@ -1,5 +1,5 @@
 import { AccountRepository } from "@/application/repository/accounts";
-import { ID, UserAccount, passwordUtils } from "../../common";
+import { AccountContract, ID, passwordUtils } from "../../common";
 import Account from "../../domain/entity/account";
 import {
    CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
@@ -10,37 +10,30 @@ class AccountService {
    constructor(private readonly accountRepository: AccountRepository) {}
 
    async registerAccount({
-      name,
       email,
       password,
-   }: CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE): Promise<void> {
+   }: {
+      email: string;
+      password: string;
+   }): Promise<void> {
       const hashedPassword = await passwordUtils.hash({
          password,
          salt: await passwordUtils.generateSalt(16),
       });
 
-      console.log({
-         name,
-         email,
-         password,
-         hashedPassword,
-      });
-
-      const profile = {
-         name,
+      const user = {
          email,
          password: hashedPassword,
       };
 
       const account = new Account({
-         profile,
+         user,
       });
 
       await this.accountRepository.createAccount({
          profile: {
-            name: <string>account.profile.name,
-            email: <string>account.profile.email,
-            password: <string>account.profile.password,
+            email: <string>account.user.email,
+            password: <string>account.user.password,
          },
       });
    }
@@ -48,42 +41,38 @@ class AccountService {
    async loginAccount({
       email,
       password,
-   }: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE): Promise<UserAccount> {
+   }: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE): Promise<AccountContract> {
       const account = await this.getProfileByEmail(email);
 
       const verifyPassword = await passwordUtils.verify({
          password: password,
-         hashedPassword: <string>account.profile.password,
+         hashedPassword: <string>account.user.password,
       });
 
-      console.log({
-         account,
-         verifyPassword,
-      });
       if (!verifyPassword) throw new Error("Email or Password is incorrect");
 
       return account;
    }
 
-   async getAccountById(id: ID): Promise<UserAccount> {
-      const { profile } = await this.accountRepository.getAccountById(id);
-      return profile as UserAccount;
+   async getAccountById(id: ID): Promise<AccountContract> {
+      const { user } = await this.accountRepository.getAccountById(id);
+      return { user } as AccountContract;
    }
 
-   async getProfileByEmail(email: string): Promise<UserAccount> {
+   async getProfileByEmail(email: string): Promise<AccountContract> {
       return await this.accountRepository.getAccount({
-         profile: {
+         user: {
             email,
          },
-      } as UserAccount);
+      } as AccountContract);
    }
 
-   async getProfileByUsername(username: string): Promise<UserAccount> {
+   async getProfileByUsername(username: string): Promise<AccountContract> {
       return await this.accountRepository.getAccount({
-         profile: {
+         user: {
             username,
          },
-      } as UserAccount);
+      } as AccountContract);
    }
 }
 

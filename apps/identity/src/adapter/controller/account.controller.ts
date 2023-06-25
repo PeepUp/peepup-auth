@@ -1,11 +1,14 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import AccountService from "../service/account";
+
 import {
    CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE,
    LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
+   REGISTRATION_ACCOUNT_REQUEST_BODY_SCHEMA,
 } from "../schema/account.schema";
-import AccountService from "../service/account";
+import { randomUUID } from "crypto";
 
 export async function getUserById(
    request: FastifyRequest<{ Params: GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE }>,
@@ -15,7 +18,6 @@ export async function getUserById(
    const profile = await accountService.getAccountById(
       request.params.accountId
    );
-   console.log({ profile });
 
    return reply.code(200).send({
       data: {
@@ -50,13 +52,13 @@ export async function getUserProfileByUsername(
    reply: FastifyReply,
    accountService: AccountService
 ) {
-   const { profile } = await accountService.getProfileByUsername(
+   const { user } = await accountService.getProfileByUsername(
       request.params.username
    );
 
    return reply.code(200).send({
       data: {
-         ...profile,
+         ...user,
       },
    });
 }
@@ -66,27 +68,28 @@ export async function registerAccount(
    reply: FastifyReply,
    accountService: AccountService
 ) {
-   const { email, password, name } = request.body;
+   const { email, password } = request.body;
 
    const existingAccount = await accountService.getProfileByEmail(email);
-   if (existingAccount.profile.email === email) {
-      return reply.code(409).send({
-         code: "409",
-         codeStatus: "Conflict",
-         ok: false,
-         message: "Account is already taken",
+   console.log({ existingAccount });
+
+   if (existingAccount.user !== undefined) {
+      return reply.code(422).send({
          error: {
-            details: [
-               {
-                  message: `Account with email '${email}' is invalid or already taken`,
-               },
-            ],
+            error: {
+               id: randomUUID(),
+               code: "409",
+               message: "Account is already taken",
+               details: "Account is already taken",
+               reason: "Account is already taken",
+               request: randomUUID(),
+               status: "Conflict",
+            },
          },
       });
    }
 
    await accountService.registerAccount({
-      name,
       email,
       password,
    });
@@ -101,14 +104,14 @@ export async function registerAccount(
 }
 
 export async function loginAccount(
-   request: FastifyRequest<{ Body: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE }>,
+   request: FastifyRequest<{ Body: CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE }>,
    reply: FastifyReply,
    accountService: AccountService
 ) {
    const { email, password } = request.body;
    const existingAccount = await accountService.getProfileByEmail(email);
 
-   if (existingAccount.profile.email !== email) {
+   if (existingAccount !== undefined && existingAccount.user.email !== email) {
       return reply.code(404).send({
          code: "404",
          codeStatus: "Not Found",
@@ -124,12 +127,12 @@ export async function loginAccount(
       });
    }
 
-   const { profile } = await accountService.loginAccount({
+   const { user } = await accountService.loginAccount({
       email,
       password,
    });
 
-   if (profile) {
+   if (user) {
       return reply.code(200).send({
          data: {
             access_token: "test",

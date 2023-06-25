@@ -4,8 +4,8 @@ import {
    AccessControlAccessor,
    AccessInfo,
    RoleAccessor,
+   RoleContract,
    RoleType,
-   UserRole,
 } from "@/common/types";
 
 describe("RBAC implements AccessControlAccessor", () => {
@@ -39,7 +39,7 @@ describe("RBAC implements AccessControlAccessor", () => {
 
    describe("Grant", () => {
       it("should create a new access control if permission doesn't exist", async () => {
-         const role: UserRole = {
+         const role: RoleContract = {
             type: RoleType.ADMIN,
             permissions: [],
          };

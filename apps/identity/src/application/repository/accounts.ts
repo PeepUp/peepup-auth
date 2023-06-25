@@ -1,35 +1,35 @@
 import type {
    AccountAccessor,
+   AccountContract,
    AccountDataSource,
    CreateAccountInput,
    ID,
-   UserAccount,
 } from "@/common";
 
 export class AccountRepository implements AccountAccessor {
    constructor(private readonly accountDataSource: AccountDataSource) {}
 
-   async getAllAccount<Q>(query?: Q): Promise<UserAccount[]> {
-      return await this.accountDataSource.query(query as UserAccount);
+   async getAllAccount<Q>(query?: Q): Promise<AccountContract[]> {
+      return await this.accountDataSource.query(query as AccountContract);
    }
 
-   async getAccountById(id: ID): Promise<UserAccount> {
+   async getAccountById(id: ID): Promise<AccountContract> {
       return await this.accountDataSource.findById(id);
    }
 
-   async getAccount(user: UserAccount): Promise<UserAccount> {
+   async getAccount(user: AccountContract): Promise<AccountContract> {
       return await this.accountDataSource.find(user);
    }
 
-   async getAccountByEmail(email: string): Promise<UserAccount> {
+   async getAccountByEmail(email: string): Promise<AccountContract> {
       return await this.accountDataSource.findByEmail(email);
    }
 
-   async createAccount(user: CreateAccountInput): Promise<UserAccount> {
+   async createAccount(user: CreateAccountInput): Promise<AccountContract> {
       return await this.accountDataSource.insert(user);
    }
 
-   async updateAccount(user: UserAccount): Promise<UserAccount> {
+   async updateAccount(user: AccountContract): Promise<AccountContract> {
       return await this.accountDataSource.update(user);
    }
 
