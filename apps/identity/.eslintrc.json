@@ -4,7 +4,7 @@
       "es2021": true,
       "node": true
    },
-   "extends": ["typescript"],
+   "extends": ["@dofaour/typescript"],
    "parser": "@typescript-eslint/parser",
    "parserOptions": {
       "ecmaVersion": "latest",
