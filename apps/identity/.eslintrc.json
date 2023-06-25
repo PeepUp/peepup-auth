@@ -4,11 +4,10 @@
       "es2021": true,
       "node": true
    },
-   "extends": ["@dofaour/typescript"],
+   "extends": ["@dofavour/eslint-config-typescript"],
    "parser": "@typescript-eslint/parser",
    "parserOptions": {
       "ecmaVersion": "latest",
       "project": ["./tsconfig.json"]
-   },
-   "plugins": ["@typescript-eslint", "import"]
+   }
 }

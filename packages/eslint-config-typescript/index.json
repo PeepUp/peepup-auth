@@ -3,25 +3,16 @@
    "extends": [
       "airbnb-base",
       "airbnb-typescript/base",
-      "next",
       "turbo",
       "prettier",
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:import/recommended",
-      "plugin:import/typescript",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      "plugin:import/typescript"
    ],
    "rules": {
       "import/no-unresolved": "off"
    },
    "parser": "@typescript-eslint/parser",
-   "ignorePatterns": [
-      ".next",
-      ".turbo",
-      "node_modules",
-      "**/*.js",
-      "**/*.mjs",
-      "**/*.jsx"
-   ]
+   "ignorePatterns": [".turbo", "node_modules", "**/*.js", "**/*.mjs"]
 }

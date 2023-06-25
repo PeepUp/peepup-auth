@@ -9,12 +9,13 @@
       "lint": "turbo lint",
       "clean": "turbo clean",
       "test": "turbo test",
+      "pretty": "turbo pretty",
       "migrate": "turbo db:migrate",
       "format": "turbo db:format",
       "seed": "turbo db:seed",
       "generate": "turbo db:generate",
       "studio": "turbo db:studio",
-      "pre-commit": "pnpm run --filter \"\" prettier",
+      "precommit": "pnpm run --filter \"@dofavour/*\" pre-commit",
       "prepare": "husky install"
    },
    "devDependencies": {

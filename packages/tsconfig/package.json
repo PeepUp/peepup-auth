@@ -5,7 +5,8 @@
    "main": "index.js",
    "license": "MIT",
    "scripts": {
-      "pre-commit": "lint-staged"
+      "precommit": "lint-staged",
+      "pretty": "prettier --write ."
    },
    "files": [
       "base.json",
