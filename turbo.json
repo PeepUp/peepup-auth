@@ -19,7 +19,12 @@
          "outputs": ["^test"]
       },
       "clean": {
-         "cache": false
+         "cache": false,
+         "outputs": ["^clean"]
+      },
+      "pretty": {
+         "cache": false,
+         "outputs": ["^pretty"]
       },
       "db:generate": {
          "cache": false,

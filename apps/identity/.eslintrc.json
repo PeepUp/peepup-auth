@@ -9,6 +9,5 @@
    "parserOptions": {
       "ecmaVersion": "latest",
       "project": ["./tsconfig.json"]
-   },
-   "plugins": ["@typescript-eslint", "import"]
+   }
 }

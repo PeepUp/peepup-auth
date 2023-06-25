@@ -1,23 +1,14 @@
 {
    "name": "@dofavour/docs",
    "version": "0.0.1",
-   "description": "Nextra docs template",
+   "description": "Documentation for the Dofavour project api & service",
    "scripts": {
       "dev": "next dev",
       "build": "next build",
       "start": "next start",
-      "pre-commit": "lint-staged"
+      "pretty": "prettier --write \"src/**/*.ts\"",
+      "precommit": "lint-staged"
    },
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/shuding/nextra-docs-template.git"
-   },
-   "author": "Shu Ding <g@shud.in>",
-   "license": "MIT",
-   "bugs": {
-      "url": "https://github.com/shuding/nextra-docs-template/issues"
-   },
-   "homepage": "https://github.com/shuding/nextra-docs-template#readme",
    "dependencies": {
       "next": "^13.4.7",
       "nextra": "2.8.0",
