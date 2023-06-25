@@ -6,7 +6,7 @@
       "dev": "next dev",
       "build": "next build",
       "start": "next start",
-      "pretty": "prettier --write \"src/**/*.ts\"",
+      "pretty": "prettier --write .",
       "precommit": "lint-staged"
    },
    "dependencies": {

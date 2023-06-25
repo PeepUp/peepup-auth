@@ -4,3 +4,6 @@ build
 .contentlayer
 data
 .github
+.next
+pnpm-lock.yaml
+next-env.d.ts
