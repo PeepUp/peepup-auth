@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Running pre-commit hooks..."
-exit 1
+echo "Hello bruh..."
+echo "Hello bruh..."
+echo "Hello bruh..."
+
+pnpm lint

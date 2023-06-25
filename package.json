@@ -14,7 +14,6 @@
       "seed": "turbo db:seed",
       "generate": "turbo db:generate",
       "studio": "turbo db:studio",
-      "prettier": "prettier --write \"**/*.{ts,tsx,md}\"",
       "pre-commit": "pnpm run --filter \"\" prettier",
       "prepare": "husky install"
    },
