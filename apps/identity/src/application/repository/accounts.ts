@@ -4,8 +4,7 @@ import type {
    AccountDataSource,
    CreateAccountInput,
    ID,
-} from "@/common";
-
+} from "@/types/types";
 export class AccountRepository implements AccountAccessor {
    constructor(private readonly accountDataSource: AccountDataSource) {}
 

@@ -1,5 +1,3 @@
-import Role from "@/domain/entity/role";
-
 export type ID = number | string;
 
 export interface Serializable {
@@ -13,7 +11,7 @@ export interface UserQuery {
    name?: string;
    phone?: string;
    providerId?: number;
-   roles?: Role[];
+   roles?: RoleContract[];
    profile?: UserContract;
    tokens?: string[];
    include?: {
@@ -79,10 +77,10 @@ export interface AccessInfo extends EntityContract {
 }
 
 export interface AccessControl {
-   canAccess(roles: Role[]): Promise<boolean>;
-   extendRole(role: Role, extendRole: Role): Promise<void>;
+   canAccess(roles: RoleContract[]): Promise<boolean>;
+   extendRole(role: RoleContract, extendRole: RoleContract): Promise<void>;
    extendPermission(): Promise<void>;
-   grant(role: Role, access: AccessInfo): Promise<void>;
+   grant(role: RoleContract, access: AccessInfo): Promise<void>;
 }
 
 export interface RoleAccessor {
@@ -151,9 +149,9 @@ export interface AccountDataSource {
 }
 
 /*
- * @Enum Role
+ * @Enum RoleContract
  * @Purpose: for roles of an account (ADMIN, VOLUNTEER, ORGANIZATION)
- * @Usage: Role.VOLUNTEER
+ * @Usage: RoleContract.VOLUNTEER
  *
  * */
 export enum RoleType {

@@ -1,10 +1,9 @@
 import { AccountRepository } from "@/application/repository/accounts";
-import { AccountContract, ID, passwordUtils } from "../../common";
+import type { AccountContract, ID } from "@/types/types";
 import Account from "../../domain/entity/account";
-import {
-   CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
-   LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
-} from "../schema/account.schema";
+import { LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE } from "../schema/account.schema";
+
+import { passwordUtils } from "../../common/utils";
 
 class AccountService {
    constructor(private readonly accountRepository: AccountRepository) {}

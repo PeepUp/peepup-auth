@@ -1,7 +1,7 @@
 import Account from "@/domain/entity/account";
 
+import type { AccountContract, UseCase } from "@/types/types";
 import type { AccountRepository } from "application/repository/accounts";
-import type { AccountContract, UseCase } from "common/types";
 
 export class RegisterUser implements UseCase<AccountContract> {
    constructor(private readonly repository: AccountRepository) {

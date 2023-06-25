@@ -1,10 +1,11 @@
 {
+   "name": "@dofavour/app",
    "private": true,
    "version": "0.0.0",
    "main": "index.js",
    "scripts": {
       "build": "turbo build",
-      "dev": "turbo dev",
+      "dev": "turbo dev --no-daemon",
       "lint": "turbo lint",
       "clean": "turbo clean",
       "test": "turbo test",
@@ -13,10 +14,13 @@
       "seed": "turbo db:seed",
       "generate": "turbo db:generate",
       "studio": "turbo db:studio",
-      "prettier": "prettier --write \"**/*.{ts,tsx,md}\""
+      "pre-commit": "pnpm run --filter \"\" prettier",
+      "prepare": "husky install"
    },
    "devDependencies": {
+      "cz-conventional-changelog": "3.3.0",
       "eslint": "^8.43.0",
+      "husky": "8.0.3",
       "prettier": "^2.8.8",
       "prettier-plugin-tailwindcss": "^0.3.0",
       "turbo": "^1.10.6"
@@ -26,5 +30,10 @@
       "yarn": ">=1.20.0",
       "pnpm": ">=8.0.0",
       "npm": "use yarn or pnpm"
+   },
+   "husky": {
+      "hooks": {
+         "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+      }
    }
 }

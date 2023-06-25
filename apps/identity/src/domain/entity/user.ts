@@ -1,4 +1,4 @@
-import type { ID, UserContract } from "common/types";
+import type { ID, UserContract } from "@/types/types";
 
 export class User implements UserContract {
    readonly _id?: ID | undefined;

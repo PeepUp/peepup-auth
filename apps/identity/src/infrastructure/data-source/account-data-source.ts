@@ -6,7 +6,7 @@ import type {
    CreateAccountInput,
    DataSourceSQL,
    ID,
-} from "@/common/types";
+} from "@/types/types";
 
 class PrismaAccountDataSourceAdapter
    implements AccountDataSource, DataSourceSQL<AccountContract>

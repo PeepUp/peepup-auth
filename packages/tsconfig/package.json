@@ -1,9 +1,12 @@
 {
-   "name": "@doFavour/tsconfig",
+   "name": "@dofavour/tsconfig",
    "version": "0.0.0",
    "private": true,
    "main": "index.js",
    "license": "MIT",
+   "scripts": {
+      "pre-commit": "lint-staged"
+   },
    "files": [
       "base.json",
       "common.json",

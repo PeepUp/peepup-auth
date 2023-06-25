@@ -1,9 +1,12 @@
 {
-   "name": "@doFavour/eslint-config-next-typescript",
+   "name": "@dofavour/eslint-config-next-typescript",
    "version": "1.0.0",
    "private": true,
    "main": "index.js",
    "license": "ISC",
+   "scripts": {
+      "pre-commit": "lint-staged"
+   },
    "dependencies": {
       "@next/eslint-plugin-next": "^13.4.7",
       "eslint-config-airbnb": "^19.0.4",

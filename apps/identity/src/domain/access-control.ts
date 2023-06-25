@@ -4,7 +4,7 @@ import type {
    AccessInfo,
    RoleAccessor,
    RoleContract,
-} from "common/types";
+} from "@/types/types.d.ts";
 
 class RBAC implements AccessControl {
    constructor(

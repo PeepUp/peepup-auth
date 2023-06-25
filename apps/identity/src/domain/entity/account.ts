@@ -3,7 +3,7 @@ import type {
    ID,
    RoleContract,
    UserContract,
-} from "common/types";
+} from "@/types/types";
 
 class Account implements AccountContract {
    public roles?: RoleContract[];
