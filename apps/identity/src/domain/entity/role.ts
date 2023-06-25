@@ -1,4 +1,4 @@
-import type { AccessInfo, ID, RoleContract, RoleType } from "@/common";
+import type { AccessInfo, ID, RoleContract, RoleType } from "@/types/types";
 
 class Role implements RoleContract {
    readonly _id?: ID | undefined;

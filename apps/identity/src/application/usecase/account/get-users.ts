@@ -1,7 +1,7 @@
 import Account from "@/domain/entity/account";
 
+import type { UseCase, UserQuery } from "@/types/types";
 import type { AccountRepository } from "application/repository/accounts";
-import type { UseCase, UserQuery } from "common/types";
 
 export class GetUsersUseCase implements UseCase<UserQuery> {
    constructor(private readonly repository: AccountRepository) {

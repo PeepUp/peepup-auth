@@ -1,7 +1,7 @@
 import { AccountRepository } from "@/application/repository/accounts";
 import Account from "@/domain/entity/account";
 
-import type { UseCase } from "@/common";
+import type { UseCase } from "@/types/types";
 
 class GetUserByEmail implements UseCase<string> {
    constructor(private readonly repository: AccountRepository) {}

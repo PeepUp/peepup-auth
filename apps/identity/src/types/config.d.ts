@@ -1,4 +1,4 @@
-declare namespace Auth {
+declare namespace Identity {
    namespace Config {
       interface Api {
          environment: {

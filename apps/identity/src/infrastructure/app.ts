@@ -1,20 +1,36 @@
 import cors from "@fastify/cors";
 import fastify from "fastify";
-import { fastifyConfig } from "../application/config/fastify.config";
-import { configPlugin } from "../application/plugin";
-import { routes } from "../adapter";
-import { errorHandler } from "../adapter/middleware/error-handler";
-import { accountSchema } from "../adapter";
-import { environmentUtils } from "../common";
 import {
    serializerCompiler,
    validatorCompiler,
    ZodTypeProvider,
 } from "fastify-type-provider-zod";
+import http from "http";
+import { accountSchema, routes } from "../adapter";
+import { errorHandler } from "../adapter/middleware/error-handler";
+import { fastifyConfig } from "../application/config/fastify.config";
+import { configPlugin } from "../application/plugin";
+import { environmentUtils } from "../common";
 
-import type http from "http";
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { request } from "http";
+import type {
+   FastifyInstance,
+   FastifyReply,
+   FastifyRequest,
+   RouteOptions,
+} from "fastify";
+
+class Application {
+   constructor(
+      private _routes: Array<RouteOptions>,
+      public app: FastifyInstance<
+         http.Server,
+         http.IncomingMessage,
+         http.ServerResponse
+      >
+   ) {}
+}
+
+export default Application;
 
 const server: FastifyInstance<
    http.Server,
@@ -41,7 +57,6 @@ const server: FastifyInstance<
 async function initialize() {
    await server.register(configPlugin);
    await server.register(cors, fastifyConfig.cors);
-
    server.setValidatorCompiler(validatorCompiler);
    server.setSerializerCompiler(serializerCompiler);
 
@@ -50,13 +65,11 @@ async function initialize() {
    }
 }
 
-initialize().catch((error) => {
-   if (error instanceof Error) {
-      process.exit(1);
-   }
-});
+initialize();
 
-server.after(() => {
+server.after((error: unknown) => {
+   if (error) server.log.error(error);
+
    const { routes: router } = routes();
 
    router.forEach((route) => {
@@ -75,14 +88,6 @@ server.after(() => {
          response_time: reply.getResponseTime(),
       });
    });
-});
-
-server.ready((err) => {
-   if (err) {
-      throw err;
-   }
-
-   console.log("successfully booted!");
 });
 
 export { server };

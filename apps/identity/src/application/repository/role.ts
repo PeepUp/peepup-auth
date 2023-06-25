@@ -1,4 +1,4 @@
-import { RoleAccessor, RoleContract, RoleDataSource } from "@/common/types";
+import { RoleAccessor, RoleContract, RoleDataSource } from "@/types/types";
 
 class RoleRepository implements RoleAccessor {
    constructor(private readonly roleDataSource: RoleDataSource) {}

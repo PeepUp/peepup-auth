@@ -4,7 +4,7 @@ import {
    AccessInfo,
    ID,
    RoleContract,
-} from "@/common";
+} from "@/types/types";
 
 class AccessControlRepository implements AccessControlAccessor {
    constructor(
