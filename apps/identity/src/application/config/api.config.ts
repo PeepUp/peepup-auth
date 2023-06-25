@@ -9,7 +9,7 @@ const env = process.env;
 export const config: Auth.Config.Api = {
    environment: {
       env: env.NODE_ENV,
-      port: parseInt(<string>env.PORT),
+      port: parseInt(<string>env.PORT, 10),
       host: env.HOST,
       whiteListClient: env.WHITE_LISTED_DOMAINS?.split(","),
    },
