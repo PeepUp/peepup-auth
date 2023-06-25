@@ -1,7 +1,10 @@
 import { AccountRepository } from "@/application/repository/accounts";
 import { ID, UserAccount, passwordUtils } from "../../common";
 import Account from "../../domain/entity/account";
-import { CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE } from "../schema/account.schema";
+import {
+   CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
+   LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
+} from "../schema/account.schema";
 
 class AccountService {
    constructor(private readonly accountRepository: AccountRepository) {}
@@ -14,6 +17,13 @@ class AccountService {
       const hashedPassword = await passwordUtils.hash({
          password,
          salt: await passwordUtils.generateSalt(16),
+      });
+
+      console.log({
+         name,
+         email,
+         password,
+         hashedPassword,
       });
 
       const profile = {
@@ -35,8 +45,37 @@ class AccountService {
       });
    }
 
+   async loginAccount({
+      email,
+      password,
+   }: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE): Promise<UserAccount> {
+      const account = await this.getProfileByEmail(email);
+
+      const verifyPassword = await passwordUtils.verify({
+         password: password,
+         hashedPassword: <string>account.profile.password,
+      });
+
+      console.log({
+         account,
+         verifyPassword,
+      });
+      if (!verifyPassword) throw new Error("Email or Password is incorrect");
+
+      return account;
+   }
+
    async getAccountById(id: ID): Promise<UserAccount> {
-      return await this.accountRepository.getAccountById(id);
+      const { profile } = await this.accountRepository.getAccountById(id);
+      return profile as UserAccount;
+   }
+
+   async getProfileByEmail(email: string): Promise<UserAccount> {
+      return await this.accountRepository.getAccount({
+         profile: {
+            email,
+         },
+      } as UserAccount);
    }
 
    async getProfileByUsername(username: string): Promise<UserAccount> {

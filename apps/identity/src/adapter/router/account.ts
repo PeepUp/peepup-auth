@@ -5,6 +5,7 @@ import {
    getUserById,
    getUserByUserName,
    getUserProfileByUsername,
+   loginAccount,
    registerAccount,
 } from "../controller/account.controller";
 
@@ -13,6 +14,7 @@ import type {
    CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE,
    GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE,
+   LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE,
 } from "../schema/account.schema";
 
 export default (accountService: AccountService): { routes: Routes } => ({
@@ -60,6 +62,23 @@ export default (accountService: AccountService): { routes: Routes } => ({
             params: $ref("get_account_params_username_schema"),
             response: {
                200: $ref("get_user_profile_response_schema"),
+            },
+         },
+      },
+      {
+         method: "POST",
+         url: "/accounts/login",
+         handler: async (
+            request: FastifyRequest<{
+               Body: LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE;
+            }>,
+            reply: FastifyReply
+         ) => loginAccount(request, reply, accountService),
+         schema: {
+            describe: "[ POST /account ] create user",
+            body: $ref("login_account_request_body_schema"),
+            response: {
+               200: $ref("login_account_response_schema"),
             },
          },
       },

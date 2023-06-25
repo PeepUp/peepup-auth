@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 import type {
    AccountDataSource,
@@ -6,7 +6,6 @@ import type {
    DataSourceSQL,
    ID,
    UserAccount,
-   UserProfile,
 } from "@/common/types";
 
 class PrismaAccountDataSourceAdapter
@@ -15,10 +14,10 @@ class PrismaAccountDataSourceAdapter
    public name: string = "Prisma Account Data Source Adapter";
    constructor(private readonly db: PrismaClient) {}
 
-   async create(data: UserAccount): Promise<UserAccount | null> {
+   async create(_data: UserAccount): Promise<UserAccount | null> {
       throw new Error("Method not implemented.");
    }
-   async read(id: string): Promise<UserAccount | null> {
+   async read(_id: string): Promise<UserAccount | null> {
       throw new Error("Method not implemented.");
    }
 
@@ -48,15 +47,15 @@ class PrismaAccountDataSourceAdapter
       return newuser as unknown as UserAccount;
    }
 
-   async update(user: UserAccount): Promise<UserAccount> {
+   async update(_user: UserAccount): Promise<UserAccount> {
       throw new Error("Method not implemented.");
    }
 
-   async updateById(id: number, data: UserAccount): Promise<void> {
+   async updateById(_id: number, _data: UserAccount): Promise<void> {
       throw new Error("Method not implemented.");
    }
 
-   async delete(id: ID): Promise<boolean> {
+   async delete(_id: ID): Promise<boolean> {
       throw new Error("Method not implemented.");
    }
 
@@ -74,7 +73,7 @@ class PrismaAccountDataSourceAdapter
                },
             },
          },
-         where: { id: <number>id },
+         where: { id: <string>id },
       });
 
       if (data?.user) {
@@ -99,15 +98,14 @@ class PrismaAccountDataSourceAdapter
          },
       });
 
-      console.log({ data });
       if (data) {
+         console.log({ ...data });
          return {
             profile: data.user,
          } as UserAccount;
       }
 
       return {} as UserAccount;
-      throw new Error("Method not implemented.");
    }
 
    async findByEmail(email: string): Promise<UserAccount> {

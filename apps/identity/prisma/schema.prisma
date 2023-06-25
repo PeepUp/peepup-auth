@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,17 +8,17 @@ datasource db {
 }
 
 model Account {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relation fields
   tokens Token[]
+  user   User?
+  roles  Role[]
 
-  user       User?
-  provider   Provider? @relation(fields: [providerId], references: [id])
-  roles      Role[]
   providerId Int?
+  provider   Provider? @relation(fields: [providerId], references: [id])
 
   @@map(name: "accounts")
 }
@@ -32,7 +29,7 @@ model Role {
   permissions Permission[]
 
   // relation fields
-  userId Int?     @unique
+  userId String?  @unique
   user   Account? @relation(fields: [userId], references: [id])
 }
 
@@ -41,9 +38,11 @@ model Permission {
   action   String?
   resource String?
 
-  roleId     Int?
-  role       Role?       @relation(fields: [roleId], references: [id])
+  // relation fields
   attributes Attribute[]
+
+  roleId Int?
+  role   Role? @relation(fields: [roleId], references: [id])
 
   @@map(name: "permissions")
 }
@@ -63,7 +62,7 @@ model Attribute {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            String    @id @default(uuid())
   name          String?
   emailVerified DateTime?
   avatar        String?
@@ -73,10 +72,11 @@ model User {
   phone         String?   @unique
 
   // relation fields
-  accountId Int?       @unique
-  account   Account?   @relation(fields: [accountId], references: [id])
-  provider  Provider[]
-  tokens    Token[]
+  accountId String?  @unique
+  account   Account? @relation(fields: [accountId], references: [id])
+
+  provider Provider[]
+  tokens   Token[]
 
   @@map(name: "users")
 }
@@ -105,26 +105,30 @@ model Provider {
   updatedAt           DateTime  @updatedAt
 
   // relation fields
-  userId  Int?
-  user    User?     @relation(fields: [userId], references: [id])
   account Account[]
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   @@map(name: "provider")
 }
 
 model Token {
-  id            Int       @id @default(autoincrement())
-  expires_at    DateTime?
-  access_token  String
-  refresh_token String
+  id                        Int       @id @default(autoincrement())
+  expires_at                DateTime?
+  access_token              String
+  refresh_token             String
+  blacklisted_access_token  String
+  blacklisted_refresh_token String
 
   // relation fields
-  userId    Int?
-  user      User?    @relation(fields: [userId], references: [id])
-  account   Account? @relation(fields: [accountId], references: [id])
-  accountId Int?
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
-  @@index([userId], name: "userId")
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
+
+  @@index([accountId], name: "accountId")
   @@map(name: "tokens")
 }
 
