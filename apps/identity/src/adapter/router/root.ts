@@ -1,3 +1,4 @@
+import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { dependencies } from "../../infrastructure/diConfig";
 import accountRouter from "./account";
 import checkhealthRouter from "./metadata/checkhealth";
@@ -15,7 +16,7 @@ export type Routes = Array<
       any,
       any,
       any,
-      any,
+      ZodTypeProvider,
       FastifyBaseLogger
    >
 >;

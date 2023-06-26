@@ -1,6 +1,8 @@
+import { environmentUtils } from "../../common";
 import { config } from "./api.config";
 
 import type { FastifyCorsOptions } from "@fastify/cors";
+import { FastifyServerOptions } from "fastify";
 import { __metadata } from "tslib";
 
 const cors: FastifyCorsOptions = {
@@ -26,6 +28,25 @@ const cors: FastifyCorsOptions = {
    hideOptionsRoute: true,
 };
 
+const fastifyOption: FastifyServerOptions = {
+   pluginTimeout: 10000,
+   logger: {
+      enabled: environmentUtils.isDevelopment() ? true : false,
+   },
+   ignoreTrailingSlash: true,
+   jsonShorthand: false,
+   ajv: {
+      customOptions: {
+         allowUnionTypes: true,
+         coerceTypes: true,
+         allErrors: false,
+         useDefaults: true,
+         removeAdditional: true,
+      },
+   },
+};
+
 export const fastifyConfig = {
    cors,
+   fastifyOption,
 };

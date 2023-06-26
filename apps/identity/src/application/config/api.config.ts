@@ -1,3 +1,4 @@
+import { Identity } from "@/types/identity";
 import dotenv from "dotenv";
 
 dotenv.config({
@@ -16,8 +17,7 @@ export const config: Identity.Config.Api = {
    },
    swagger: {
       title: "DoFavour Auth API",
-      description:
-         "DoFavour Auth API Documentation: [nextra](http://localhost:3000)",
+      description: "DoFavour Auth API Documentation: [nextra](http://localhost:3000)",
       url: <Awaited<string>>process.env.SWAGGER_URL,
    },
    api: {
