@@ -93,10 +93,11 @@ class JOSEToken {
 
          const signature = await new jose.SignJWT({
             ...payload,
+            aud: "urn:example:client",
          })
             .setProtectedHeader({ alg: "RS256", typ: "JWT", kid: this.keyId })
-            .setAudience(<string>payload.client)
-            .setExpirationTime(exiprationTime)
+            .setAudience("urn:example:client")
+            .setExpirationTime("2h")
             .setIssuer(
                `urn:server-1:${config.config.environment.host}:${config.config.environment.port}`
             )
@@ -176,13 +177,14 @@ class JOSEToken {
 
       const token = await new jose.SignJWT({
          ...payload,
+         aud: "urn:client-1",
       })
          .setProtectedHeader({ alg: "RS256" })
          .setIssuedAt()
          .setIssuer(
             `urn:server-1:${config.config.environment.host}:${config.config.environment.port}`
          )
-         .setAudience(<string>payload.client)
+         .setAudience("urn:client-1")
          .setSubject("urn:example:subject")
          .setExpirationTime(exiprationTime)
          .sign(privateKeyImport);
@@ -196,14 +198,20 @@ class JOSEToken {
       options?: jose.JWTVerifyOptions
    ): Promise<boolean> {
       try {
-         const importedPublicKey = await jose.importSPKI(publicKey, "RS256");
+         const JWKS = jose.createRemoteJWKSet(
+            new URL("http://127.0.0.1:4334/oauth2/v1/certs")
+         );
+         const publicKeyImport = await jose.importSPKI(publicKey, "RS256");
+
          const { payload, protectedHeader } = await jose.jwtVerify(
             jwtToken,
-            importedPublicKey,
+            publicKeyImport,
             options
          );
 
          const { iat, exp, nbf, aud, iss, jti, sub } = payload;
+
+         console.log(payload, protectedHeader);
 
          // Validate 'not before' and 'expiration' claims
          const currentTime = Math.floor(Date.now() / 1000);
