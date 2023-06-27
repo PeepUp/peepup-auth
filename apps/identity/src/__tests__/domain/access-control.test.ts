@@ -1,4 +1,4 @@
-import RBAC from "@/domain/access-control";
+import RBAC from "../../domain/access-control";
 
 import {
    AccessControlAccessor,
@@ -6,7 +6,7 @@ import {
    RoleAccessor,
    RoleContract,
    RoleType,
-} from "@/common/types";
+} from "../../types/types";
 
 describe("RBAC implements AccessControlAccessor", () => {
    let roleRepository: RoleAccessor;
@@ -45,7 +45,7 @@ describe("RBAC implements AccessControlAccessor", () => {
          };
 
          const access: AccessInfo = {
-            _id: 1,
+            id: 1,
             action: "create",
             resource: "user",
             possession: "any",
@@ -53,16 +53,11 @@ describe("RBAC implements AccessControlAccessor", () => {
          };
 
          roleRepository.getRole = jest.fn().mockResolvedValue(role);
-         accessControlRepository.getAccess = jest
-            .fn()
-            .mockResolvedValue(undefined);
+         accessControlRepository.getAccess = jest.fn().mockResolvedValue(undefined);
          accessControlRepository.createAccess = jest.fn();
          await rbac.grant(role, access);
 
-         expect(accessControlRepository.createAccess).toHaveBeenCalledWith(
-            role,
-            access
-         );
+         expect(accessControlRepository.createAccess).toHaveBeenCalledWith(role, access);
       });
    });
 });

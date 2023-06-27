@@ -52,7 +52,7 @@ declare namespace Identity {
             FastifyBaseLogger
          > {}
 
-      interface Routes extends Array<Route> {}
+      export interface Routes extends Array<Route> {}
 
       interface Plugin {
          plugin: any;

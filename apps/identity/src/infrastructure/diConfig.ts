@@ -1,14 +1,14 @@
-import PrismaAccountDataSourceAdapter from "./data-source/account-data-source";
-import { AccountRepository } from "../application/repository/accounts";
-import AccountService from "../adapter/service/account";
-import prisma from "./prisma";
+import IdentityService from "../adapter/service/identity";
+import IdentityRepository from "../application/repository/identity";
+import IdentityStoreAdapter from "./data-source/identity.data-source";
+import { _prisma as prisma } from "./prisma";
 
 import type { Dependencies } from "./dependencies";
 
-const accountService = new AccountService(
-   new AccountRepository(new PrismaAccountDataSourceAdapter(prisma))
+const identityService = new IdentityService(
+   new IdentityRepository(new IdentityStoreAdapter(prisma.prismaExtendedIdentityModel))
 );
 
 export const dependencies: Dependencies = {
-   accountService,
+   identityService,
 };

@@ -1931,8 +1931,8 @@
             "type": "object",
             "properties": {
                "id": {
-                  "type": "integer",
-                  "format": "int64"
+                  "type": "string",
+                  "format": "uuid"
                },
                "avatar": {
                   "type": "string"
@@ -1943,33 +1943,30 @@
                "lastName": {
                   "type": "string"
                },
-               "age": {
-                  "type": "integer",
-                  "format": "int64"
-               },
                "email": {
                   "type": "string"
+               },
+               "emailVerified": {
+                  "type": "string",
+                  "format": "date-time"
                },
                "password": {
                   "type": "string"
                },
-               "country": {
+               "state": {
                   "type": "string"
                },
-               "timeZone": {
-                  "type": "string"
+               "providerId": {
+                  "type": "integer",
+                  "format": "int64"
                },
-               "language": {
-                  "type": "string"
+               "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
                },
-               "ip": {
-                  "type": "string"
-               },
-               "roles": {
-                  "type": "array",
-                  "items": {
-                     "$ref": "#/components/schemas/Role"
-                  }
+               "updateAt": {
+                  "type": "string",
+                  "format": "date-time"
                }
             }
          },

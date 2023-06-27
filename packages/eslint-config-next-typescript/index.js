@@ -43,10 +43,7 @@ module.exports = {
             ],
          },
       ],
-      "react/require-default-props": [
-         "error",
-         { functions: "defaultArguments" },
-      ],
+      "react/require-default-props": ["error", { functions: "defaultArguments" }],
       "react/jsx-props-no-spreading": [
          "error",
          {
@@ -54,12 +51,5 @@ module.exports = {
          },
       ],
    },
-   ignorePatterns: [
-      ".next",
-      ".turbo",
-      "node_modules",
-      "**/*.js",
-      "**/*.mjs",
-      "**/*.jsx",
-   ],
+   ignorePatterns: [".next", ".turbo", "node_modules", "**/*.js", "**/*.mjs", "**/*.jsx"],
 };

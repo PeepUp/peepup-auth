@@ -5,34 +5,22 @@ import type {
    CreateAccountInput,
    ID,
 } from "@/types/types";
+
 export class AccountRepository implements AccountAccessor {
    constructor(private readonly accountDataSource: AccountDataSource) {}
-
-   async getAllAccount<Q>(query?: Q): Promise<AccountContract[]> {
-      return await this.accountDataSource.query(query as AccountContract);
+   getAllAccount(): Promise<AccountContract[] | null> {
+      throw new Error("Method not implemented.");
    }
-
-   async getAccountById(id: ID): Promise<AccountContract> {
-      return await this.accountDataSource.findById(id);
+   getAccountById(id: ID): Promise<AccountContract | null> {
+      throw new Error("Method not implemented.");
    }
-
-   async getAccount(user: AccountContract): Promise<AccountContract> {
-      return await this.accountDataSource.find(user);
+   createAccount(user: CreateAccountInput): Promise<AccountContract> {
+      throw new Error("Method not implemented.");
    }
-
-   async getAccountByEmail(email: string): Promise<AccountContract> {
-      return await this.accountDataSource.findByEmail(email);
+   updateAccount(user: AccountContract): Promise<AccountContract> {
+      throw new Error("Method not implemented.");
    }
-
-   async createAccount(user: CreateAccountInput): Promise<AccountContract> {
-      return await this.accountDataSource.insert(user);
-   }
-
-   async updateAccount(user: AccountContract): Promise<AccountContract> {
-      return await this.accountDataSource.update(user);
-   }
-
-   async deleteAccount(id: ID): Promise<boolean> {
-      return await this.accountDataSource.delete(id);
+   deleteAccount(id: ID): Promise<void> {
+      throw new Error("Method not implemented.");
    }
 }

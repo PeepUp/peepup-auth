@@ -1,7 +1,10 @@
+import type { Identity } from "@/domain/entity/identity";
+import { Prisma } from "@prisma/client";
+
 export type ID = number | string;
 
 export interface Serializable {
-   _id?: ID;
+   readonly id?: ID;
 }
 
 export interface UserQuery {
@@ -22,13 +25,12 @@ export interface UserQuery {
 }
 
 export interface EntityContract extends Serializable {}
+export interface Entity extends Serializable {}
 
 export interface UseCase<T> {
    execute(
       props?: T
-   ): Promise<
-      EntityContract | EntityContract[] | string | number | boolean | T
-   >;
+   ): Promise<EntityContract | EntityContract[] | string | number | boolean | T>;
 }
 
 export interface AccountContract extends EntityContract {
@@ -55,12 +57,22 @@ export interface UserContract extends EntityContract {
    username?: string;
 }
 
+export type FindUniqeIdentityQuery = Partial<
+   Omit<Prisma.IdentityEmailUsernamePhoneNumberCompoundUniqueInput, "phoneNumber">
+>;
+
+export interface FindLoginIdentityQuery {
+   where: FindUniqeIdentityQuery;
+   data: { readonly password: string };
+}
+
 export interface DataSourceSQL<T> {
-   name: string;
-   create(data: T): Promise<T | null>;
-   read(id: string): Promise<T | null>;
-   update(data: T): Promise<T | null>;
-   delete(id: string): Promise<boolean>;
+   create(data: T): Promise<T>;
+   find(id: ID): Promise<Readonly<T> | null>;
+   findMany(): Promise<Readonly<T>[] | null>;
+   update(id: ID, data: T): Promise<T>;
+   delete(id: ID): Promise<void>;
+   query(query: Partial<T>): Promise<T | T[] | null>;
 }
 
 export interface RoleContract extends EntityContract {
@@ -123,11 +135,11 @@ export interface AccessControlDataSource {
 }
 
 export interface AccountAccessor {
-   getAllAccount(): Promise<AccountContract[]>;
-   getAccountById(id: ID): Promise<AccountContract>;
+   getAllAccount(): Promise<AccountContract[] | null>;
+   getAccountById(id: ID): Promise<AccountContract | null>;
    createAccount(user: CreateAccountInput): Promise<AccountContract>;
    updateAccount(user: AccountContract): Promise<AccountContract>;
-   deleteAccount(id: ID): Promise<boolean>;
+   deleteAccount(id: ID): Promise<void>;
 }
 
 export type CreateAccountInput = {
@@ -140,20 +152,55 @@ export type CreateAccountInput = {
 export interface AccountDataSource {
    insert(user: CreateAccountInput): Promise<AccountContract>;
    update(user: AccountContract): Promise<AccountContract>;
-   delete(id: ID): Promise<boolean>;
-   findById(id: ID): Promise<AccountContract>;
-   find(user: AccountContract): Promise<AccountContract>;
+   delete(id: ID): Promise<void>;
+   find(id: ID): Promise<AccountContract | null>;
    findByEmail(email: string): Promise<AccountContract>;
    query<Q>(query?: Q): Promise<AccountContract[]>;
    updateById(id: ID, data: AccountContract): Promise<void>;
 }
 
-/*
- * @Enum RoleContract
- * @Purpose: for roles of an account (ADMIN, VOLUNTEER, ORGANIZATION)
- * @Usage: RoleContract.VOLUNTEER
- *
- * */
+export interface IdentityQueryOption {
+   id?: ID;
+   email?: string;
+   username?: string;
+   phoneNumber?: string;
+}
+
+export interface HashPasswordArgs {
+   readonly _: string;
+}
+
+export interface HashPasswordUtils extends HashPasswordArgs {
+   salt: string;
+}
+export interface VerifyHashPasswordUtils extends HashPasswordArgs {
+   readonly __: string;
+}
+
+export interface IdentityAccessor {
+   create<T>(identity: Identity): Promise<T | void>;
+   update<T>(id: ID, identity: Identity): Promise<T | void>;
+   deleteById(id: ID): Promise<void>;
+   getIdentityById<T>(id: ID): Promise<Readonly<T> | null>;
+   getIdentity<T>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null>;
+   getLoginIdentity<T>(query: FindLoginIdentityQuery): Promise<Readonly<T> | null>;
+   getIdentities(): Promise<Readonly<Identity>[] | null>;
+}
+
+export interface IdentityDataSource {
+   create<T>(identity: Identity): Promise<T | void>;
+   update<T>(id: ID, identity: Identity): Promise<T | void>;
+   deleteById(id: ID): Promise<void>;
+   delete(identity: Identity): Promise<void>;
+   getIdentityById(id: ID): Promise<Identity>;
+   getIdentities(): Promise<Identity[]>;
+}
+
+export type IdentityCreateFirst = {
+   email: string;
+   password: string;
+};
+
 export enum RoleType {
    ADMIN = "admin",
    VOLUNTEER = "volunteer",
