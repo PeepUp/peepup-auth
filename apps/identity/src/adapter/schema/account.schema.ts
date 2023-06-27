@@ -61,24 +61,23 @@ const gone_response_registration_account_schema = z.object({
    }),
 });
 
-const error_unprocessable_content_response_registration_account_schema =
-   z.object({
-      error: z
-         .object({
-            error: z.object({
-               code: z.number().or(z.string()),
-               debug: z.string().optional(),
-               details: z.object({}).optional(),
-               id: z.string(),
-               message: z.string(),
-               reason: z.string(),
-               request: z.string().or(z.number({})),
-               status: z.string(),
-            }),
-         })
-         .optional(),
-      redirect_browser_to: z.string().url().optional(),
-   });
+const error_unprocessable_content_response_registration_account_schema = z.object({
+   error: z
+      .object({
+         error: z.object({
+            code: z.number().or(z.string()),
+            debug: z.string().optional(),
+            details: z.object({}).optional(),
+            id: z.string(),
+            message: z.string(),
+            reason: z.string(),
+            request: z.string().or(z.number({})),
+            status: z.string(),
+         }),
+      })
+      .optional(),
+   redirect_browser_to: z.string().url().optional(),
+});
 
 const default_error_response_registration_account_schema = z.object({
    error: z.object({
@@ -161,9 +160,7 @@ export const create_account_response_schema = z.object({
 });
 
 export type ACCOUNT_SCHEMA_TYPE = z.infer<typeof account_schema>;
-export type CREATE_ACCOUNT_BODY_SCHEMA_TYPE = z.infer<
-   typeof create_account_body_schema
->;
+export type CREATE_ACCOUNT_BODY_SCHEMA_TYPE = z.infer<typeof create_account_body_schema>;
 
 export type GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE = z.infer<
    typeof get_account_params_id_schema
@@ -195,15 +192,15 @@ export type LOGIN_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<
 export type ERROR_GONE_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.infer<
    typeof gone_response_registration_account_schema
 >;
-export type ERROR_UNPROCESSABLE_CONTENT_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA =
-   z.infer<
-      typeof error_unprocessable_content_response_registration_account_schema
-   >;
+export type ERROR_UNPROCESSABLE_CONTENT_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.infer<
+   typeof error_unprocessable_content_response_registration_account_schema
+>;
 export type DEFAULT_ERROR_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.infer<
    typeof default_error_response_registration_account_schema
 >;
-export type ERROR_REGISTRATION_FLOW_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA =
-   z.infer<typeof error_registration_flow_response_registration_account_schema>;
+export type ERROR_REGISTRATION_FLOW_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.infer<
+   typeof error_registration_flow_response_registration_account_schema
+>;
 export type REGISTRATION_ACCOUNT_REQUEST_BODY_SCHEMA = z.infer<
    typeof registration_account_request_body_schema
 >;

@@ -37,7 +37,7 @@ class RBAC implements AccessControl {
                };
 
                await this.accessControlRepository.updateAccess(
-                  <number>existPermission._id,
+                  <number>existPermission.id,
                   updatedPermission
                );
             }
@@ -73,9 +73,7 @@ class RBAC implements AccessControl {
       }
 
       for (const permission of permissions) {
-         const existPermission = await this.accessControlRepository.getAccess(
-            permission
-         );
+         const existPermission = await this.accessControlRepository.getAccess(permission);
 
          if (existPermission) {
             return true;
@@ -132,10 +130,7 @@ class RBAC implements AccessControl {
       return true;
    }
 
-   async extendRole(
-      role: RoleContract,
-      extendRole: RoleContract
-   ): Promise<void> {
+   async extendRole(role: RoleContract, extendRole: RoleContract): Promise<void> {
       const roleData = await this.getRolePermissions(extendRole);
       const extendedRolePermissions = roleData.map((permission) => ({
          action: permission.action,
@@ -153,7 +148,7 @@ class RBAC implements AccessControl {
       }));
 
       const updatedRole: RoleContract = {
-         _id: role._id,
+         id: role.id,
          type: role.type,
          permissions: [...role.permissions, ...extendedRolePermissions],
       };

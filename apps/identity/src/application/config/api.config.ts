@@ -1,4 +1,4 @@
-import { Identity } from "@/types/identity";
+import { Identity } from "@/types/main";
 import dotenv from "dotenv";
 
 dotenv.config({

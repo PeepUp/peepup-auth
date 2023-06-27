@@ -2,19 +2,17 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const account: Prisma.AccountCreateInput = {
-   user: {
-      create: {
-         phone: "1234567890",
-         username: "john123",
-         emailVerified: new Date(),
-         password: "$john123",
-         avatar: "https://www.google.com",
-         firstName: "John",
-         lastName: "Doe",
-         email: "john@gmail.com",
-      },
-   },
+const identity: Prisma.IdentityCreateInput = {
+   phoneNumber: "1234567890",
+   username: "john123",
+   state: "active",
+   emailVerified: new Date(),
+   password:
+      "$argon2id$v=19$m=65536,t=3,p=4$CUsArk9CbT6eVPTTqyV7Vg$asdklfhjk3l4wjr23iojoiasdjfiodsafjiods75Z2GayCOWUJpd34",
+   avatar: "https://www.google.com",
+   firstName: "John",
+   lastName: "Doe",
+   email: "john@gmail.com",
    roles: {
       create: {
          permissions: {
@@ -48,8 +46,8 @@ const account: Prisma.AccountCreateInput = {
 async function main() {
    console.log(`---- Start seeding ----`);
 
-   await prisma.account.create({
-      data: account,
+   await prisma.identity.create({
+      data: identity,
    });
 
    console.log(`---- Finish seeding ----`);
@@ -62,7 +60,6 @@ main()
    .catch(async (e) => {
       console.error(e);
       await prisma.$disconnect();
-      process.exit(1);
    });
 
 /* const newuser = await prisma.account.create({

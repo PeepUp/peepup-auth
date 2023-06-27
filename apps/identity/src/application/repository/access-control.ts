@@ -7,9 +7,7 @@ import {
 } from "@/types/types";
 
 class AccessControlRepository implements AccessControlAccessor {
-   constructor(
-      private readonly accessControlDataSource: AccessControlDataSource
-   ) {}
+   constructor(private readonly accessControlDataSource: AccessControlDataSource) {}
 
    async updateAccess(accessId: ID, data: AccessInfo): Promise<void> {
       return await this.accessControlDataSource.updateById(accessId, data);

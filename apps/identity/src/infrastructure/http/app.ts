@@ -33,9 +33,9 @@ async function initSchema(
 async function initSchemaValidatorAndSerializer(
    server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
+   await server.after();
    server.setValidatorCompiler(validatorCompiler);
    server.setSerializerCompiler(serializerCompiler);
-   await server.after();
 }
 
 async function initErrorHandlers(
@@ -50,8 +50,11 @@ async function setup() {
    await server.register(fastifyPlugin.configPlugin);
    await server.register(fastifyPlugin.signal, { timeout: 10000 });
 
+   await server.after();
    await initRoutes(server);
    await initSchema(server);
+
+   await server.after();
    await initErrorHandlers(server);
    await initSchemaValidatorAndSerializer(server);
 }

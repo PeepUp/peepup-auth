@@ -1,9 +1,11 @@
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { dependencies } from "../../infrastructure/diConfig";
-import accountRouter from "./account";
-import checkhealthRouter from "./metadata/checkhealth";
-import versionRouter from "./metadata/version";
-import openapiRouter from "./openapi";
+import identityRoutes from "./identity";
+import localIdentityRoutes from "./local.identity";
+import checkhealthRoutes from "./metadata/checkhealth";
+import versionRoutes from "./metadata/version";
+import jwksRoutes from "./oauth2/jwks";
+import openapiRoutes from "./openapi";
 
 import type { FastifyBaseLogger, RouteOptions } from "fastify";
 import type http from "http";
@@ -22,18 +24,22 @@ export type Routes = Array<
 >;
 
 export function routes(): { routes: Routes } {
-   const { accountService } = dependencies;
-   const { routes: accountRoutes } = accountRouter(accountService);
-   const { routes: checkhealthRoutes } = checkhealthRouter();
-   const { routes: openapiRoutes } = openapiRouter();
-   const { routes: versionRoutes } = versionRouter();
+   const { identityService } = dependencies;
+   const { routes: localStrategy } = localIdentityRoutes(identityService);
+   const { routes: identity } = identityRoutes(identityService);
+   const { routes: checkhealth } = checkhealthRoutes();
+   const { routes: openapi } = openapiRoutes();
+   const { routes: version } = versionRoutes();
+   const { routes: jwks } = jwksRoutes();
 
    return {
       routes: [
-         ...openapiRoutes,
-         ...accountRoutes,
-         ...checkhealthRoutes,
-         ...versionRoutes,
+         ...openapi,
+         ...jwks,
+         ...checkhealth,
+         ...version,
+         ...identity,
+         ...localStrategy,
       ],
    };
 }

@@ -1,9 +1,4 @@
-import type {
-   AccountContract,
-   ID,
-   RoleContract,
-   UserContract,
-} from "@/types/types";
+import type { AccountContract, ID, RoleContract, UserContract } from "@/types/types";
 
 class Account implements AccountContract {
    public roles?: RoleContract[];

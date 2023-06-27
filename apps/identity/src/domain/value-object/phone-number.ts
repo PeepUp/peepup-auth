@@ -7,10 +7,7 @@ class PhoneNumberValidator {
       phoneNumberString: string,
       defaultCountry: CountryCode = "ID"
    ): PhoneNumber {
-      const phoneNumber = parsePhoneNumberFromString(
-         phoneNumberString,
-         defaultCountry
-      );
+      const phoneNumber = parsePhoneNumberFromString(phoneNumberString, defaultCountry);
       if (phoneNumber && phoneNumber.isValid()) {
          return phoneNumber;
       }
