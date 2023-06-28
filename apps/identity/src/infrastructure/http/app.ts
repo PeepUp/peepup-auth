@@ -2,8 +2,9 @@ import cors from "@fastify/cors";
 import fastify from "fastify";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import http from "http";
+import { authSchema } from "../../adapter/schema/auth.schema";
 
-import { routes, schemas } from "../../adapter";
+import { routes } from "../../adapter";
 import { errorHandler } from "../../adapter/middleware/error.handler";
 import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
 import { fastifyConfig } from "../../application/config/fastify.config";
@@ -26,7 +27,9 @@ async function initRoutes(
 async function initSchema(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
-    server.addSchema(schemas[0]);
+    for (const schema of [...authSchema]) {
+        server.addSchema(schema);
+    }
 }
 
 async function initSchemaValidatorAndSerializer(
@@ -46,14 +49,12 @@ async function setup() {
     await server.register(fastifyPlugin.configPlugin);
     await server.register(fastifyPlugin.signal, { timeout: 10000 });
 
-    await server.after();
     await initRoutes(server);
-
     await server.after();
     await initSchema(server);
 }
 
-void setup().catch((error: unknown) => server.log.error(error));
+void setup().catch((error: unknown) => console.log(error));
 
 server.after(() => {
     server.setNotFoundHandler(notFoundHandler);

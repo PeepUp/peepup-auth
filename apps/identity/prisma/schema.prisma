@@ -23,19 +23,20 @@ model Identity {
   updatedAt DateTime @updatedAt
 
   // relation fields
-  tokens Token[]
-  roles  Role[]
+  whitelistedTokens WhitelistedToken[]
+  roles             Role[]
 
   providerId Int?
   provider   Provider? @relation(fields: [providerId], references: [id])
+  Token      Token[]
 
   @@unique([email, username, phoneNumber])
   @@map(name: "identities")
 }
 
 model Role {
-  id          Int          @id @default(autoincrement())
-  type        UserRoleType @default(volunteer)
+  id          Int           @id @default(autoincrement())
+  type        UserRoleTypes @default(volunteer)
   permissions Permission[]
 
   // relation fields
@@ -101,23 +102,67 @@ model Provider {
 }
 
 model Token {
-  id                        Int       @id @default(autoincrement())
-  expires_at                DateTime?
-  access_token              String
-  refresh_token             String
-  blacklisted_access_token  String
-  blacklisted_refresh_token String
+  id             Int              @id @default(autoincrement())
+  value          String           @unique
+  tokenTypes     TokenTypes
+  header         Json
+  payload        Json
+  kid            String
+  jti            String
+  nbf            Int
+  expires_at     Int
+  tokenStatus    TokenStatusTypes
+  expirationTime DateTime
+
+  createdAt DateTime @default(now())
 
   // relation fields
   identityId String?
   identity   Identity? @relation(fields: [identityId], references: [id])
 
-  @@index([identityId], name: "identityId")
+  WhitelistedToken WhitelistedToken[]
+
+  @@index([value], name: "tokenValueIndex")
+  @@index([jti], name: "tokenJtiIndex")
+  @@index([identityId], name: "tokenIdentityIdIndex")
   @@map(name: "tokens")
 }
 
-enum UserRoleType {
+model WhitelistedToken {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // relation fields
+  tokenId Int
+  token   Token @relation(fields: [tokenId], references: [id])
+
+  identityId String?
+  identity   Identity? @relation(fields: [identityId], references: [id])
+
+  @@unique([tokenId, identityId])
+  @@index([identityId], name: "whitelistedTokenIdentityIdIndex")
+  @@map(name: "tokens_whitelisted")
+}
+
+enum UserRoleTypes {
   admin
   volunteer
   organization
+}
+
+enum TokenTypes {
+  access
+  refresh
+}
+
+enum TokenStatusTypes {
+  revoked
+  signed
+  expired
+  revokedAndExpired
+  error
+  active
+  queued
+  unknown
+  rotated
 }

@@ -1,8 +1,7 @@
-import { z } from "zod";
 import IdentityService from "../service/identity";
 
 import type { RequestHandler } from "@/types/types";
-import { LoginIdentityBody } from "../schema/auth.schema";
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
 
 /**
  * @todo:
@@ -10,19 +9,23 @@ import { LoginIdentityBody } from "../schema/auth.schema";
  *
  */
 class AuthLocalStrategyHandler {
-    constructor(readonly identitiesService: IdentityService) {}
+    constructor(private readonly identitiesService: IdentityService) {}
 
     login: RequestHandler<{ Body: LoginIdentityBody }> = async (request, reply) => {
-        const data = request.body;
-        console.log(typeof data);
+        const { traits, password, password_identifier, method } = <LoginIdentityBody>(
+            request.body
+        );
 
         const result = await this.identitiesService.login({
-            ...data,
+            traits,
+            password_identifier,
+            method,
+            password,
         });
 
-        if (result === null) {
+        if (!result) {
             setImmediate(() => {
-                reply.status(404).send({
+                reply.status(401).send({
                     status: "failed",
                     code: 401,
                     codeStatus: "Unauthorized",
@@ -33,23 +36,14 @@ class AuthLocalStrategyHandler {
         }
 
         setImmediate(() => {
-            reply.status(200).send({
-                status: "ok",
-                code: 200,
-                codeStatus: "Ok",
-                message: "Logged in successfully",
-            });
+            reply.status(200).send();
         });
 
         return reply;
     };
 
-    registration: RequestHandler<RequestRegisterIdentityBody> = async (
-        request,
-        reply
-    ) => {
-        const { traits, password, method } = request.body;
-        console.dir(request.body, { depth: Infinity });
+    registration: RequestHandler<RegisterIdentityBody> = async (request, reply) => {
+        const { traits, password, method } = <RegisterIdentityBody>request.body;
 
         await this.identitiesService.registration({
             password,
@@ -71,22 +65,3 @@ class AuthLocalStrategyHandler {
 }
 
 export default AuthLocalStrategyHandler;
-
-export const registerMethodValues = ["password", "oidc"] as const;
-export const passwordIdentifier = ["email", "username"] as const;
-export const requestRegisterIdentityBody = z.object({
-    traits: z.object({
-        email: z.string().email().optional(),
-        username: z.string().optional(),
-    }),
-    method: z.enum(registerMethodValues),
-    password: z.string(),
-});
-export const identityPasswordIdentifier = z.object({
-    password_identifier: z.enum(passwordIdentifier),
-});
-export const requestLoginIdentityBody = requestRegisterIdentityBody.merge(
-    identityPasswordIdentifier
-);
-export type RequestLoginIdentityBody = z.infer<typeof requestLoginIdentityBody>;
-export type RequestRegisterIdentityBody = z.infer<typeof requestRegisterIdentityBody>;

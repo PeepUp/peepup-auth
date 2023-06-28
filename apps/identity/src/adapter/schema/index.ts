@@ -1,5 +1,5 @@
-import { $ref as auth, schemas as authSchema } from "./auth.schema";
-import { $ref as identities, schemas as identitiesSchema } from "./identity";
+import { $ref as auth, authSchema } from "./auth.schema";
+import { refIdentities as identities, identitiesSchema } from "./identity";
 
 export const ref = {
     auth,
