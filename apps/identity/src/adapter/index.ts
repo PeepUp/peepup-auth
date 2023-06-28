@@ -1,4 +1,4 @@
-export * from "./router/root";
+export * from "./routes";
 export * from "./schema";
 /**
  * Defines global types used by the service.
@@ -11,10 +11,10 @@ export * from "./schema";
  */
 
 declare namespace Api {
-   /**
-    * Represents the possible values for the NODE_ENV environment variable in a Node.js application.
-    *
-    * @see {@link https://nodejs.org/api/process.html#process_process_env | process.env}
-    */
-   type Environment = "development" | "staging" | "production" | "test" | "ci";
+    /**
+     * Represents the possible values for the NODE_ENV environment variable in a Node.js application.
+     *
+     * @see {@link https://nodejs.org/api/process.html#process_process_env | process.env}
+     */
+    type Environment = "development" | "staging" | "production" | "test" | "ci";
 }
