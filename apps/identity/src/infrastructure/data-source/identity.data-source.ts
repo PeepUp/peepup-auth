@@ -6,7 +6,6 @@ import type {
     FindUniqeIdentityQuery,
     ID,
 } from "@/types/types";
-import { Prisma } from "@prisma/client";
 
 /**
  * @todo:
@@ -31,7 +30,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
     }
 
     async findUnique(query: FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
-        const result: Readonly<Identity | null> = await this.db.identity.findUnique({
+        const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: query,
         });
 
@@ -39,7 +38,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
     }
 
     async findFirst(query: FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
-        const result: Readonly<Identity | null> = await this.db.identity.findFirst({
+        const result: Readonly<Identity> | null = await this.db.identity.findFirst({
             where: query,
         });
 
@@ -49,7 +48,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
     async findUniqueLogin(
         query: FindLoginIdentityQuery
     ): Promise<Readonly<Identity> | null> {
-        const result: Readonly<Identity | null> = await this.db.identity.findUnique({
+        const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
                 email: query.where.email,
                 username: query.where.username,
@@ -110,11 +109,10 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
                 id: <string>id,
             },
             data: {
-                email: data.email,
                 username: data.username,
-                password: data.password,
                 firstName: data.firstName,
                 lastName: data.lastName,
+                avatar: data.avatar,
                 updatedAt: new Date(),
             },
         });

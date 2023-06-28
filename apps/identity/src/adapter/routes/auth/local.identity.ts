@@ -17,7 +17,7 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
     return {
         routes: [
             {
-                method: "POST", 
+                method: "POST",
                 url: "/local/registration",
                 handler: handler.registration,
                 schema: {
@@ -28,7 +28,9 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 method: "POST",
                 url: "/local/login",
                 handler: handler.login,
-                schema: {},
+                schema: {
+                    body: $ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),
+                },
             },
         ],
     };

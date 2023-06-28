@@ -18,7 +18,7 @@ class IdentityRepository implements IdentityAccessor {
     }
 
     async getIdentity<T>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null> {
-        const data = await this.dataSource.findFirst(query);
+        const data = await this.dataSource.findUnique(query);
         return <T>data ?? null;
     }
 
@@ -47,7 +47,9 @@ class IdentityRepository implements IdentityAccessor {
         await this.dataSource.delete(id);
     }
 
-    async getIdentities(): Promise<Readonly<Identity>[] | null> {
+    async getIdentities(
+        query?: FindUniqeIdentityQuery
+    ): Promise<Readonly<Identity>[] | null> {
         const result: Readonly<Identity>[] | null = await this.dataSource.findMany();
         return result ?? null;
     }

@@ -1,13 +1,13 @@
 import IdentityRepository from "@/application/repository/identity";
+import { FindUniqeIdentityQuery, ID } from "@/types/types";
+import {
+    BadRequestException,
+    ResourceAlreadyExistException,
+} from "../middleware/error/common";
+
 import type { Identity } from "@/domain/entity/identity";
-import { FindUniqeIdentityQuery } from "@/types/types";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import { FastifyError } from "fastify";
-import type {
-    RequestLoginIdentityBody,
-    RequestRegisterIdentityBody,
-} from "../handler/identity";
-import { ResourceAlreadyExistException } from "../middleware/error/common";
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
+import { PUT_IDENTITY_BODY_SCHEMA, PutIdentityBody } from "../schema/identity";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
@@ -35,7 +35,7 @@ export interface IdentityManagementServiceType {
  *
  * */
 class IdentityService {
-    constructor(public readonly identityRepository: IdentityRepository) {}
+    constructor(private readonly identityRepository: IdentityRepository) {}
 
     /**
      * @todo:
@@ -48,7 +48,7 @@ class IdentityService {
      *   🤔
      *
      * */
-    async registration(body: RequestRegisterIdentityBody): Promise<void> {
+    async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password, method } = body;
 
         const existingIdentity = await this.identityRepository.getIdentity<Identity>(
@@ -79,9 +79,7 @@ class IdentityService {
         }
     }
 
-    async login(
-        body: RequestLoginIdentityBody
-    ): Promise<Readonly<IdentityOmitted> | null> {
+    async login(body: LoginIdentityBody): Promise<Readonly<IdentityOmitted> | null> {
         const { traits, password, method, password_identifier } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
@@ -96,7 +94,7 @@ class IdentityService {
     async getIdentities(): Promise<Readonly<IdentityOmitted>[] | null> {
         const data = await this.identityRepository.getIdentities();
 
-        if (data === null) return data;
+        if (!data) return data;
 
         const result = data.map((identity) => {
             const {
@@ -133,12 +131,86 @@ class IdentityService {
         query: FindUniqeIdentityQuery
     ): Promise<Readonly<IdentityOmitted> | null> {
         const data = await this.identityRepository.getIdentity<Identity>(query);
-        if (data === null) return data;
+        if (!data) return data;
 
         const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
             data;
 
         return result;
+    }
+
+    async updateIdentityById(
+        id: string,
+        data: PutIdentityBody
+    ): Promise<Readonly<IdentityOmitted> | null> {
+        // @todo check if identity exists before update
+        const identity = await this.identityRepository.getIdentityById<Identity>(id);
+
+        if (!identity) {
+            return null;
+            // throw new BadRequestException(`identity with id ${id} doesn't exists`);
+        }
+
+        // @todo validate date before update
+        const parsedData = PUT_IDENTITY_BODY_SCHEMA.safeParse(data);
+
+        if (!parsedData.success) {
+            return null;
+            // throw new BadRequestException(`invalid data: ${parsedData.error.message}`);
+        }
+
+        // @todo [SOON] implement update identity logic
+
+        const toBeUpdatedIdentity: Readonly<Identity> = {
+            ...identity,
+            lastName: parsedData.data.lastName ?? identity.lastName,
+            firstName: parsedData.data.firstName ?? identity.firstName,
+            avatar: parsedData.data.avatar ?? identity.avatar,
+        } as const;
+
+        console.log({ toBeUpdatedIdentity });
+
+        // @todo [SOON] delete assertion below
+        const updatedIdentity: Readonly<Identity> | void =
+            await this.identityRepository.update<Readonly<Identity>>(
+                id,
+                toBeUpdatedIdentity
+            );
+
+        if (!updatedIdentity) {
+            return null;
+        }
+
+        const {
+            password,
+            providerId,
+            phoneNumber,
+            updatedAt,
+            ...result
+        }: typeof updatedIdentity = updatedIdentity;
+
+        // @todo [SOON] what should I return type of error if identity not updated?
+        if (Object.entries(result).length === 0) {
+            return result;
+            // throw new Error("Error: cannot update identity");
+        }
+
+        return result;
+    }
+
+    async deleteIdentityById(id: string): Promise<boolean> {
+        // @todo check if identity exists before delete
+
+        const identity = await this.getIdentityById(id);
+
+        if (!identity) {
+            return false;
+            // throw new BadRequestException(`identity with id ${id} doesn't exists`);
+        }
+
+        await this.identityRepository.deleteById(id);
+
+        return true;
     }
 }
 

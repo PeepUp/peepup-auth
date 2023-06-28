@@ -1,9 +1,9 @@
 import { z } from "zod";
 import IdentityHandler from "../../../adapter/handler/identity";
+import { $ref } from "../../../adapter/schema/auth.schema";
 import IdentityService from "../../service/identity";
 
 import type { IdentityRoutes } from "@/types/types";
-import type { FastifyReply, FastifyRequest } from "fastify";
 
 export const requestIdentityParams = z.object({
     email: z.string().email().optional(),
@@ -21,39 +21,37 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 method: "GET",
                 url: "/identities",
                 handler: identityHandler.identities,
-                schema: {},
+                schema: {
+                    querystring: $ref("GET_IDENTITY_PARTIAL_QUERY_SCHEMA"),
+                    response: {},
+                },
             },
             {
                 method: "GET",
                 url: "/identities/:id",
-                handler: async (
-                    request: FastifyRequest<{ Params: { id: string } }>,
-                    reply: FastifyReply
-                ): Promise<unknown> => {
-                    const { id } = request.params;
-                    const data = await identitiesService.getIdentityById(id);
-
-                    if (data === null) {
-                        setImmediate(() => {
-                            reply.code(200).send({
-                                code: 404,
-                                message: "data identity record not found",
-                                data: [],
-                            });
-                        });
-
-                        return reply;
-                    }
-
-                    setImmediate(() => {
-                        reply.code(200).send({
-                            data,
-                        });
-                    });
-
-                    return reply;
-                },
+                handler: identityHandler.getIdentityById,
                 schema: {},
+            },
+            {
+                method: "PUT",
+                url: "/identities/:id",
+                handler: identityHandler.updateIdentityById,
+                schema: {
+                    request: {
+                        params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                    },
+                    body: $ref("PUT_IDENTITY_BODY_SCHEMA"),
+                },
+            },
+            {
+                method: "DELETE",
+                url: "/identities/:id",
+                handler: identityHandler.deleteIdentityById,
+                schema: {
+                    request: {
+                        params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                    },
+                },
             },
         ],
     };

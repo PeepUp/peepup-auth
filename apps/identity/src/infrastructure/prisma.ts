@@ -13,30 +13,30 @@ const prisma = new PrismaClient();
  *  🤔 idk why readonly in string with method replace*() dont respect readonly
  */
 export const prismaExtendedIdentityModel = prisma.$extends({
-   model: {
-      identity: {
-         async hashPassword(data: HashPasswordArgs) {
-            const { _ } = data;
-            const hashed = await passwordUtils.hash({
-               _: _,
-               salt: await passwordUtils.generateSalt(),
-            });
-            return hashed;
-         },
+    model: {
+        identity: {
+            async hashPassword(data: HashPasswordArgs) {
+                const { _ } = data;
+                const hashed = await passwordUtils.hash({
+                    _: _,
+                    salt: await passwordUtils.generateSalt(),
+                });
+                return hashed;
+            },
 
-         async verifyPassword(data: VerifyHashPasswordUtils) {
-            const { _, __ } = data;
-            const verified = await passwordUtils.verify({
-               _: _,
-               __: __,
-            });
-            return verified;
-         },
-      },
-   },
+            async verifyPassword(data: VerifyHashPasswordUtils) {
+                const { _, __ } = data;
+                const verified = await passwordUtils.verify({
+                    _: _,
+                    __: __,
+                });
+                return verified;
+            },
+        },
+    },
 });
 
 export const _prisma = {
-   prisma,
-   prismaExtendedIdentityModel,
+    prisma,
+    prismaExtendedIdentityModel,
 };

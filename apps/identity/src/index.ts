@@ -7,6 +7,10 @@ async function main() {
         host: <string>server.config.environment.host,
     });
 
+    // server.ready(() => {
+    //     console.log(server.getSchemas());
+    // });
+
     console.log(`🐢 Server listening on ${_}`);
 }
 

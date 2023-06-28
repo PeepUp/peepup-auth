@@ -1,27 +1,49 @@
-import { z } from "zod";
+import {
+    GET_IDENTITY_PARAMS_ID_SCHEMA,
+    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
+} from "../schema/identity";
 import IdentityService from "../service/identity";
 
 import type { RequestHandler } from "@/types/types";
-import { RequestIdentityParams } from "../routes/identity/identity";
+import type { GetIdentityParamsId, IdentityQueryPartial } from "../schema/identity";
 
 /**
  * @todo:
- *  ☐ clean up this mess (code smells & clean code)
+ *  ☐ check smells code
+ *
+ *  ☑️ clean up this mess (code smells & clean code)
  *
  */
 class IdentityHandler {
-    constructor(readonly identitiesService: IdentityService) {}
+    constructor(private readonly identitiesService: IdentityService) {}
 
-    identities: RequestHandler<RequestIdentityParams> = async (request, reply) => {
-        const { email, username } = request.query;
+    identities: RequestHandler<{ Query: IdentityQueryPartial }> = async (
+        request,
+        reply
+    ) => {
+        const { email, username } = <IdentityQueryPartial>request.query;
+        const hasKeys = Object.entries(request.query).length > 0;
 
-        if (Object.keys(request.query).length > 0) {
+        if (hasKeys) {
+            const parseQuery = GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(request.query);
+
+            if (!parseQuery.success) {
+                reply.code(400).send({
+                    code: 400,
+                    message: "bad request",
+                    details: `found unknown / ${JSON.stringify(
+                        request.query
+                    )} / in query params`,
+                    data: [],
+                });
+            }
+
             const data = await this.identitiesService.getIdentityByQuery({
                 email,
                 username,
             });
 
-            if (data === null || Object.keys(data).length === 0) {
+            if (data === null || Object.entries(data).length <= 0) {
                 reply.code(200).send({
                     code: 404,
                     message: "data identity record not found",
@@ -39,6 +61,41 @@ class IdentityHandler {
         const data = await this.identitiesService.getIdentities();
 
         if (data === null || data.length === 0) {
+            /**
+             * @todo
+             *  ☐ make this as error no data found
+             *
+             */
+            reply.code(200).send({
+                code: 404,
+                message: "data identity record not found",
+                data,
+            });
+        }
+
+        reply.code(200).send({
+            data,
+        });
+
+        return reply;
+    };
+
+    getIdentityById: RequestHandler<GetIdentityParamsId> = async (request, reply) => {
+        const { id } = request.params;
+        const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+
+        if (!parseId.success) {
+            reply.code(400).send({
+                code: 400,
+                message: "bad request",
+            });
+
+            return reply;
+        }
+
+        const data = await this.identitiesService.getIdentityById(id);
+
+        if (!data) {
             reply.code(200).send({
                 code: 404,
                 message: "data identity record not found",
@@ -53,16 +110,28 @@ class IdentityHandler {
         return reply;
     };
 
-    getIdentityById: RequestHandler<GetIdentitiesByIdParams> = async (request, reply) => {
+    updateIdentityById: RequestHandler<GetIdentityParamsId> = async (request, reply) => {
         const { id } = request.params;
+        const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
-        const data = await this.identitiesService.getIdentityById(id);
+        if (!parseId.success) {
+            reply.code(400).send({
+                code: 400,
+                message: "bad request",
+            });
 
-        if (data === null || Object.keys(data).length === 0) {
-            reply.code(200).send({
-                code: 404,
-                message: "data identity record not found",
-                data: [],
+            return reply;
+        }
+
+        const data = await this.identitiesService.updateIdentityById(id, request.body);
+
+        console.log({ data });
+
+        if (!data) {
+            reply.code(400).send({
+                code: 400,
+                status: "bad request",
+                message: "cannot update identity record",
             });
         }
 
@@ -71,32 +140,32 @@ class IdentityHandler {
         });
 
         return reply;
+    };
+
+    deleteIdentityById: RequestHandler<GetIdentityParamsId> = async (request, reply) => {
+        const { id } = request.params;
+        const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+
+        if (!parseId.success) {
+            return reply.code(400).send({
+                code: 400,
+                message: "bad request",
+                errorss: parseId.error.message,
+            });
+        }
+
+        const deleted = await this.identitiesService.deleteIdentityById(id);
+
+        if (!deleted) {
+            return reply.code(400).send({
+                code: 400,
+                message: "bad request",
+                errorss: `cannot delete identity record with id /${id}/`,
+            });
+        }
+
+        return reply.code(204).send();
     };
 }
 
 export default IdentityHandler;
-
-export const getIdentitiesById = z.object({
-    id: z.string().uuid(),
-});
-
-export const registerMethodValues = ["password", "oidc"] as const;
-export const passwordIdentifier = ["email", "username"] as const;
-export const requestRegisterIdentityBody = z.object({
-    traits: z.object({
-        email: z.string().email().optional(),
-        username: z.string().optional(),
-    }),
-    method: z.enum(registerMethodValues),
-    password: z.string(),
-});
-export const identityPasswordIdentifier = z.object({
-    password_identifier: z.enum(passwordIdentifier),
-});
-export const requestLoginIdentityBody = requestRegisterIdentityBody.merge(
-    identityPasswordIdentifier
-);
-
-export type GetIdentitiesByIdParams = z.infer<typeof getIdentitiesById>;
-export type RequestLoginIdentityBody = z.infer<typeof requestLoginIdentityBody>;
-export type RequestRegisterIdentityBody = z.infer<typeof requestRegisterIdentityBody>;

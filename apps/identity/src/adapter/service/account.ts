@@ -1,7 +1,7 @@
-import { AccountRepository } from "@/application/repository/accounts";
+// import { AccountRepository } from "@/application/repository/accounts";
 
-class AccountService {
-   constructor(private readonly accountRepository: AccountRepository) {}
-}
+// class AccountService {
+//     constructor() {}
+// }
 
-export default AccountService;
+// export default AccountService;

@@ -1,7 +1,13 @@
 import type { Identity } from "@/domain/entity/identity";
 import type { Prisma } from "@prisma/client";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { FastifyInstance } from "fastify/types/instance";
 import type { FastifyBaseLogger } from "fastify/types/logger";
+import type { FastifyPluginAsync } from "fastify/types/plugin";
+import type { FastifyReply, FastifyRequest } from "fastify/types/request";
+import type { RouteOptions } from "fastify/types/route";
+import type { IncomingMessage, Server, ServerResponse } from "http";
+import type { JoseHeaderParameters } from "jose";
 
 import type {
     RequestBodyDefault,
@@ -85,6 +91,41 @@ export interface AccountContract extends EntityContract {
     tokens?: string[];
 }
 
+export interface Token extends EntityContract {
+    value: string;
+    tokenTypes: TokenTypes;
+    header: Prisma.JsonValue;
+    payload: Prisma.JsonValue;
+    kid: string;
+    jti: string;
+    nbf: number;
+    expires_at: number;
+    tokenStatus: TokenStatus;
+    expirationTime: Date;
+    createdAt: Date;
+    identityId: string | null;
+}
+
+type TokenTypes = "access" | "refresh";
+
+type TokenStatus =
+    | "revoked"
+    | "signed"
+    | "expired"
+    | "revokedAndExpired"
+    | "error"
+    | "active"
+    | "queued"
+    | "rotated"
+    | "unknown";
+
+export interface WhiteListedToken extends EntityContract {
+    id: number;
+    token: Token;
+    identity: IdentityContract;
+    createdAt: Date;
+}
+
 export interface Tokens {
     accessToken: string;
     refreshToken: string;
@@ -113,6 +154,15 @@ export interface FindLoginIdentityQuery {
 
 export interface DataSourceSQL<T> {
     create(data: T): Promise<T>;
+    find(id: ID): Promise<Readonly<T> | null>;
+    findMany(): Promise<Readonly<T>[] | null>;
+    update(id: ID, data: T): Promise<T>;
+    delete(id: ID): Promise<void>;
+    query(query: Partial<T>): Promise<T | T[] | null>;
+}
+
+export interface DataSourceSQLExtended<T> {
+    create<R = unknown>(data: T, _: R): Promise<T>;
     find(id: ID): Promise<Readonly<T> | null>;
     findMany(): Promise<Readonly<T>[] | null>;
     update(id: ID, data: T): Promise<T>;
@@ -180,12 +230,39 @@ export interface AccessControlDataSource {
 }
 
 export interface AccountAccessor {
+    createToken(token: Token): Promise<Token>;
+    getTokenByValue(tokenValue: string): Promise<Token | null>;
     getAllAccount(): Promise<AccountContract[] | null>;
     getAccountById(id: ID): Promise<AccountContract | null>;
     createAccount(user: CreateAccountInput): Promise<AccountContract>;
     updateAccount(user: AccountContract): Promise<AccountContract>;
     deleteAccount(id: ID): Promise<void>;
 }
+
+export interface TokenAccessor {
+    generateToken(token: Token, identityId: ID): Promise<Token>;
+    rotateToken(token: Token, identityId: ID): Promise<Token>;
+    verifyToken(token: string, identityId: ID): Promise<Token>;
+    revokeToken(token: string, identityId: ID): Promise<Token>;
+    revokeAllToken(identityId: ID): Promise<Token[]>;
+    getTokens(identityId: ID): Promise<Token[]>;
+    cleanUpExpiredToken(): Promise<void>;
+    cleanupRevokedTokens(): Promise<void>;
+    cleanUpExpiredAndRevokedTokens(): Promise<void>;
+    validateTokenScope(token: Token, scope: string): Promise<boolean>;
+}
+
+export type AccessorTokenAndWhiteListedTokenAccessor = TokenAccessor &
+    WhiteListedTokenAccessor;
+
+export interface WhiteListedTokenAccessor {
+    whitelistToken(token: Token, identityId: ID): Promise<WhiteListedToken>;
+    removeFromWhiteList(token: Token): Promise<void>;
+    getWhiteListedToken(token: Token): Promise<WhiteListedToken>;
+    getWhiteListedTokens(identityId: ID): Promise<WhiteListedToken[]>;
+}
+
+export type TokenAndWhiteListed = TokenAccessor & WhiteListedTokenAccessor;
 
 export type CreateAccountInput = {
     profile: Pick<
@@ -224,12 +301,12 @@ export interface VerifyHashPasswordUtils extends HashPasswordArgs {
 
 export interface IdentityAccessor {
     create<T>(identity: Identity): Promise<T | void>;
-    update<T>(id: ID, identity: Identity): Promise<T | void>;
+    update<T>(id: ID, identity: Identity): Promise<Readonly<T> | void>;
     deleteById(id: ID): Promise<void>;
     getIdentityById<T>(id: ID): Promise<Readonly<T> | null>;
     getIdentity<T>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null>;
     getLoginIdentity<T>(query: FindLoginIdentityQuery): Promise<Readonly<T> | null>;
-    getIdentities(): Promise<Readonly<Identity>[] | null>;
+    getIdentities(query?: FindUniqeIdentityQuery): Promise<Readonly<Identity>[] | null>;
 }
 
 export interface IdentityDataSource {

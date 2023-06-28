@@ -5,5 +5,5 @@ import { Identity } from "@/types/main";
 import { config as _config } from "../../application/config";
 
 export const configPlugin: FastifyPluginAsync = fp(async (fastify: FastifyInstance) => {
-   fastify.decorate<Identity.Config.Api>("config", _config);
+    fastify.decorate<Identity.Config.Api>("config", _config);
 });
