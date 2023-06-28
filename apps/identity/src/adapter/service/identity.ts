@@ -1,20 +1,28 @@
 import IdentityRepository from "@/application/repository/identity";
-
 import type { Identity } from "@/domain/entity/identity";
 import { FindUniqeIdentityQuery } from "@/types/types";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { FastifyError } from "fastify";
 import type {
-   RequestLoginIdentityBody,
-   RequestRegisterIdentityBody,
+    RequestLoginIdentityBody,
+    RequestRegisterIdentityBody,
 } from "../handler/identity";
+import { ResourceAlreadyExistException } from "../middleware/error/common";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
 export type IdentityDataOmittedValue =
-   | "password"
-   | "providerId"
-   | "phoneNumber"
-   | "updatedAt";
+    | "password"
+    | "providerId"
+    | "phoneNumber"
+    | "updatedAt";
 export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
+
+export interface IdentityManagementServiceType {
+    getIdentityByQuery: (query: FindUniqeIdentityQuery) => Promise<Identity | null>;
+    getIdentityById: (id: string) => Promise<Identity | null>;
+    getIdentities: () => Promise<Identity[] | null>;
+}
 
 /*
  * @todo:
@@ -22,109 +30,116 @@ export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
  *  ☐ where should I put the validation?
  *  ☐ make factory to encapsulte creating identity object
  *  ☐ don't identity already exists
+ *  ☐ separate the logic of authentication and identity management
+ *  ☐ implement type for IdentityManagementServiceType
  *
- *  @figure
- *   🤔
  * */
 class IdentityService {
-   constructor(public readonly identityRepository: IdentityRepository) {}
+    constructor(public readonly identityRepository: IdentityRepository) {}
 
-   /**
-    * @todo:
-    *  ☐ validate email
-    *  ☐ validate password
-    *  ☐ hash password
-    *  ☐ check identity already exists
-    *
-    *  @figure
-    *   🤔
-    *
-    * */
-   async registration(body: RequestRegisterIdentityBody): Promise<void> {
-      const { traits, password, method } = body;
+    /**
+     * @todo:
+     *  ☐ validate email
+     *  ☐ validate password
+     *  ☐ hash password
+     *  ☐ check identity already exists
+     *
+     *  @figure
+     *   🤔
+     *
+     * */
+    async registration(body: RequestRegisterIdentityBody): Promise<void> {
+        const { traits, password, method } = body;
 
-      const identity: Identity = {
-         email: <string>traits.email,
-         password: password,
-         avatar: "",
-         username: <string>traits.username ?? <string>traits.email?.split("@")[0],
-         lastName: "",
-         firstName: "",
-         phoneNumber: "",
-         state: "active",
-         providerId: null,
-         emailVerified: null,
-      };
+        const existingIdentity = await this.identityRepository.getIdentity<Identity>(
+            traits
+        );
 
-      const data = await this.identityRepository.create<Identity>(identity);
+        if (existingIdentity !== null) {
+            throw new ResourceAlreadyExistException("identity already exists");
+        }
 
-      if (!data) {
-         throw new Error("Error: cannot creating identity");
-      }
-   }
+        const identity: Identity = {
+            email: <string>traits.email,
+            password: password,
+            avatar: "",
+            username: <string>traits.username ?? <string>traits.email?.split("@")[0],
+            lastName: "",
+            firstName: "",
+            phoneNumber: "",
+            state: "active",
+            providerId: null,
+            emailVerified: null,
+        };
 
-   async login(
-      body: RequestLoginIdentityBody
-   ): Promise<Readonly<IdentityOmitted> | null> {
-      const { traits, password, method, password_identifier } = body;
-      const identity = await this.identityRepository.getLoginIdentity<Identity>({
-         where: traits,
-         data: { password },
-      });
+        const data = await this.identityRepository.create<Identity>(identity);
 
-      if (identity === null) return null;
+        if (!data) {
+            throw new Error("Error: cannot creating identity");
+        }
+    }
 
-      return identity;
-   }
+    async login(
+        body: RequestLoginIdentityBody
+    ): Promise<Readonly<IdentityOmitted> | null> {
+        const { traits, password, method, password_identifier } = body;
+        const identity = await this.identityRepository.getLoginIdentity<Identity>({
+            where: traits,
+            data: { password },
+        });
 
-   async getIdentities(): Promise<Readonly<IdentityOmitted>[] | null> {
-      const data = await this.identityRepository.getIdentities();
-      if (data === null) return data;
-      /* const [{ password, providerId, phoneNumber, updatedAt, ...result }]: typeof data =
-         data; */
+        if (identity === null) return null;
 
-      const result = data.map((identity) => {
-         const {
-            password,
-            providerId,
-            phoneNumber,
-            updatedAt,
-            ...result
-         }: typeof identity = identity;
+        return identity;
+    }
 
-         return result;
-      });
+    async getIdentities(): Promise<Readonly<IdentityOmitted>[] | null> {
+        const data = await this.identityRepository.getIdentities();
 
-      return result ?? null;
-   }
+        if (data === null) return data;
 
-   /**
-    * @todo
-    *    ☐ data identity must be set to readonly
-    *    ☑ [DONE]: make this method return IdentityOmitted type
-    *    ☑ [DONE]: make this method dont spoil the password attribute
-    */
+        const result = data.map((identity) => {
+            const {
+                password,
+                providerId,
+                phoneNumber,
+                updatedAt,
+                ...result
+            }: typeof identity = identity;
 
-   async getIdentityById(id: string): Promise<Readonly<IdentityOmitted> | null> {
-      const data = await this.identityRepository.getIdentityById<Identity>(id);
-      if (data === null) return data;
+            return result;
+        });
 
-      const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
-         data;
-      return result;
-   }
+        return result ?? null;
+    }
 
-   async getIdentityByQuery(
-      query: FindUniqeIdentityQuery
-   ): Promise<Readonly<IdentityOmitted> | null> {
-      const data = await this.identityRepository.getIdentity<Identity>(query);
-      if (data === null) return data;
+    /**
+     * @todo
+     *    ☐ data identity must be set to readonly
+     *    ☑ [DONE]: make this method return IdentityOmitted type
+     *    ☑ [DONE]: make this method dont spoil the password attribute
+     */
 
-      const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
-         data;
+    async getIdentityById(id: string): Promise<Readonly<IdentityOmitted> | null> {
+        const data = await this.identityRepository.getIdentityById<Identity>(id);
+        if (data === null) return data;
 
-      return result;
-   }
+        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
+            data;
+        return result;
+    }
+
+    async getIdentityByQuery(
+        query: FindUniqeIdentityQuery
+    ): Promise<Readonly<IdentityOmitted> | null> {
+        const data = await this.identityRepository.getIdentity<Identity>(query);
+        if (data === null) return data;
+
+        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
+            data;
+
+        return result;
+    }
 }
 
 export default IdentityService;
