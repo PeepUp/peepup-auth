@@ -9,10 +9,6 @@ import type {
 export class TokenRepository implements AccessorTokenAndWhiteListedTokenAccessor {
     constructor(private readonly tokenDataSource: DataSourceSQLExtended<Token>) {}
 
-    generateToken(token: Token, identityId: ID): Promise<Token> {
-        return this.tokenDataSource.create<ID>(token, identityId);
-    }
-
     /**
      * @todo
      *  - [SOON] this not implemented in this TokenRepository Class
@@ -26,55 +22,60 @@ export class TokenRepository implements AccessorTokenAndWhiteListedTokenAccessor
      *     - set status of old token to revoked
      *
      */
-    verifyToken(token: string, identityId: ID): Promise<Token> {
-        throw new Error("Method not implemented.");
-    }
-
-    rotateToken(token: Token, identityId: ID): Promise<Token> {
+    async generateToken(token: Token, identityId: ID): Promise<Token> {
         return this.tokenDataSource.create<ID>(token, identityId);
     }
 
-    revokeToken(token: string, identityId: ID): Promise<Token> {
+    async verifyToken(token: Token, identityId: ID): Promise<Token> {
         throw new Error("Method not implemented.");
     }
 
-    revokeAllToken(identityId: ID): Promise<Token[]> {
+    async rotateToken(token: Token, identityId: ID): Promise<Token> {
+        return this.tokenDataSource.create<ID>(token, identityId);
+    }
+
+    async revokeToken(token: Token, identityId: ID): Promise<void> {
+        await this.tokenDataSource.update(identityId, token);
         throw new Error("Method not implemented.");
     }
 
-    getTokens(identityId: ID): Promise<Token[]> {
+    async revokeAllToken(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");
     }
 
-    cleanUpExpiredToken(): Promise<void> {
+    async getTokens(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");
     }
 
-    cleanupRevokedTokens(): Promise<void> {
+    async cleanUpExpiredToken(): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    cleanUpExpiredAndRevokedTokens(): Promise<void> {
+    async cleanupRevokedTokens(): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    validateTokenScope(token: Token, scope: string): Promise<boolean> {
+    async cleanUpExpiredAndRevokedTokens(): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    whitelistToken(token: Token, identityId: ID): Promise<WhiteListedToken> {
+    async validateTokenScope(token: Token, scope: string): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
 
-    removeFromWhiteList(token: Token): Promise<void> {
+    async whitelistToken(token: Token, identityId: ID): Promise<WhiteListedToken> {
         throw new Error("Method not implemented.");
     }
 
-    getWhiteListedToken(token: Token): Promise<WhiteListedToken> {
+    async removeFromWhiteList(token: Token): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    getWhiteListedTokens(identityId: ID): Promise<WhiteListedToken[]> {
+    async getWhiteListedToken(token: Token): Promise<WhiteListedToken> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getWhiteListedTokens(identityId: ID): Promise<WhiteListedToken[]> {
         throw new Error("Method not implemented.");
     }
 }

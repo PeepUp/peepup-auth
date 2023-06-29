@@ -242,8 +242,8 @@ export interface AccountAccessor {
 export interface TokenAccessor {
     generateToken(token: Token, identityId: ID): Promise<Token>;
     rotateToken(token: Token, identityId: ID): Promise<Token>;
-    verifyToken(token: string, identityId: ID): Promise<Token>;
-    revokeToken(token: string, identityId: ID): Promise<Token>;
+    verifyToken(token: Token, identityId: ID): Promise<Token>;
+    revokeToken(token: Token, identityId: ID): Promise<void>;
     revokeAllToken(identityId: ID): Promise<Token[]>;
     getTokens(identityId: ID): Promise<Token[]>;
     cleanUpExpiredToken(): Promise<void>;
