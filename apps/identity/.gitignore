@@ -15,6 +15,7 @@ lib
 dist
 build
 keys
+.well-known
 
 # Misc
 .DS_Store
