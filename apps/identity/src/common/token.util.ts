@@ -10,8 +10,8 @@ import { fileUtils } from "./utils";
 
 import type { JWTHeaderParameters, JWTPayload } from "jose";
 
-type KeyFormat = "jwk" | "pkcs8" | "raw" | "spki";
-type KeyEncodingFornat = "pem" | "der";
+// type KeyFormat = "jwk" | "pkcs8" | "raw" | "spki";
+// type KeyEncodingFornat = "pem" | "der";
 
 class JOSEToken {
     public static keyId: string = cryptoUtils.generateRandomSHA256(32);
@@ -37,7 +37,10 @@ class JOSEToken {
             const privateKeyPath = join(dirPath, "private.pem.key");
             const publicKeyPath = join(dirPath, "public.pem.key");
 
-            if (fileUtils.countFilesAndDirectories(rootDirPath).directories > 5) {
+            if (
+                fileUtils.checkDirectory(rootDirPath) &&
+                fileUtils.countFilesAndDirectories(rootDirPath).directories > 5
+            ) {
                 fileUtils.deleteFolderRecursive(rootDirPath);
             }
 
@@ -303,16 +306,3 @@ export interface KeyPair {
 }
 
 export default JOSEToken;
-
-// class JsonWebKey {
-//    public kty: string;
-//    public kid: string;
-//    public use: string;
-//    public x5t: string;
-//    public x5c: Array<string>;
-//    public n?: string;
-//    public e?: string;
-//    public x?: string;
-//    public y?: string;
-//    public crv?: string;
-// }

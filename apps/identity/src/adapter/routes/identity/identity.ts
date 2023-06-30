@@ -22,15 +22,20 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 url: "/identities",
                 handler: identityHandler.identities,
                 schema: {
-                    querystring: $ref("GET_IDENTITY_PARTIAL_QUERY_SCHEMA"),
-                    response: {},
+                    request: {
+                        querystring: $ref("GET_IDENTITY_PARTIAL_QUERY_SCHEMA"),
+                    },
                 },
             },
             {
                 method: "GET",
                 url: "/identities/:id",
                 handler: identityHandler.getIdentityById,
-                schema: {},
+                schema: {
+                    request: {
+                        params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                    },
+                },
             },
             {
                 method: "PUT",
@@ -39,8 +44,8 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 schema: {
                     request: {
                         params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                        body: $ref("PUT_IDENTITY_BODY_SCHEMA"),
                     },
-                    body: $ref("PUT_IDENTITY_BODY_SCHEMA"),
                 },
             },
             {

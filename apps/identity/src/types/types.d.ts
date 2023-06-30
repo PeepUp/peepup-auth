@@ -15,7 +15,7 @@ import type {
     RequestParamsDefault,
     RequestQuerystringDefault,
     RequestRawQueryDefault,
-    RequestUrlDefault,
+    unknown,
 } from "fastify";
 
 export type ID = number | string;
@@ -24,12 +24,12 @@ export interface Serializable {
 }
 
 export type RequestHandler<
-    Headers = RequestHeadersDefault,
-    RawQuery = RequestRawQueryDefault,
-    Body = RequestBodyDefault,
-    Params = RequestParamsDefault,
-    Querystring = RequestQuerystringDefault,
-    Url = RequestUrlDefault
+    Headers = unknown,
+    RawQuery = unknown,
+    Body = unknown,
+    Params = unknown,
+    Querystring = unknown,
+    Url = unknown
 > = (
     request: FastifyRequest<{
         Headers: Headers;

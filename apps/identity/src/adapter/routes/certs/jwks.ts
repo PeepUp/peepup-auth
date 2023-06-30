@@ -8,8 +8,15 @@ export default (): { routes: IdentityRoutes } => {
         routes: [
             {
                 method: "GET",
-                url: "/oauth2/v1/jwks/:wildcard",
+                url: "/oauth2/v1/jwks/:*",
                 handler: handler.jwksCerts,
+                schema: {
+                    request: {
+                        params: {
+                            "*": { type: "string" },
+                        },
+                    },
+                },
             },
             {
                 method: "GET",

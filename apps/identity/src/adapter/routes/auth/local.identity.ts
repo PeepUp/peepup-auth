@@ -21,7 +21,9 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 url: "/local/registration",
                 handler: handler.registration,
                 schema: {
-                    body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
+                    request: {
+                        body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
+                    },
                 },
             },
             {
@@ -29,7 +31,9 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                 url: "/local/login",
                 handler: handler.login,
                 schema: {
-                    body: $ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),
+                    request: {
+                        body: $ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),
+                    },
                 },
             },
         ],

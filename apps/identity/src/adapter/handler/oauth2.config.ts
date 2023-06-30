@@ -25,8 +25,11 @@ class OAuthConfigurationHandler {
         return reply.code(200).send(json);
     };
 
-    jwksCerts: RequestHandler = async (request, reply) => {
-        const { wildcard: path } = request.params;
+    jwksCerts: RequestHandler<unknown, unknown, unknown, { "*": string }> = async (
+        request,
+        reply
+    ) => {
+        const { "*": path } = request.params;
         const jwksPath = join(process.cwd(), "public/.well-known", path);
 
         console.log(jwksPath, path);

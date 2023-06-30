@@ -1,4 +1,6 @@
+import JOSEToken from "./common/token.util";
 import { server } from "./infrastructure/http/app";
+
 async function main() {
     await server.ready();
 
@@ -7,9 +9,7 @@ async function main() {
         host: <string>server.config.environment.host,
     });
 
-    // server.ready(() => {
-    //     console.log(server.getSchemas());
-    // });
+    // JOSEToken.buildJWKSPublicKey(await JOSEToken.generateKeyPair().publicKey);
 
     console.log(`🐢 Server listening on ${_}`);
 }
