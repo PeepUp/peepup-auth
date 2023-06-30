@@ -23,6 +23,15 @@ export async function errorHandler(
         });
     }
 
+    if (error.statusCode === 401 && error.name === "BadCredentialsException") {
+        return reply.code(error.statusCode).send({
+            status: "failed",
+            code: error.statusCode,
+            codeStatus: "Bad Credential",
+            message: error.message,
+        });
+    }
+
     if (error.validation) {
         console.log("ERROR FROM VALIDATION!");
         return reply.code(400).send({

@@ -1,16 +1,8 @@
-import { z } from "zod";
 import IdentityHandler from "../../../adapter/handler/identity";
 import { $ref } from "../../../adapter/schema/auth.schema";
-import IdentityService from "../../service/identity";
 
 import type { IdentityRoutes } from "@/types/types";
-
-export const requestIdentityParams = z.object({
-    email: z.string().email().optional(),
-    username: z.string().optional(),
-});
-
-export type RequestIdentityParams = z.infer<typeof requestIdentityParams>;
+import type IdentityService from "../../service/identity";
 
 export default (identitiesService: IdentityService): { routes: IdentityRoutes } => {
     const identityHandler = new IdentityHandler(identitiesService);

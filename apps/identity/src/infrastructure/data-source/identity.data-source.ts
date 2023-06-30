@@ -1,10 +1,14 @@
+import { PrismaClient } from "@prisma/client";
+import { passwordUtils } from "../../common";
+
 import type { Identity } from "@/domain/entity/identity";
-import type { PrismaIdentityExtendedModel } from "@/types/prisma";
 import type {
     DataSourceSQL,
     FindLoginIdentityQuery,
     FindUniqeIdentityQuery,
+    HashPasswordArgs,
     ID,
+    VerifyHashPasswordUtils,
 } from "@/types/types";
 
 /**
@@ -15,14 +19,38 @@ import type {
  */
 
 class IdentityStoreAdapter implements DataSourceSQL<Identity> {
-    constructor(private readonly db: PrismaIdentityExtendedModel) {}
+    constructor(private readonly db: PrismaClient) {
+        this.db.$extends({
+            model: {
+                identity: {
+                    async hashPassword(data: HashPasswordArgs) {
+                        const { _ } = data;
+                        const hashed = await passwordUtils.hash({
+                            _: _,
+                            salt: await passwordUtils.generateSalt(),
+                        });
+                        return hashed;
+                    },
+
+                    async verifyPassword(data: VerifyHashPasswordUtils) {
+                        const { _, __ } = data;
+                        const verified = await passwordUtils.verify({
+                            _: _,
+                            __: __,
+                        });
+                        return verified;
+                    },
+                },
+            },
+        });
+    }
 
     async query(query: Identity): Promise<Identity[]> {
         const result: Readonly<Identity>[] = await this.db.identity.findMany({
             where: {
                 email: { contains: query.email },
-                id: { contains: query.id },
-                username: { contains: query.username },
+                id: { contains: <string>query.id },
+                username: { contains: <string>query.username },
             },
         });
 
@@ -57,27 +85,27 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
 
         if (result === null) return null;
 
-        const verified = await this.db.identity.verifyPassword({
-            _: query.data.password,
-            __: result.password,
-        });
+        // const verified = await this.db.identity.verifyPassword({
+        //     _: query.data.password,
+        //     __: result.password,
+        // });
 
-        console.dir({ verified }, { depth: Infinity });
-        if (!verified) return null;
+        // console.dir({ verified }, { depth: Infinity });
+        // if (!verified) return null;
 
         return result;
     }
 
     async create(identity: Identity): Promise<Identity> {
-        const hashedPassword = await this.db.identity.hashPassword({
-            _: identity.password,
-        });
+        // const hashedPassword = await this.db.identity.hashPassword({
+        //     _: identity.password,
+        // });
 
         const result: Readonly<Identity> = await this.db.identity.create({
             data: {
                 email: identity.email,
                 username: identity.username,
-                password: hashedPassword,
+                password: identity.password,
                 firstName: identity.firstName,
                 lastName: identity.lastName,
                 updatedAt: new Date(),

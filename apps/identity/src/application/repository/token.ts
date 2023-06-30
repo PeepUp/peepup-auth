@@ -1,13 +1,29 @@
-import type {
-    AccessorTokenAndWhiteListedTokenAccessor,
-    DataSourceSQLExtended,
-    ID,
-    Token,
-    WhiteListedToken,
-} from "@/types/types";
+import TokenStoreAdapter, {
+    QueryTokenArgs,
+    QueryWhitelistedTokenArgs,
+} from "@/infrastructure/data-source/token.data-source";
+import type { ID, Token, TokenAccessor, Tokens, WhiteListedToken } from "@/types/types";
 
-export class TokenRepository implements AccessorTokenAndWhiteListedTokenAccessor {
-    constructor(private readonly tokenDataSource: DataSourceSQLExtended<Token>) {}
+export class TokenRepository implements TokenAccessor {
+    constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
+
+    async saveToken(token: Token, identityId: ID): Promise<Token> {
+        return await this.tokenDataSource.create<ID>(token, identityId);
+    }
+
+    async findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null> {
+        return await this.tokenDataSource.findUnique(query);
+    }
+
+    async WhitelistedToken(
+        token: QueryWhitelistedTokenArgs
+    ): Promise<Readonly<Token> | null> {
+        return await this.tokenDataSource.findUniqueInWhiteListed(token);
+    }
+
+    // async findTokens(identityId: ID): Promise<Readonly<Tokens>[] | null> {
+    //     return await this.tokenDataSource.findMany(identityId);
+    // }
 
     /**
      * @todo
@@ -68,10 +84,6 @@ export class TokenRepository implements AccessorTokenAndWhiteListedTokenAccessor
     }
 
     async removeFromWhiteList(token: Token): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
-    async getWhiteListedToken(token: Token): Promise<WhiteListedToken> {
         throw new Error("Method not implemented.");
     }
 

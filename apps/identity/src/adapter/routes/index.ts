@@ -18,8 +18,9 @@ import type { IdentityRoutes } from "@/types/types";
  *
  */
 export function routes(): { routes: IdentityRoutes } {
-    const { identityService } = dependencies;
-    const localStrategy = localIdentityRoutes(identityService).routes;
+    const { identityService, authenticationService, tokenManagementService } =
+        dependencies;
+    const localStrategy = localIdentityRoutes(authenticationService).routes;
     const identity = identityRoutes(identityService).routes;
     const checkhealth = checkhealthRoutes().routes;
     const main = mainRoutes().routes;
