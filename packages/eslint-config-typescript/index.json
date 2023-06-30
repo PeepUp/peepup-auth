@@ -1,5 +1,9 @@
 {
-   "plugins": ["@typescript-eslint"],
+   "env": {
+      "commonjs": true,
+      "node": true
+   },
+   "plugins": ["@typescript-eslint/index.json"],
    "extends": [
       "airbnb-base",
       "airbnb-typescript/base",

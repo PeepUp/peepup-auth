@@ -1,7 +1,6 @@
+import { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
 import { PrismaClient } from "@prisma/client";
 import { passwordUtils } from "../common";
-
-import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +11,8 @@ const prisma = new PrismaClient();
  *  🤔 rather the password
  *  🤔 idk why readonly in string with method replace*() dont respect readonly
  */
-export const prismaExtendedIdentityModel = prisma.$extends({
+
+prisma.$extends({
     model: {
         identity: {
             async hashPassword(data: HashPasswordArgs) {
@@ -36,7 +36,4 @@ export const prismaExtendedIdentityModel = prisma.$extends({
     },
 });
 
-export const _prisma = {
-    prisma,
-    prismaExtendedIdentityModel,
-};
+export default prisma;

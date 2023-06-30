@@ -1,14 +1,7 @@
+import { QueryTokenArgs } from "@/infrastructure/data-source/token.data-source";
+
 import type { Identity } from "@/domain/entity/identity";
 import type { Prisma } from "@prisma/client";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import type { FastifyInstance } from "fastify/types/instance";
-import type { FastifyBaseLogger } from "fastify/types/logger";
-import type { FastifyPluginAsync } from "fastify/types/plugin";
-import type { FastifyReply, FastifyRequest } from "fastify/types/request";
-import type { RouteOptions } from "fastify/types/route";
-import type { IncomingMessage, Server, ServerResponse } from "http";
-import type { JoseHeaderParameters } from "jose";
-
 import type {
     RequestBodyDefault,
     RequestHeadersDefault,
@@ -17,6 +10,14 @@ import type {
     RequestRawQueryDefault,
     unknown,
 } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { FastifyInstance } from "fastify/types/instance";
+import type { FastifyBaseLogger } from "fastify/types/logger";
+import type { FastifyPluginAsync } from "fastify/types/plugin";
+import type { FastifyReply, FastifyRequest } from "fastify/types/request";
+import type { RouteOptions } from "fastify/types/route";
+import type { IncomingMessage, Server, ServerResponse } from "http";
+import type { JoseHeaderParameters } from "jose";
 
 export type ID = number | string;
 export interface Serializable {
@@ -161,13 +162,23 @@ export interface DataSourceSQL<T> {
     query(query: Partial<T>): Promise<T | T[] | null>;
 }
 
-export interface DataSourceSQLExtended<T> {
-    create<R = unknown>(data: T, _: R): Promise<T>;
+export interface DataSourceSQLGeneric<T> {
+    create<R = unknown>(data: T, _: R): Promise<Readonly<T>>;
     find(id: ID): Promise<Readonly<T> | null>;
     findMany(): Promise<Readonly<T>[] | null>;
+    findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     update(id: ID, data: T): Promise<T>;
     delete(id: ID): Promise<void>;
     query(query: Partial<T>): Promise<T | T[] | null>;
+}
+
+export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token> {
+    findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
+    findUniqueInWhiteListed(
+        query: QueryWhitelistedTokenArgs
+    ): Promise<Readonly<Token> | null>;
+    find(identityId: ID): Promise<Readonly<Token> | null>;
+    findMany(identityId: ID, tokenValue?: string): Promise<Readonly<T>[] | null>;
 }
 
 export interface RoleContract extends EntityContract {
@@ -240,6 +251,7 @@ export interface AccountAccessor {
 }
 
 export interface TokenAccessor {
+    saveToken(token: Token, identityId: ID): Promise<Readonly<Token>>;
     generateToken(token: Token, identityId: ID): Promise<Token>;
     rotateToken(token: Token, identityId: ID): Promise<Token>;
     verifyToken(token: Token, identityId: ID): Promise<Token>;
@@ -252,13 +264,10 @@ export interface TokenAccessor {
     validateTokenScope(token: Token, scope: string): Promise<boolean>;
 }
 
-export type AccessorTokenAndWhiteListedTokenAccessor = TokenAccessor &
-    WhiteListedTokenAccessor;
-
 export interface WhiteListedTokenAccessor {
     whitelistToken(token: Token, identityId: ID): Promise<WhiteListedToken>;
     removeFromWhiteList(token: Token): Promise<void>;
-    getWhiteListedToken(token: Token): Promise<WhiteListedToken>;
+    addToWhiteListedToken(token: Token, identityId: ID): Promise<WhiteListedToken>;
     getWhiteListedTokens(identityId: ID): Promise<WhiteListedToken[]>;
 }
 

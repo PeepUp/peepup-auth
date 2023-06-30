@@ -1,13 +1,12 @@
 import IdentityRepository from "@/application/repository/identity";
 import { FindUniqeIdentityQuery, ID } from "@/types/types";
-import {
-    BadRequestException,
-    ResourceAlreadyExistException,
-} from "../middleware/error/common";
+import { ResourceAlreadyExistException } from "../middleware/error/common";
+import { PUT_IDENTITY_BODY_SCHEMA } from "../schema/identity";
+import tokenManagementService from "./token";
 
 import type { Identity } from "@/domain/entity/identity";
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
-import { PUT_IDENTITY_BODY_SCHEMA, PutIdentityBody } from "../schema/identity";
+import type { PutIdentityBody } from "../schema/identity";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
@@ -18,7 +17,7 @@ export type IdentityDataOmittedValue =
     | "updatedAt";
 export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
 
-export interface IdentityManagementServiceType {
+export interface IdentityManagementService {
     getIdentityByQuery: (query: FindUniqeIdentityQuery) => Promise<Identity | null>;
     getIdentityById: (id: string) => Promise<Identity | null>;
     getIdentities: () => Promise<Identity[] | null>;
@@ -35,7 +34,10 @@ export interface IdentityManagementServiceType {
  *
  * */
 class IdentityService {
-    constructor(private readonly identityRepository: IdentityRepository) {}
+    constructor(
+        private readonly identityRepository: IdentityRepository,
+        private tokenManagementService: tokenManagementService
+    ) {}
 
     /**
      * @todo:
@@ -60,16 +62,19 @@ class IdentityService {
         }
 
         const identity: Identity = {
+            id: "",
             email: <string>traits.email,
             password: password,
             avatar: "",
             username: <string>traits.username ?? <string>traits.email?.split("@")[0],
             lastName: "",
             firstName: "",
-            phoneNumber: "",
+            phoneNumber: null,
             state: "active",
             providerId: null,
             emailVerified: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         };
 
         const data = await this.identityRepository.create<Identity>(identity);

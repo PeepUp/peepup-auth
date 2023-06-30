@@ -1,7 +1,6 @@
-import IdentityService from "../service/identity";
-
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
+import type AuthenticationService from "../service/authentication";
 
 /**
  * @todo:
@@ -9,14 +8,14 @@ import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.sch
  *
  */
 class AuthLocalStrategyHandler {
-    constructor(private readonly identitiesService: IdentityService) {}
+    constructor(private readonly authService: AuthenticationService) {}
 
     login: RequestHandler<{ Body: LoginIdentityBody }> = async (request, reply) => {
         const { traits, password, password_identifier, method } = <LoginIdentityBody>(
             request.body
         );
 
-        const result = await this.identitiesService.login({
+        const result = await this.authService.login({
             traits,
             password_identifier,
             method,
@@ -36,7 +35,10 @@ class AuthLocalStrategyHandler {
         }
 
         setImmediate(() => {
-            reply.status(200).send();
+            reply.status(200).send({
+                access_token: result?.access.value,
+                refresh_token: result?.access.value,
+            });
         });
 
         return reply;
@@ -45,7 +47,7 @@ class AuthLocalStrategyHandler {
     registration: RequestHandler<RegisterIdentityBody> = async (request, reply) => {
         const { traits, password, method } = <RegisterIdentityBody>request.body;
 
-        await this.identitiesService.registration({
+        await this.authService.registration({
             password,
             traits,
             method,

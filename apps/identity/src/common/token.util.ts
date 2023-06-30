@@ -1,5 +1,5 @@
-import { createPrivateKey, createPublicKey, generateKeyPairSync } from "crypto";
-import { mkdirSync, writeFile, writeFileSync } from "fs";
+import { createPublicKey, generateKeyPairSync } from "crypto";
+import { mkdirSync, writeFileSync } from "fs";
 import * as jose from "jose";
 import { JWK } from "jose";
 import { join } from "path";
@@ -87,12 +87,19 @@ class JOSEToken {
 
     static async createJWToken({
         privateKey,
-        algorithm,
+        header,
         payload,
         exiprationTime,
     }: CreateTokenArgs): Promise<string> {
         try {
-            const privateKeyImport = await jose.importPKCS8(privateKey, algorithm);
+            const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
+
+            console.log({
+                privateKey,
+                header,
+                payload,
+                exiprationTime,
+            });
 
             const signature = await new jose.SignJWT({
                 ...payload,
@@ -100,7 +107,7 @@ class JOSEToken {
             })
                 .setProtectedHeader({ alg: "RS256", typ: "JWT", kid: this.keyId })
                 .setAudience("urn:example:client")
-                .setExpirationTime("2h")
+                .setExpirationTime(exiprationTime)
                 .setIssuer(
                     `urn:server-1:${config.config.environment.host}:${config.config.environment.port}`
                 )
@@ -108,10 +115,14 @@ class JOSEToken {
                 .setIssuedAt()
                 .sign(privateKeyImport);
 
-            console.log(signature);
             return signature;
         } catch (error) {
             console.log(error);
+
+            if (error) {
+                throw new Error(error as any);
+            }
+
             return "";
         }
     }
@@ -162,15 +173,12 @@ class JOSEToken {
     }
 
     static async createToken({
-        publicKey,
         privateKey,
-        algorithm,
-        payload,
         header,
+        payload,
         exiprationTime,
     }: CreateTokenArgs): Promise<string> {
-        const privateKeyImport = await jose.importPKCS8(privateKey, algorithm);
-        const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
+        const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
 
         /*  const encryptedPayload = await new jose.CompactEncrypt(
          new TextEncoder().encode(JSON.stringify(payload))
@@ -181,10 +189,7 @@ class JOSEToken {
          })
          .encrypt(publicKeyImport); */
 
-        const token = await new jose.SignJWT({
-            ...payload,
-            aud: "urn:client-1",
-        })
+        const token = await new jose.SignJWT(payload)
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer(
@@ -292,12 +297,10 @@ export interface VerifyTokenArgs {
 }
 
 export interface CreateTokenArgs {
-    publicKey: string;
     privateKey: string;
-    algorithm: string;
     payload: JWTPayload;
     header: JWTHeaderParameters;
-    exiprationTime: string | number;
+    exiprationTime: number;
 }
 
 export interface KeyPair {
