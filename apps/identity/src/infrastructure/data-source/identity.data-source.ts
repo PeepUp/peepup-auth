@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { passwordUtils } from "../../common";
-
+/* eslint-disable @typescript-eslint/naming-convention */
+import type { PrismaClient } from "@prisma/client";
 import type { Identity } from "@/domain/entity/identity";
 import type {
     DataSourceSQL,
@@ -10,6 +9,7 @@ import type {
     ID,
     VerifyHashPasswordUtils,
 } from "@/types/types";
+import { passwordUtils } from "../../common";
 
 /**
  * @todo:
@@ -26,7 +26,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
                     async hashPassword(data: HashPasswordArgs) {
                         const { _ } = data;
                         const hashed = await passwordUtils.hash({
-                            _: _,
+                            _,
                             salt: await passwordUtils.generateSalt(),
                         });
                         return hashed;
@@ -35,8 +35,8 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
                     async verifyPassword(data: VerifyHashPasswordUtils) {
                         const { _, __ } = data;
                         const verified = await passwordUtils.verify({
-                            _: _,
-                            __: __,
+                            _,
+                            __,
                         });
                         return verified;
                     },

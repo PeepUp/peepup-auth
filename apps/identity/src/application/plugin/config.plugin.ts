@@ -1,9 +1,10 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 
-import { Identity } from "@/types/main";
-import { config as _config } from "../../application/config";
+import type { Identity } from "@/types/main";
+import configEnv from "../config/api.config";
 
+// eslint-disable-next-line import/prefer-default-export
 export const configPlugin: FastifyPluginAsync = fp(async (fastify: FastifyInstance) => {
-    fastify.decorate<Identity.Config.Api>("config", _config);
+    fastify.decorate<Identity.Config.Api>("config", configEnv);
 });

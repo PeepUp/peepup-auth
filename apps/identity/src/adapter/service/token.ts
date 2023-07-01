@@ -1,11 +1,9 @@
-import { randomBytes, randomUUID } from "crypto";
 import { join } from "path";
+import type { JWTPayload } from "jose";
+import type { AccessInfo, ID, Token, TokenAccessor } from "@/types/types";
 import { fileUtils } from "../../common";
 import JOSEToken from "../../common/token.util";
 import { Identity } from "../../domain/entity/identity";
-
-import type { AccessInfo, ID, Token, TokenAccessor } from "@/types/types";
-import type { JWTPayload } from "jose";
 
 export type TokenPayloadIdentity = Pick<Identity, "email" | "id"> &
     Pick<AccessInfo, "resource">;
@@ -37,19 +35,19 @@ export default class TokenManagementService {
 
         const header = {
             alg: "RS256",
-            typ: "JWT",
+            typ: tokenType,
             kid: keyId,
         };
 
-        const created_token = await JOSEToken.createJWToken({
-            privateKey: privateKey,
-            payload: payload,
-            header: header,
+        const createdToken = await JOSEToken.createJWToken({
+            privateKey,
+            payload,
+            header,
             exiprationTime: expirationTime,
         });
 
-        const _token: Token = {
-            value: created_token,
+        const signingToken: Token = {
+            value: createdToken,
             tokenStatus: "active",
             tokenTypes: "access",
             kid: header.kid,
@@ -63,7 +61,7 @@ export default class TokenManagementService {
             createdAt: new Date(),
         };
 
-        const data = await this.tokenRepository.saveToken(_token, <ID>identity.id);
+        const data = await this.tokenRepository.saveToken(signingToken, <ID>identity.id);
 
         if (!data) {
             throw new Error("Error: cannot save token");

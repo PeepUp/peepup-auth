@@ -1,17 +1,17 @@
+/* eslint-disable */
+
 import cors from "@fastify/cors";
 import fastify from "fastify";
-import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import http from "http";
+import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+import type { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { authSchema } from "../../adapter/schema/auth.schema";
-
 import { routes } from "../../adapter";
 import { errorHandler } from "../../adapter/middleware/error.handler";
 import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
-import { fastifyConfig } from "../../application/config/fastify.config";
+import fastifyConfig from "../../application/config/fastify.config";
 import * as fastifyPlugin from "../../application/plugin";
-
-import type { FastifyInstance } from "fastify";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);

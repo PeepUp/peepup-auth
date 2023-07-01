@@ -1,8 +1,11 @@
-import { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
+/* eslint-disable */
+
 import argon2 from "argon2";
 import { randomBytes } from "crypto";
 import * as fs from "fs";
 import { join } from "path";
+
+import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
 
 export const utils = {
     type(o: unknown): string {
@@ -23,12 +26,13 @@ export const utils = {
         if (utils.type(o) !== "object") return;
         const props = Object.getOwnPropertyNames(o);
         props.forEach((key: string) => {
-            let sub = o[key];
+            const sub = o[key];
             if (Array.isArray(sub)) Object.freeze(sub);
             if (utils.type(sub) === "object") {
                 utils.deepFreeze(sub);
             }
         });
+        // eslint-disable-next-line consistent-return
         return Object.freeze(o);
     },
 };
@@ -150,7 +154,7 @@ export const passwordUtils = {
         }
     },
 
-    async generateSalt(length: number = 16): Promise<string> {
+    async generateSalt(length = 16): Promise<string> {
         return new Promise((resolve, reject) => {
             randomBytes(length, (err, buffer) => {
                 if (err) {

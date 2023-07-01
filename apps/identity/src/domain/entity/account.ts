@@ -2,10 +2,15 @@ import type { AccountContract, ID, RoleContract, UserContract } from "@/types/ty
 
 class Account implements AccountContract {
     public roles?: RoleContract[];
+
     public tokens?: string[];
+
     public user: UserContract = <UserContract>{};
+
     public providerId?: ID;
+
     public readonly createdAt: Date = new Date();
+
     readonly _id?: ID;
 
     constructor(props: AccountContract) {
@@ -18,8 +23,9 @@ class Account implements AccountContract {
         this.user = props.user;
         this.providerId = props?.providerId;
     }
+
     public get id(): ID | undefined {
-        return this._id;
+        return this.id;
     }
 }
 

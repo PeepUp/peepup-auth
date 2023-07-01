@@ -1,12 +1,22 @@
 module.exports = {
-    extends: ["@dofavour/eslint-config-typescript"],
+    ...require("../../packages/config/eslint-server"),
     parserOptions: {
-        project: "tsconfig.json",
+        root: true,
         tsconfigRootDir: __dirname,
-        sourceType: "module",
+        project: ["./tsconfig.lint.json"],
     },
-    files: ["*.ts"],
-    parserOptions: {
-        project: ["**/tsconfig.json"],
+    rules: {
+        "import/prefer-default-export": ["off" | "warn" | "error", { target: "single" }],
+        "no-console": "off",
+        "no-restricted-syntax": [
+            "off",
+            {
+                selector:
+                    "CallExpression[callee.object.name='console'][callee.property.name!=/^(log|warn|error|info|trace)$/]",
+                message: "Unexpected property on console object was called",
+            },
+        ],
+
+        "@typescript-eslint/naming-convention": "off",
     },
 };

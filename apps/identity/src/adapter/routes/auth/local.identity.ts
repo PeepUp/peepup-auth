@@ -1,5 +1,5 @@
 import { IdentityRoutes } from "@/types/types";
-import { $ref } from "../../../adapter/schema/auth.schema";
+import { $ref } from "../../schema/auth.schema";
 import AuthLocalStrategyHandler from "../../handler/authentication";
 
 import type AuthenticationService from "../../service/authentication";

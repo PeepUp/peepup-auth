@@ -1,3 +1,4 @@
+import type { IdentityRoutes } from "@/types/types";
 import dependencies from "../../infrastructure/diConfig";
 import localIdentityRoutes from "./auth/local.identity";
 import jwksRoutes from "./certs/jwks";
@@ -6,8 +7,6 @@ import checkhealthRoutes from "./metadata/checkhealth";
 import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
-
-import type { IdentityRoutes } from "@/types/types";
 
 /**
  *
@@ -18,6 +17,7 @@ import type { IdentityRoutes } from "@/types/types";
  *
  */
 export function routes(): { routes: IdentityRoutes } {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { identityService, authenticationService, tokenManagementService } =
         dependencies;
     const localStrategy = localIdentityRoutes(authenticationService).routes;

@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import crypto from "crypto";
 
 function generateRandomSHA256(len: number): string {

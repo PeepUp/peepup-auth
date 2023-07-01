@@ -1,4 +1,4 @@
-import {
+import type {
     AccessControlAccessor,
     AccessControlDataSource,
     AccessInfo,
@@ -10,22 +10,24 @@ class AccessControlRepository implements AccessControlAccessor {
     constructor(private readonly accessControlDataSource: AccessControlDataSource) {}
 
     async updateAccess(accessId: ID, data: AccessInfo): Promise<void> {
-        return await this.accessControlDataSource.updateById(accessId, data);
+        return this.accessControlDataSource.updateById(accessId, data);
     }
 
     async getAccess(access: AccessInfo): Promise<RoleContract> {
-        return await this.accessControlDataSource.find({ permissions: [access] });
+        return this.accessControlDataSource.find({ permissions: [access] });
     }
 
     async getAllAccess(): Promise<RoleContract[]> {
-        return await this.accessControlDataSource.findAll();
+        return this.accessControlDataSource.findAll();
     }
 
     async deleteAccess(accessId: ID): Promise<void> {
-        return await this.accessControlDataSource.deleteById(accessId);
+        return this.accessControlDataSource.deleteById(accessId);
     }
 
     async createAccess(role: RoleContract, access: AccessInfo): Promise<void> {
-        return await this.accessControlDataSource.create(role, access);
+        return this.accessControlDataSource.create(role, access);
     }
 }
+
+export default AccessControlRepository;

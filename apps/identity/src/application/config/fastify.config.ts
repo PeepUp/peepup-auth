@@ -1,9 +1,6 @@
-import { environmentUtils } from "../../common";
-import { config } from "./api.config";
-
 import type { FastifyCorsOptions } from "@fastify/cors";
 import { FastifyServerOptions } from "fastify";
-import { __metadata } from "tslib";
+import config from "./api.config";
 
 const cors: FastifyCorsOptions = {
     origin: config.environment.whiteListClient,
@@ -48,7 +45,9 @@ const fastifyOption: FastifyServerOptions = {
     disableRequestLogging: true,
 };
 
-export const fastifyConfig = {
+const fastifyConfig = {
     cors,
     fastifyOption,
 };
+
+export default fastifyConfig;

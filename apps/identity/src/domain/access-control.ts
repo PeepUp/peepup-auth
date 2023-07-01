@@ -1,10 +1,11 @@
+/* eslint-disable */
 import type {
     AccessControl,
     AccessControlAccessor,
     AccessInfo,
     RoleAccessor,
     RoleContract,
-} from "@/types/types.d.ts";
+} from "@/types/types";
 
 class RBAC implements AccessControl {
     constructor(

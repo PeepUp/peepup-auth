@@ -1,20 +1,20 @@
 {
-   "name": "@dofavour/tsconfig",
-   "version": "0.0.0",
-   "private": true,
-   "main": "index.js",
-   "license": "MIT",
-   "scripts": {
-      "precommit": "lint-staged",
-      "pretty": "prettier --write ."
-   },
-   "files": [
-      "base.json",
-      "common.json",
-      "nextjs.json",
-      "react-library.json"
-   ],
-   "publishConfig": {
-      "access": "public"
-   }
+    "name": "@dofavour/tsconfig",
+    "version": "0.0.0",
+    "private": true,
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+        "precommit": "lint-staged",
+        "pretty": "prettier --write ."
+    },
+    "files": [
+        "base.json",
+        "common.json",
+        "nextjs.json",
+        "react-library.json"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
 }
