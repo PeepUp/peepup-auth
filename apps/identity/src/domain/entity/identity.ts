@@ -1,4 +1,4 @@
-import { Entity } from "@/types/types";
+import type { Entity } from "@/types/types";
 
 export interface Identity extends Entity {
     avatar: string;

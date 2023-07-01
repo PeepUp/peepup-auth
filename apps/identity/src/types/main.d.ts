@@ -1,11 +1,4 @@
-import {
-    FastifySchema,
-    FastifySchemaCompiler,
-    HTTPMethods,
-    RouteGenericInterface,
-    RouteOptions,
-} from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { RouteOptions } from "fastify";
 
 declare namespace Identity {
     namespace Config {
@@ -40,25 +33,24 @@ declare namespace Identity {
             }
         }
 
-        interface Route
-            extends RouteOptions<
-                http.Server,
-                http.IncomingMessage,
-                http.ServerResponse,
-                any,
-                any,
-                any,
-                any,
-                FastifyBaseLogger
-            > {}
+        type Route = RouteOptions<
+            http.Server,
+            http.IncomingMessage,
+            http.ServerResponse,
+            any,
+            any,
+            any,
+            any,
+            FastifyBaseLogger
+        >;
 
-        export interface Routes extends Array<Route> {}
+        export type Routes = Array<Route>;
 
         interface Plugin {
             plugin: any;
             options?: any;
         }
 
-        interface Plugins extends Array<Plugin> {}
+        type Plugins = Array<Plugin>;
     }
 }

@@ -1,5 +1,6 @@
-import type { IdentityRoutes } from "@/types/types";
 import OAuthConfigurationHandler from "../../handler/oauth2.config";
+
+import type { IdentityRoutes } from "@/types/types";
 
 export default (): { routes: IdentityRoutes } => {
     const handler = new OAuthConfigurationHandler();

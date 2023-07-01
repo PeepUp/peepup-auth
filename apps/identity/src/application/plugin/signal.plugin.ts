@@ -1,32 +1,24 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable consistent-return */
-/* eslint-disable @typescript-eslint/no-shadow */
-
 import type { FastifyPluginAsync } from "fastify";
-
-export type FastifyGracefulExitOptions = {
-    logBindings?: Record<string, unknown>;
-    timeout?: number;
-};
+import type { FastifyGracefulExitOptions } from "@/types/types";
 
 export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
     fastify,
     options = {
         timeout: 3000,
+        message: "🌿 Server is shutting down",
     }
 ): Promise<void> => {
     const { timeout = 30000 } = options;
     const { log } = fastify;
     let closePromise: Promise<undefined> | null = null;
 
-    const gracefullyClose = async (signal: string) => {
+    const gracefullyClose = async (sign: string): Promise<unknown> => {
         if (closePromise) {
             return closePromise;
         }
 
         console.warn(
-            `🌿 Server has been interrupt on ${signal} gracefully and will be shut down ...`
+            `🌿 Server has been interrupt on ${sign} gracefully and will be shut down ...`
         );
 
         setTimeout(() => {
@@ -35,10 +27,8 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
         }, timeout);
 
         closePromise = fastify.close();
-
         await closePromise;
-
-        process.exit(0);
+        return process.exit(0);
     };
 
     process.on("uncaughtException", (err) => {
@@ -46,18 +36,17 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
         gracefullyClose("uncaughtException");
     });
 
-    process.on("unhandledRejection", (reason, _promise) => {
+    process.on("unhandledRejection", (reason) => {
         log.error({ reason }, `Unhandled Rejection: ${reason}`);
         gracefullyClose("unhandledRejection");
     });
 
-    // eslint-disable-next-line no-restricted-syntax, @typescript-eslint/no-shadow
-    for (const signal of ["SIGINT", "SIGTERM"]) {
-        process.on(signal, () => {
+    for (const sig of ["SIGINT", "SIGTERM"]) {
+        process.on(sig, () => {
             console.warn(
-                `🌿 Server has been interrupt on ${signal} gracefully and will be shut down ...`
+                `🌿 Server has been interrupt on ${sig} gracefully and will be shut down ...`
             );
-            gracefullyClose(signal);
+            gracefullyClose(sig);
         });
     }
 };

@@ -1,11 +1,10 @@
-/* eslint-disable */
-import IdentityRepository from "@/application/repository/identity";
-import { FindUniqeIdentityQuery } from "@/types/types";
-import type { Identity } from "@/domain/entity/identity";
-import { ResourceAlreadyExistException } from "../middleware/error/common";
+import TokenManagementService from "./token";
 import { PUT_IDENTITY_BODY_SCHEMA } from "../schema/identity";
-import tokenManagementService from "./token";
+import IdentityRepository from "../../application/repository/identity";
+import ResourceAlreadyExistException from "../middleware/error/resource-exists";
 
+import type { FindUniqeIdentityQuery } from "@/types/types";
+import type { Identity } from "@/domain/entity/identity";
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
 import type { PutIdentityBody } from "../schema/identity";
 
@@ -37,7 +36,8 @@ export interface IdentityManagementService {
 class IdentityService {
     constructor(
         private readonly identityRepository: IdentityRepository,
-        private tokenManagementService: tokenManagementService
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        private tokenManagementService: TokenManagementService
     ) {}
 
     /**
@@ -86,6 +86,7 @@ class IdentityService {
     }
 
     async login(body: LoginIdentityBody): Promise<Readonly<IdentityOmitted> | null> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { traits, password, method, password_identifier } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
@@ -108,10 +109,10 @@ class IdentityService {
                 providerId,
                 phoneNumber,
                 updatedAt,
-                ...result
+                ...rest
             }: typeof identity = identity;
 
-            return result;
+            return rest;
         });
 
         return result ?? null;

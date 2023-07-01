@@ -1,9 +1,10 @@
-/* eslint-disable class-methods-use-this */
 import { existsSync } from "fs";
 import { join } from "path";
-import type { RequestHandler } from "@/types/types";
 import { fileUtils } from "../../common";
 
+import type { RequestHandler } from "@/types/types";
+
+/* eslint-disable class-methods-use-this */
 class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
         const jwksPath = join(process.cwd(), "public/.well-known/jwks.json");

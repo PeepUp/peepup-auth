@@ -1,11 +1,13 @@
-/* eslint-disable */
+import ResourceAlreadyExistException from "../../middleware/error/resource-exists";
 
-import { ResourceAlreadyExistException } from "@/adapter/middleware/error/common";
-import { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth.schema";
-import { IdentityOmitted } from "@/adapter/service/identity";
-import tokenManagementService from "@/adapter/service/token";
-import IdentityRepository from "@/application/repository/identity";
-import { Identity } from "@/domain/entity/identity";
+import type { IdentityOmitted } from "@/adapter/service/identity";
+import type tokenManagementService from "@/adapter/service/token";
+import type IdentityRepository from "@/application/repository/identity";
+import type { Identity } from "@/domain/entity/identity";
+import type {
+    LoginIdentityBody,
+    RegisterIdentityBody,
+} from "@/adapter/schema/auth.schema";
 
 export default class AuthenticationService {
     constructor(
@@ -14,7 +16,7 @@ export default class AuthenticationService {
     ) {}
 
     async registration(body: RegisterIdentityBody): Promise<void> {
-        const { traits, password, method } = body;
+        const { traits, password } = body;
 
         const existingIdentity = await this.identityRepository.getIdentity<Identity>(
             traits
@@ -46,7 +48,7 @@ export default class AuthenticationService {
     }
 
     async login(body: LoginIdentityBody): Promise<Readonly<IdentityOmitted> | null> {
-        const { traits, password, method, password_identifier } = body;
+        const { traits, password } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
             data: { password },
@@ -68,10 +70,10 @@ export default class AuthenticationService {
                 providerId,
                 phoneNumber,
                 updatedAt,
-                ...result
+                ...rest
             }: typeof identity = identity;
 
-            return result;
+            return rest;
         });
 
         return result ?? null;

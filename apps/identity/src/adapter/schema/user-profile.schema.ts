@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { z } from "zod";
 
 export const user_profile_schema = z.object({

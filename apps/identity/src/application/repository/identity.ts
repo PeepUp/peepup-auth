@@ -1,11 +1,11 @@
-import type { Identity } from "@/domain/entity/identity";
-import type IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
 import type {
     FindLoginIdentityQuery,
     FindUniqeIdentityQuery,
     ID,
     IdentityAccessor,
 } from "@/types/types";
+import type { Identity } from "@/domain/entity/identity";
+import type IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
 
 class IdentityRepository implements IdentityAccessor {
     constructor(private readonly dataSource: IdentityStoreAdapter) {}

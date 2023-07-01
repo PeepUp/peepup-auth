@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
 import {
