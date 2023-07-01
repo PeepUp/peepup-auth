@@ -1,5 +1,7 @@
+// eslint-disable-next-line max-classes-per-file
 export class BadRequestException extends Error {
     private statusCode: number;
+
     public constructor(message: string) {
         super(message);
         this.name = "BadRequestException";
@@ -9,6 +11,7 @@ export class BadRequestException extends Error {
 
 export class ForbiddenException extends Error {
     private statusCode: number;
+
     public constructor(message: string) {
         super(message);
         this.name = "ForbiddenException";
@@ -18,6 +21,7 @@ export class ForbiddenException extends Error {
 
 export class BadCredentialsException extends Error {
     private statusCode: number;
+
     constructor(message: string) {
         super(message);
         this.name = "BadCredentialsException";

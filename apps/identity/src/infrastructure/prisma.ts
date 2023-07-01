@@ -1,5 +1,6 @@
-import { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
+/* eslint-disable @typescript-eslint/naming-convention */
 import { PrismaClient } from "@prisma/client";
+import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
 import { passwordUtils } from "../common";
 
 const prisma = new PrismaClient();
@@ -18,17 +19,18 @@ prisma.$extends({
             async hashPassword(data: HashPasswordArgs) {
                 const { _ } = data;
                 const hashed = await passwordUtils.hash({
-                    _: _,
+                    _,
                     salt: await passwordUtils.generateSalt(),
                 });
                 return hashed;
             },
 
             async verifyPassword(data: VerifyHashPasswordUtils) {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 const { _, __ } = data;
                 const verified = await passwordUtils.verify({
-                    _: _,
-                    __: __,
+                    _,
+                    __,
                 });
                 return verified;
             },

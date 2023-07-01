@@ -1,14 +1,13 @@
+import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
-import { Identity } from "@/domain/entity/identity";
+import type { Token } from "@/types/types";
 import { passwordUtils } from "../../common";
 import {
     BadCredentialsException,
     ResourceAlreadyExistException,
 } from "../middleware/error/common";
 import { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
-import { IdentityOmitted } from "./identity";
 
-import { Token } from "@prisma/client";
 import type TokenManagementService from "./token";
 
 export default class AuthenticationService {
@@ -18,7 +17,7 @@ export default class AuthenticationService {
     ) {}
 
     async registration(body: RegisterIdentityBody): Promise<void> {
-        const { traits, password, method } = body;
+        const { traits, password } = body;
 
         const existingIdentity = await this.identityRepository.getIdentity<Identity>(
             traits
@@ -56,8 +55,8 @@ export default class AuthenticationService {
         }
     }
 
-    async login(body: LoginIdentityBody): Promise<Readonly<{ access: any }> | null> {
-        const { traits, password, method, password_identifier } = body;
+    async login(body: LoginIdentityBody): Promise<Readonly<{ access: Token }> | null> {
+        const { traits, password } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
             data: { password },

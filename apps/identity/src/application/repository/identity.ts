@@ -1,5 +1,5 @@
 import type { Identity } from "@/domain/entity/identity";
-import IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
+import type IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
 import type {
     FindLoginIdentityQuery,
     FindUniqeIdentityQuery,
@@ -48,6 +48,7 @@ class IdentityRepository implements IdentityAccessor {
     }
 
     async getIdentities(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         query?: FindUniqeIdentityQuery
     ): Promise<Readonly<Identity>[] | null> {
         const result: Readonly<Identity>[] | null = await this.dataSource.findMany();

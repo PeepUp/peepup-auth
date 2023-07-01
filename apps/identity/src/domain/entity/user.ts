@@ -1,6 +1,6 @@
 import type { ID, UserContract } from "@/types/types";
 
-export class User implements UserContract {
+export default class User implements UserContract {
     readonly _id?: ID | undefined;
 
     constructor(
@@ -16,6 +16,7 @@ export class User implements UserContract {
     ) {}
 
     get id(): ID | undefined {
+        // eslint-disable-next-line no-underscore-dangle
         return this._id ? this._id : undefined;
     }
 }

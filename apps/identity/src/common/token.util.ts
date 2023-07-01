@@ -1,15 +1,14 @@
+/* eslint-disable no-console */
 import { createPublicKey, generateKeyPairSync } from "crypto";
 import { mkdirSync, writeFileSync } from "fs";
 import * as jose from "jose";
 import { JWK } from "jose";
 import { join } from "path";
-import { config } from "../application";
-
-import { cryptoUtils } from "./crypto";
-import { fileUtils } from "./utils";
 
 import type { JWTHeaderParameters, JWTPayload } from "jose";
-
+import config from "../application/config/api.config";
+import { fileUtils } from "./utils";
+import { cryptoUtils } from "./crypto";
 // type KeyFormat = "jwk" | "pkcs8" | "raw" | "spki";
 // type KeyEncodingFornat = "pem" | "der";
 
@@ -21,7 +20,7 @@ class JOSEToken {
     public static generateKeyPair(modulusLength = 4096, keyId = this.keyId): KeyPair {
         try {
             const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-                modulusLength: modulusLength,
+                modulusLength,
                 publicKeyEncoding: {
                     type: "pkcs1",
                     format: "pem",
@@ -109,29 +108,27 @@ class JOSEToken {
                 .setAudience("urn:example:client")
                 .setExpirationTime(exiprationTime)
                 .setIssuer(
-                    `urn:server-1:${config.config.environment.host}:${config.config.environment.port}`
+                    `urn:server-1:${config.environment.host}:${config.environment.port}`
                 )
                 .setSubject("urn:example:subject")
                 .setIssuedAt()
                 .sign(privateKeyImport);
 
             return signature;
-        } catch (error) {
-            console.log(error);
-
-            if (error) {
-                throw new Error(error as any);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
             }
 
             return "";
         }
     }
 
-    static async buildJWKSPublicKey(publicKey: string): Promise<void> {
+    static async buildJWKSPublicKey(): Promise<void> {
         try {
             const keysDirPath = join(process.cwd(), `/keys`);
             const keysCounter = fileUtils.getFolderNames(keysDirPath);
-            let keysList: JWK[] = [];
+            const keysList: JWK[] = [];
 
             if (keysCounter.length === 0) return;
 
@@ -150,15 +147,15 @@ class JOSEToken {
             const jwksPath = join(process.cwd(), `/public/.well-known/`);
 
             if (!fileUtils.checkDirectory(jwksPath)) {
-                console.log(`📁 created new directory: ${jwksPath}`);
                 mkdirSync(jwksPath, { recursive: true });
             }
 
             const jwks = JSON.stringify({ keys: keysList }, null, 2);
-            writeFileSync(jwksPath + "jwks.json", jwks);
-            console.log("jwks.json file created successfully.");
+            writeFileSync(`${jwksPath}jwks.json`, jwks);
         } catch (error) {
-            console.log(error);
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
         }
     }
 
@@ -193,7 +190,7 @@ class JOSEToken {
             .setProtectedHeader({ alg: "RS256" })
             .setIssuedAt()
             .setIssuer(
-                `urn:server-1:${config.config.environment.host}:${config.config.environment.port}`
+                `urn:server-1:${config.environment.host}:${config.environment.port}`
             )
             .setAudience("urn:client-1")
             .setSubject("urn:example:subject")
@@ -209,9 +206,10 @@ class JOSEToken {
         options?: jose.JWTVerifyOptions
     ): Promise<boolean> {
         try {
-            const JWKS = jose.createRemoteJWKSet(
+            /* const JWKS = jose.createRemoteJWKSet(
                 new URL("http://127.0.0.1:4334/oauth2/v1/certs")
-            );
+            ); */
+
             const publicKeyImport = await jose.importSPKI(publicKey, "RS256");
 
             const { payload, protectedHeader } = await jose.jwtVerify(
@@ -222,6 +220,7 @@ class JOSEToken {
 
             const { iat, exp, nbf, aud, iss, jti, sub } = payload;
 
+            console.log(iat, exp, nbf, aud, iss, jti, sub);
             console.log(payload, protectedHeader);
 
             // Validate 'not before' and 'expiration' claims
@@ -239,24 +238,26 @@ class JOSEToken {
 
             return true;
         } catch (error) {
-            console.error("Error occurred during JWT verification:", error);
+            if (error instanceof Error) {
+                console.error("Error occurred during JWT verification:", error);
+                throw new Error(error.message);
+            }
             return false;
         }
     }
 
     static async verificationToken({
-        privateKey,
         publicKey,
         algorithm,
         token,
-        issuer = "urn:server-1:" +
-            `${config.config.environment.host}:${config.config.environment.port}`,
-        audience = "urn:example:audience",
         options,
-    }: VerifyTokenArgs): Promise<{
-        payload: JWTPayload;
-        header: JWTHeaderParameters;
-    }> {
+    }: VerifyTokenArgs): Promise<
+        | {
+              payload: JWTPayload;
+              header: JWTHeaderParameters;
+          }
+        | undefined
+    > {
         if (!publicKey || !algorithm || !token) {
             throw new Error("Invalid input parameters");
         }
@@ -280,8 +281,16 @@ class JOSEToken {
 
             return { payload, header: protectedHeader };
         } catch (error) {
-            console.error(error);
-            throw new Error("Token verification failed");
+            if (error instanceof Error) {
+                console.error(error);
+                throw new Error("Token verification failed");
+            }
+            return {
+                payload: {},
+                header: {
+                    alg: "",
+                },
+            };
         }
     }
 }

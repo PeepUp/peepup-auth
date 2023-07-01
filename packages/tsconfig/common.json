@@ -1,24 +1,24 @@
 {
-   "$schema": "http://json.schemastore.org/tsconfig",
-   "display": "Node.js",
-   "extends": "./base.json",
-   "compilerOptions": {
-      "module": "commonjs",
-      "lib": ["esnext"],
-      "target": "ESNext",
-      "noImplicitAny": true,
-      "experimentalDecorators": true,
-      "removeComments": true,
-      "sourceMap": true,
-      "noFallthroughCasesInSwitch": true,
-      "emitDecoratorMetadata": true,
-      "pretty": true,
-      "allowJs": true,
-      "allowSyntheticDefaultImports": true,
-      "moduleResolution": "node",
-      "noEmit": false,
-      "forceConsistentCasingInFileNames": true,
-      "resolveJsonModule": true,
-      "importHelpers": true
-   }
+    "$schema": "http://json.schemastore.org/tsconfig",
+    "display": "Node.js",
+    "extends": "./base.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "lib": ["esnext"],
+        "target": "ESNext",
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "noFallthroughCasesInSwitch": true,
+        "emitDecoratorMetadata": true,
+        "pretty": true,
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node",
+        "noEmit": false,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "importHelpers": true
+    }
 }

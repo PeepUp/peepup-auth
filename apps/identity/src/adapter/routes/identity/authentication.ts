@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { ResourceAlreadyExistException } from "@/adapter/middleware/error/common";
 import { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth.schema";
 import { IdentityOmitted } from "@/adapter/service/identity";
@@ -24,7 +26,7 @@ export default class AuthenticationService {
 
         const identity: Identity = {
             email: <string>traits.email,
-            password: password,
+            password,
             avatar: "",
             username:
                 <string>traits.username ?? (<string>traits.email?.split("@")[0] || null),

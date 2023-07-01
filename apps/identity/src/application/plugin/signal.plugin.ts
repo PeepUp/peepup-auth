@@ -1,3 +1,8 @@
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import type { FastifyPluginAsync } from "fastify";
 
 export type FastifyGracefulExitOptions = {
@@ -46,6 +51,7 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
         gracefullyClose("unhandledRejection");
     });
 
+    // eslint-disable-next-line no-restricted-syntax, @typescript-eslint/no-shadow
     for (const signal of ["SIGINT", "SIGTERM"]) {
         process.on(signal, () => {
             console.warn(

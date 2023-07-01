@@ -1,11 +1,12 @@
-import { Identity } from "@/types/main";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import dotenv from "dotenv";
+import type { Identity } from "@/types/main";
 
 dotenv.config({
     path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
 });
 
-export const config: Identity.Config.Api = {
+const config: Identity.Config.Api = {
     environment: {
         env: process.env.NODE_ENV,
         port: parseInt(<string>process.env.PORT, 10),
@@ -24,3 +25,5 @@ export const config: Identity.Config.Api = {
         prefix: "/v1",
     },
 };
+
+export default config;

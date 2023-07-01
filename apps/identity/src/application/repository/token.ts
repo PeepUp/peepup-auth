@@ -1,24 +1,26 @@
-import TokenStoreAdapter, {
+/* eslint-disable */
+import type { ID, Token, TokenAccessor, WhiteListedToken } from "@/types/types";
+import type TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";
+import type {
     QueryTokenArgs,
     QueryWhitelistedTokenArgs,
 } from "@/infrastructure/data-source/token.data-source";
-import type { ID, Token, TokenAccessor, Tokens, WhiteListedToken } from "@/types/types";
 
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
 
     async saveToken(token: Token, identityId: ID): Promise<Token> {
-        return await this.tokenDataSource.create<ID>(token, identityId);
+        return this.tokenDataSource.create<ID>(token, identityId);
     }
 
     async findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null> {
-        return await this.tokenDataSource.findUnique(query);
+        return this.tokenDataSource.findUnique(query);
     }
 
     async WhitelistedToken(
         token: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
-        return await this.tokenDataSource.findUniqueInWhiteListed(token);
+        return this.tokenDataSource.findUniqueInWhiteListed(token);
     }
 
     // async findTokens(identityId: ID): Promise<Readonly<Tokens>[] | null> {

@@ -1,5 +1,5 @@
+import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
-import { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * @todo:
@@ -52,7 +52,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         return result;
     }
 
-    async create<R>(token: Token, _identity: R): Promise<Readonly<Token>> {
+    async create<R>(token: Token, identity: R): Promise<Readonly<Token>> {
         const result: Readonly<Token> = await this.dataSource.token.create({
             data: {
                 value: token.value,
@@ -68,7 +68,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
                 expires_at: token.expires_at,
                 identity: {
                     connect: {
-                        id: <string>token.identityId,
+                        id: <string>identity,
                     },
                 },
                 WhitelistedToken: {

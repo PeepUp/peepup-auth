@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 export class UnknownDbError extends Error {
     constructor(message: string) {
         super(message);
@@ -33,7 +35,7 @@ export class CheckViolationException extends Error {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-explicit-any
 export const mapPgError = (error: any) => {
     if (!error?.code) return new UnknownDbError(error);
     switch (error.code) {
