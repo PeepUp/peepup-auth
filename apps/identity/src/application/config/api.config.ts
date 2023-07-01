@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import dotenv from "dotenv";
 import type { Identity } from "@/types/main";
 

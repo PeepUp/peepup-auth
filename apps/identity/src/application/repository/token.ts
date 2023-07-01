@@ -9,6 +9,10 @@ import type {
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
 
+    revokeAllToken(identityId: ID): Promise<Token[]> {
+        throw new Error("Method not implemented.");
+    }
+
     async saveToken(token: Token, identityId: ID): Promise<Token> {
         return this.tokenDataSource.create<ID>(token, identityId);
     }
@@ -45,7 +49,7 @@ export class TokenRepository implements TokenAccessor {
     }
 
     async verifyToken(token: Token, identityId: ID): Promise<Token> {
-        throw new Error("Method not implemented.");
+        return this.tokenDataSource.create<ID>(token, identityId);
     }
 
     async rotateToken(token: Token, identityId: ID): Promise<Token> {
@@ -54,10 +58,6 @@ export class TokenRepository implements TokenAccessor {
 
     async revokeToken(token: Token, identityId: ID): Promise<void> {
         await this.tokenDataSource.update(identityId, token);
-        throw new Error("Method not implemented.");
-    }
-
-    async revokeAllToken(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");
     }
 

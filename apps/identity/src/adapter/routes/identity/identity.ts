@@ -1,7 +1,7 @@
-import type { IdentityRoutes } from "@/types/types";
 import IdentityHandler from "../../handler/identity";
 import { $ref } from "../../schema/auth.schema";
 
+import type { IdentityRoutes } from "@/types/types";
 import type IdentityService from "../../service/identity";
 
 export default (identitiesService: IdentityService): { routes: IdentityRoutes } => {

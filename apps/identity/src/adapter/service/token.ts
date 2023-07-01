@@ -15,7 +15,8 @@ export default class TokenManagementService {
         identity: TokenPayloadIdentity,
         tokenType: string
     ): Promise<Readonly<Token>> {
-        const keyId = "2b3dbb78b05b682704aeafdc44df35c30031661ad0ac8069c3b4eb5063cb52e9";
+        const { keyId } = JOSEToken;
+        console.log("keyId: ", keyId);
         const path = join(process.cwd(), "keys", keyId, "private.pem.key");
         const privateKey = fileUtils.readFile(path, "utf-8");
         const clientId = process.env.CLIENT_ID ?? "dofavourMobileApp";

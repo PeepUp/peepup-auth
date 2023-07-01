@@ -18,5 +18,13 @@ module.exports = {
         ],
 
         "@typescript-eslint/naming-convention": "off",
+        "import/no-extraneous-dependencies": [
+            "off",
+            {
+                devDependencies: false,
+                optionalDependencies: false,
+                peerDependencies: false,
+            },
+        ],
     },
 };

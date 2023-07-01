@@ -1,12 +1,11 @@
+import { passwordUtils } from "../../common";
+import BadCredentialsException from "../middleware/error/bad-credential-exception";
+import ResourceAlreadyExistException from "../middleware/error/resource-exists";
+
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
 import type { Token } from "@/types/types";
-import { passwordUtils } from "../../common";
-import {
-    BadCredentialsException,
-    ResourceAlreadyExistException,
-} from "../middleware/error/common";
-import { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
 
 import type TokenManagementService from "./token";
 

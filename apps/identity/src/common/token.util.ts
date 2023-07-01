@@ -1,21 +1,20 @@
-/* eslint-disable no-console */
-import { createPublicKey, generateKeyPairSync } from "crypto";
-import { mkdirSync, writeFileSync } from "fs";
+import type { JWTHeaderParameters, JWTPayload } from "jose";
+
 import * as jose from "jose";
 import { JWK } from "jose";
 import { join } from "path";
-
-import type { JWTHeaderParameters, JWTPayload } from "jose";
-import config from "../application/config/api.config";
+import { mkdirSync, writeFileSync } from "fs";
+import { createPublicKey, generateKeyPairSync } from "crypto";
 import { fileUtils } from "./utils";
-import { cryptoUtils } from "./crypto";
-// type KeyFormat = "jwk" | "pkcs8" | "raw" | "spki";
-// type KeyEncodingFornat = "pem" | "der";
+
+import config from "../application/config/api.config";
 
 class JOSEToken {
-    public static keyId: string = cryptoUtils.generateRandomSHA256(32);
+    public static keyId: string;
 
-    constructor(public issuer: string) {}
+    constructor(public issuer: string, keyId?: string) {
+        JOSEToken.keyId = <string>keyId;
+    }
 
     public static generateKeyPair(modulusLength = 4096, keyId = this.keyId): KeyPair {
         try {
@@ -104,7 +103,11 @@ class JOSEToken {
                 ...payload,
                 aud: "urn:example:client",
             })
-                .setProtectedHeader({ alg: "RS256", typ: "JWT", kid: this.keyId })
+                .setProtectedHeader({
+                    alg: "RS256",
+                    typ: "JWT",
+                    kid: !header.kid ? this.keyId : header.kid,
+                })
                 .setAudience("urn:example:client")
                 .setExpirationTime(exiprationTime)
                 .setIssuer(

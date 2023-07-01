@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
 import {
@@ -12,7 +11,7 @@ import {
 } from "./identity";
 
 const method = z.enum(["password", "oidc"] as const);
-const typeValue = z.enum(["api", "browser"] as const);
+// const typeValue = z.enum(["api", "browser"] as const);
 const password_identifier = z.enum(["email", "username"] as const);
 
 const traits = createIdentityForRegistration;

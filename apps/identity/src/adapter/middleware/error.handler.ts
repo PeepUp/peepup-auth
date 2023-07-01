@@ -4,7 +4,7 @@ import type {
     FastifyReply,
     FastifyRequest,
 } from "fastify";
-import { ResourceAlreadyExistException } from "./error/common";
+import ResourceAlreadyExistException from "./error/resource-exists";
 
 export async function errorHandler(
     this: FastifyInstance,

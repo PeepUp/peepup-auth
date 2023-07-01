@@ -1,43 +1,13 @@
-/* eslint-disable max-classes-per-file */
+import CheckViolationException from "./check-violation";
+import ForeignKeyViolationException from "./foreignkey-violation";
+import NotNullException from "./not-null";
+import UniqueViolationException from "./unique-violation";
+import UnknownDbError from "./unknown-db";
 
-export class UnknownDbError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "UnknownDbError";
-    }
-}
-
-export class NotNullException extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "NotNullException";
-    }
-}
-
-export class ForeignKeyViolationException extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ForeignKeyViolationException";
-    }
-}
-
-export class UniqueViolationException extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "UniqueViolationException";
-    }
-}
-
-export class CheckViolationException extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "CheckViolationException";
-    }
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mapPgError = (error: any) => {
     if (!error?.code) return new UnknownDbError(error);
+
     switch (error.code) {
         case "23502": {
             throw new NotNullException(error);

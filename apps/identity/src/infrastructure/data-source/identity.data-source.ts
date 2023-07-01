@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import type { PrismaClient } from "@prisma/client";
+import { passwordUtils } from "../../common";
+
 import type { Identity } from "@/domain/entity/identity";
 import type {
     DataSourceSQL,
@@ -9,7 +10,6 @@ import type {
     ID,
     VerifyHashPasswordUtils,
 } from "@/types/types";
-import { passwordUtils } from "../../common";
 
 /**
  * @todo:

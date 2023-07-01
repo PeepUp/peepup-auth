@@ -1,23 +1,10 @@
-import { QueryTokenArgs } from "@/infrastructure/data-source/token.data-source";
-
-import type { Identity } from "@/domain/entity/identity";
 import type { Prisma } from "@prisma/client";
-import type {
-    RequestBodyDefault,
-    RequestHeadersDefault,
-    RequestParamsDefault,
-    RequestQuerystringDefault,
-    RequestRawQueryDefault,
-    unknown,
-} from "fastify";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import type { FastifyInstance } from "fastify/types/instance";
-import type { FastifyBaseLogger } from "fastify/types/logger";
-import type { FastifyPluginAsync } from "fastify/types/plugin";
-import type { FastifyReply, FastifyRequest } from "fastify/types/request";
 import type { RouteOptions } from "fastify/types/route";
-import type { IncomingMessage, Server, ServerResponse } from "http";
-import type { JoseHeaderParameters } from "jose";
+import type { FastifyBaseLogger } from "fastify/types/logger";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { FastifyReply, FastifyRequest } from "fastify/types/request";
+import type { Identity } from "@/domain/entity/identity";
+import type { QueryTokenArgs } from "../infrastructure/data-source/token.data-source";
 
 export type ID = number | string;
 export interface Serializable {
@@ -76,8 +63,8 @@ export interface UserQuery {
     };
 }
 
-export interface EntityContract extends Serializable {}
-export interface Entity extends Serializable {}
+export type EntityContract = Serializable;
+export type Entity = Serializable;
 
 export interface UseCase<T> {
     execute(
@@ -355,3 +342,9 @@ export enum Scope {
     OWN = "own",
     OWN_OR_ANY = "ownOrAny",
 }
+
+export type FastifyGracefulExitOptions = {
+    logBindings?: Record<string, unknown>;
+    timeout?: number;
+    message?: string;
+};

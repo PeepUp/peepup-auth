@@ -12,6 +12,8 @@ import { errorHandler } from "../../adapter/middleware/error.handler";
 import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
 import fastifyConfig from "../../application/config/fastify.config";
 import * as fastifyPlugin from "../../application/plugin";
+import { fileUtils } from "../../common";
+import JOSEToken from "../../common/token.util";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -40,9 +42,26 @@ async function initSchemaValidatorAndSerializer(
     server.setSerializerCompiler(serializerCompiler);
 }
 
-async function initErrorHandlers(
-    server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
-) {}
+async function initJWKS() {
+    const keysDir = fileUtils.checkDirectory("keys");
+    const wellKnownDir = fileUtils.checkDirectory("public/.well-known");
+
+    if (keysDir && JOSEToken.keyId === undefined) {
+        const kid = fileUtils.getFolderNames("keys");
+        new JOSEToken("", kid[0]);
+    }
+
+    if (!wellKnownDir) {
+        JOSEToken.buildJWKSPublicKey();
+    }
+
+    if (!keysDir) {
+        console.log("keys directory does not exist");
+        const { privateKey, publicKey } = JOSEToken.generateKeyPair();
+        console.log(privateKey, publicKey);
+        return;
+    }
+}
 
 async function setup() {
     await server.register(cors, fastifyConfig.cors);
@@ -52,6 +71,8 @@ async function setup() {
     await initRoutes(server);
     await server.after();
     await initSchema(server);
+    await initSchemaValidatorAndSerializer(server);
+    await initJWKS();
 }
 
 void setup().catch((error: unknown) => console.log(error));
@@ -61,4 +82,4 @@ server.after(() => {
     server.setErrorHandler(errorHandler);
 });
 
-export { server };
+export default server;

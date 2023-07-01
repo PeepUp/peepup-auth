@@ -1,5 +1,6 @@
-import type { IdentityRoutes } from "@/types/types";
 import MetadataHandler from "../../handler/metadata";
+
+import type { IdentityRoutes } from "@/types/types";
 
 export default (): { routes: IdentityRoutes } => {
     const metadataHandler = new MetadataHandler();
