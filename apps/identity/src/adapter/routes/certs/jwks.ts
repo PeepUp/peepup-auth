@@ -1,6 +1,5 @@
-import OAuthConfigurationHandler from "../../handler/oauth2.config";
-
 import type { IdentityRoutes } from "@/types/types";
+import OAuthConfigurationHandler from "../../handler/oauth2.config";
 
 export default (): { routes: IdentityRoutes } => {
     const handler = new OAuthConfigurationHandler();
@@ -27,13 +26,3 @@ export default (): { routes: IdentityRoutes } => {
         ],
     };
 };
-
-// Define a custom route interface
-/* interface CustomRequest extends FastifyRequest {
-    RawQuery: null;
-    Params: null;
-    Headers: null;
-    Body: null;
-    Querystring: null;
-    Url: string;
-  } */

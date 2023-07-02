@@ -9,7 +9,7 @@ import type {
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
 
-    revokeAllToken(identityId: ID): Promise<Token[]> {
+    async revokeAllToken(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");
     }
 

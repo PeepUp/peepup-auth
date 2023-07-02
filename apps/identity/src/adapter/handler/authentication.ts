@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@/types/types";
-import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
 import type AuthenticationService from "../service/authentication";
 
 /**
@@ -23,25 +23,19 @@ class AuthLocalStrategyHandler {
         });
 
         if (!result) {
-            setImmediate(() => {
-                reply.status(401).send({
-                    status: "failed",
-                    code: 401,
-                    codeStatus: "Unauthorized",
-                    message:
-                        "failed logged in identity, check username, email or password are incorrect",
-                });
+            return reply.status(401).send({
+                status: "failed",
+                code: 401,
+                codeStatus: "Unauthorized",
+                message:
+                    "failed logged in identity, check username, email or password are incorrect",
             });
         }
 
-        setImmediate(() => {
-            reply.status(200).send({
-                access_token: result?.access.value,
-                refresh_token: result?.access.value,
-            });
+        return reply.status(200).send({
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
         });
-
-        return reply;
     };
 
     registration: RequestHandler<RegisterIdentityBody> = async (request, reply) => {

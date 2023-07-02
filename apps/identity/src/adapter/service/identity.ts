@@ -1,11 +1,11 @@
+import type { FindUniqeIdentityQuery } from "@/types/types";
+import type { Identity } from "@/domain/entity/identity";
 import TokenManagementService from "./token";
 import { PUT_IDENTITY_BODY_SCHEMA } from "../schema/identity";
 import IdentityRepository from "../../application/repository/identity";
 import ResourceAlreadyExistException from "../middleware/error/resource-exists";
 
-import type { FindUniqeIdentityQuery } from "@/types/types";
-import type { Identity } from "@/domain/entity/identity";
-import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth.schema";
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
 import type { PutIdentityBody } from "../schema/identity";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;

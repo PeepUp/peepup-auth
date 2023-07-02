@@ -1,9 +1,34 @@
-import { $ref as auth, authSchema } from "./auth.schema";
-import { refIdentities as identities, identitiesSchema } from "./identity";
+import { buildJsonSchemas } from "fastify-zod";
+import {
+    localStrategy,
+    POST_REGISTER_IDENTITY_BODY_SCHEMA,
+    POST_LOGIN_IDENTITY_BODY_SCHEMA,
+} from "./auth";
+import {
+    GET_IDENTITIES_RESPONSE_SCHEMA,
+    GET_IDENTITY_PARAMS_ID_SCHEMA,
+    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
+    GET_IDENTITY_RESPONSE_SCHEMA,
+    PUT_IDENTITY_BODY_SCHEMA,
+} from "./identity";
+import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "./token";
 
-export const ref = {
-    auth,
-    identities,
-};
+const { schemas: identitySchema, $ref } = buildJsonSchemas({
+    // Auth
+    localStrategy,
+    POST_REGISTER_IDENTITY_BODY_SCHEMA,
+    POST_LOGIN_IDENTITY_BODY_SCHEMA,
 
-export const schemas = [...authSchema, ...identitiesSchema];
+    // Identity
+    GET_IDENTITY_RESPONSE_SCHEMA,
+    GET_IDENTITY_PARAMS_ID_SCHEMA,
+    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
+    PUT_IDENTITY_BODY_SCHEMA,
+    GET_IDENTITIES_RESPONSE_SCHEMA,
+
+    // Token
+    POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA,
+});
+
+export { $ref };
+export const schemas = [...identitySchema];

@@ -1,10 +1,10 @@
+import type { RequestHandler } from "@/types/types";
 import {
     GET_IDENTITY_PARAMS_ID_SCHEMA,
     GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
 } from "../schema/identity";
 
 import type IdentityService from "../service/identity";
-import type { RequestHandler } from "@/types/types";
 import type {
     GetIdentityParamsId,
     IdentityQueryPartial,
@@ -89,6 +89,7 @@ class IdentityHandler {
     getIdentityById: RequestHandler<unknown, unknown, unknown, GetIdentityParamsId> =
         async (request, reply) => {
             const { id } = request.params;
+
             const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
             if (!parseId.success) {

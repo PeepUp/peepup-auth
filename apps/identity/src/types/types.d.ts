@@ -239,12 +239,14 @@ export interface AccountAccessor {
 
 export interface TokenAccessor {
     saveToken(token: Token, identityId: ID): Promise<Readonly<Token>>;
+    WhitelistedToken(token: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     generateToken(token: Token, identityId: ID): Promise<Token>;
     rotateToken(token: Token, identityId: ID): Promise<Token>;
     verifyToken(token: Token, identityId: ID): Promise<Token>;
     revokeToken(token: Token, identityId: ID): Promise<void>;
     revokeAllToken(identityId: ID): Promise<Token[]>;
     getTokens(identityId: ID): Promise<Token[]>;
+    findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     cleanUpExpiredToken(): Promise<void>;
     cleanupRevokedTokens(): Promise<void>;
     cleanUpExpiredAndRevokedTokens(): Promise<void>;
