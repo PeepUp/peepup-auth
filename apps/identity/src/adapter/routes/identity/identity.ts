@@ -1,8 +1,7 @@
-import IdentityHandler from "../../handler/identity";
-import { $ref } from "../../schema";
-
 import type { IdentityRoutes } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
+import IdentityHandler from "../../handler/identity";
+import { $ref } from "../../schema";
 
 export default (identitiesService: IdentityService): { routes: IdentityRoutes } => {
     const identityHandler = new IdentityHandler(identitiesService);

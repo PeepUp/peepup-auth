@@ -1,7 +1,7 @@
+import type { IdentityRoutes } from "@/types/types";
 import TokenHandler from "../../handler/token";
 import TokenManagementService from "../../service/token";
 import { $ref } from "../../schema";
-import type { IdentityRoutes } from "@/types/types";
 
 /**
  * @todo

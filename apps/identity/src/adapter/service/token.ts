@@ -1,11 +1,11 @@
 import { join } from "path";
 import type { JWTPayload, JWTVerifyOptions } from "jose";
+import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
 import { fileUtils } from "../../common";
 import JOSEToken from "../../common/token.util";
 import { cryptoUtils } from "../../common/crypto";
 import { Identity } from "../../domain/entity/identity";
 
-import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
 import { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import {
     audience,

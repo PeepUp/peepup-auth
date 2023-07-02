@@ -1,7 +1,7 @@
+import type { RequestHandler } from "@/types/types";
 import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "../schema/token";
 import TokenManagementService from "../service/token";
 
-import type { RequestHandler } from "@/types/types";
 import type { PostRefreshTokenParams } from "../schema/token";
 
 class TokenHandler {

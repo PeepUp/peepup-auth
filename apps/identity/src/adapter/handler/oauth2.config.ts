@@ -3,7 +3,6 @@ import { join } from "path";
 import type { RequestHandler } from "@/types/types";
 import { fileUtils } from "../../common";
 
-
 /* eslint-disable class-methods-use-this */
 class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
