@@ -1,19 +1,20 @@
 /* eslint-disable */
-
-import cors from "@fastify/cors";
-import fastify from "fastify";
 import http from "http";
-import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
-import type { FastifyInstance } from "fastify";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { authSchema } from "../../adapter/schema/auth.schema";
+import fastify from "fastify";
+import cors from "@fastify/cors";
 import { routes } from "../../adapter";
-import { errorHandler } from "../../adapter/middleware/error.handler";
-import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
-import fastifyConfig from "../../application/config/fastify.config";
-import * as fastifyPlugin from "../../application/plugin";
 import { fileUtils } from "../../common";
 import JOSEToken from "../../common/token.util";
+import { cryptoUtils } from "../../common/crypto";
+import * as fastifyPlugin from "../../application/plugin";
+import { schemas } from "../../adapter/schema";
+import fastifyConfig from "../../application/config/fastify.config";
+import { errorHandler } from "../../adapter/middleware/error.handler";
+import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
+import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+
+import type { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -21,7 +22,7 @@ const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResp
 async function initRoutes(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
-    routes().routes.forEach((route) => {
+    routes(server).routes.forEach((route) => {
         server.withTypeProvider<ZodTypeProvider>().route(route);
     });
 }
@@ -29,7 +30,7 @@ async function initRoutes(
 async function initSchema(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
-    for (const schema of [...authSchema]) {
+    for (const schema of [...schemas]) {
         server.addSchema(schema);
     }
 }
@@ -46,20 +47,30 @@ async function initJWKS() {
     const keysDir = fileUtils.checkDirectory("keys");
     const wellKnownDir = fileUtils.checkDirectory("public/.well-known");
 
-    if (keysDir && JOSEToken.keyId === undefined) {
-        const kid = fileUtils.getFolderNames("keys");
-        new JOSEToken("", kid[0]);
+    if (
+        keysDir &&
+        JOSEToken.rsakeyId === undefined &&
+        JOSEToken.ecsdakeyId === undefined
+    ) {
+        const rsaKeysId = fileUtils.getFolderNames("keys/RSA");
+        const ecsdaKeysId = fileUtils.getFolderNames("keys/ECSDA");
+        new JOSEToken(rsaKeysId[0], ecsdaKeysId[0]);
+    }
+
+    if (!keysDir) {
+        const rsa256KeyId = cryptoUtils.generateRandomSHA256(32);
+        const escdaKeyId = cryptoUtils.generateRandomSHA256(32);
+        console.log("keys directory does not exist");
+        const { privateKey, publicKey } = JOSEToken.generateKeyPair(4096, rsa256KeyId);
+        const { privateKey: escdaPrivateKey, publicKey: escdaPublicKey } =
+            JOSEToken.generateKeyPairECDSA(escdaKeyId);
+        console.log(privateKey, publicKey);
+        console.log(escdaPrivateKey, escdaPublicKey);
+        return;
     }
 
     if (!wellKnownDir) {
         JOSEToken.buildJWKSPublicKey();
-    }
-
-    if (!keysDir) {
-        console.log("keys directory does not exist");
-        const { privateKey, publicKey } = JOSEToken.generateKeyPair();
-        console.log(privateKey, publicKey);
-        return;
     }
 }
 

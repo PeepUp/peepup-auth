@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { buildJsonSchemas } from "fastify-zod";
 
 export const default_api_error_response_schema = z.object({
     error: z.object({
@@ -17,7 +16,3 @@ export const default_api_error_response_schema = z.object({
 export type DEFAULT_API_ERROR_RESPONSE_SCHEMA = z.infer<
     typeof default_api_error_response_schema
 >;
-
-export const { schemas: apiErrorSchema } = buildJsonSchemas({
-    default_api_error_response_schema,
-});

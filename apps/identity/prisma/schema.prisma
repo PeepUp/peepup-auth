@@ -102,13 +102,12 @@ model Provider {
 }
 
 model Token {
-  id             Int              @id @default(autoincrement())
+  jti            String           @id
   value          String           @unique
   tokenTypes     TokenTypes
   header         Json
   payload        Json
   kid            String
-  jti            String
   nbf            Int
   expires_at     Int
   tokenStatus    TokenStatusTypes
@@ -133,8 +132,8 @@ model WhitelistedToken {
   createdAt DateTime @default(now())
 
   // relation fields
-  tokenId Int
-  token   Token @relation(fields: [tokenId], references: [id])
+  tokenId String
+  token   Token  @relation(fields: [tokenId], references: [jti])
 
   identityId String?
   identity   Identity? @relation(fields: [identityId], references: [id])

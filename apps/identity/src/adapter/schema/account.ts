@@ -1,9 +1,5 @@
-import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
-import {
-    get_user_profile_response_schema,
-    user_profile_schema,
-} from "./user-profile.schema";
+import { user_profile_schema } from "./user-profile.schema";
 
 export const account_schema = z.object({
     profile: user_profile_schema.optional().or(z.undefined()),
@@ -205,7 +201,7 @@ export type REGISTRATION_ACCOUNT_REQUEST_BODY_SCHEMA = z.infer<
     typeof registration_account_request_body_schema
 >;
 
-export const { schemas: accountSchema, $ref } = buildJsonSchemas({
+/* export const { schemas: accountSchema, $ref } = buildJsonSchemas({
     account_schema,
     create_account_body_schema,
     get_account_params_id_schema,
@@ -225,3 +221,4 @@ export const { schemas: accountSchema, $ref } = buildJsonSchemas({
     error_unprocessable_content_response_registration_account_schema,
     default_error_response_registration_account_schema,
 });
+ */

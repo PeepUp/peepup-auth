@@ -12,8 +12,6 @@ export async function errorHandler(
     _request: FastifyRequest,
     reply: FastifyReply
 ) {
-    console.log("FUCK THIS SHIT");
-
     if (error.statusCode === 409 && error.name === "ResourceAlreadyExistException") {
         return reply.code(error.statusCode).send({
             status: "failed",
@@ -33,7 +31,6 @@ export async function errorHandler(
     }
 
     if (error.validation) {
-        console.log("ERROR FROM VALIDATION!");
         return reply.code(400).send({
             ok: false,
             code: error.statusCode,
@@ -41,6 +38,17 @@ export async function errorHandler(
             errors: {
                 context: error.validationContext,
                 message: error.message,
+            },
+        });
+    }
+
+    if (error.statusCode === 403 && error.name === "ForbiddenException") {
+        return reply.code(403).send({
+            ok: false,
+            code: 403,
+            codeStatus: "Forbidden",
+            errors: {
+                error: <string>error.message,
             },
         });
     }
@@ -54,11 +62,11 @@ export async function errorHandler(
     }
 
     if (error instanceof Error) {
-        console.dir(error, { depth: 10 });
+        console.dir(error, { depth: Infinity });
 
         return reply.code(500).send({
             code: 500,
-            message: "Internal Server Error",
+            message: error.message,
         });
     }
 

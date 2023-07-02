@@ -1,27 +1,34 @@
-import type { JWTHeaderParameters, JWTPayload } from "jose";
-
 import * as jose from "jose";
 import { JWK } from "jose";
 import { join } from "path";
 import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey, generateKeyPairSync } from "crypto";
+import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
 import { fileUtils } from "./utils";
 
-import config from "../application/config/api.config";
+import type { TokenPayloadIdentity } from "../adapter/service/token";
+import ForbiddenException from "../adapter/middleware/error/forbidden-exception";
 
 class JOSEToken {
-    public static keyId: string;
+    public static rsakeyId: string;
 
-    constructor(public issuer: string, keyId?: string) {
-        JOSEToken.keyId = <string>keyId;
+    public static ecsdakeyId: string;
+
+    public static payload: JWTPayload;
+
+    public static header: JWTHeaderParameters;
+
+    constructor(rsakeyId?: string, ecsdaKeyId?: string) {
+        JOSEToken.rsakeyId = <string>rsakeyId;
+        JOSEToken.ecsdakeyId = <string>ecsdaKeyId;
     }
 
-    public static generateKeyPair(modulusLength = 4096, keyId = this.keyId): KeyPair {
+    public static generateKeyPairECDSA(keyId: string = this.ecsdakeyId): KeyPair {
         try {
-            const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-                modulusLength,
+            const { privateKey, publicKey } = generateKeyPairSync("ec", {
+                namedCurve: "prime256v1",
                 publicKeyEncoding: {
-                    type: "pkcs1",
+                    type: "spki",
                     format: "pem",
                 },
                 privateKeyEncoding: {
@@ -30,8 +37,8 @@ class JOSEToken {
                 },
             });
 
-            const rootDirPath = join(process.cwd(), `/keys`);
-            const dirPath = join(process.cwd(), `/keys/${keyId}`);
+            const rootDirPath = join(process.cwd(), `/keys/ECSDA`);
+            const dirPath = join(process.cwd(), `/keys/ECSDA/${keyId}`);
             const privateKeyPath = join(dirPath, "private.pem.key");
             const publicKeyPath = join(dirPath, "public.pem.key");
 
@@ -59,62 +66,82 @@ class JOSEToken {
         }
     }
 
-    static async signClaims(
-        subject: string,
-        privateKey: string,
-        algorithm: string,
-        issuer: string,
-        payload: object
-    ): Promise<string> {
-        const privateKeyImport = await jose.importPKCS8(privateKey, algorithm);
+    public static generateKeyPair(modulusLength = 4096, keyId = this.rsakeyId): KeyPair {
+        try {
+            const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+                modulusLength,
+                publicKeyEncoding: {
+                    type: "spki",
+                    format: "pem",
+                },
+                privateKeyEncoding: {
+                    type: "pkcs8",
+                    format: "pem",
+                },
+            });
 
-        const jws = await new jose.CompactSign(
-            new TextEncoder().encode(
-                JSON.stringify({
-                    ...payload,
-                    sub: subject,
-                    iss: issuer,
-                })
-            )
-        )
-            .setProtectedHeader({ alg: "RS256" })
-            .sign(privateKeyImport);
+            const rootDirPath = join(process.cwd(), `/keys/RSA`);
+            const dirPath = join(process.cwd(), `/keys/RSA/${keyId}`);
+            const privateKeyPath = join(dirPath, "private.pem.key");
+            const publicKeyPath = join(dirPath, "public.pem.key");
 
-        return jws;
+            if (
+                fileUtils.checkDirectory(rootDirPath) &&
+                fileUtils.countFilesAndDirectories(rootDirPath).directories > 5
+            ) {
+                fileUtils.deleteFolderRecursive(rootDirPath);
+            }
+
+            if (!fileUtils.checkDirectory(dirPath)) {
+                console.log(`📁 created new directory : ${dirPath}`);
+                mkdirSync(dirPath, { recursive: true });
+            }
+
+            console.log(`🔑 Keys generated: ${privateKeyPath} and ${publicKeyPath}`);
+
+            writeFileSync(privateKeyPath, privateKey);
+            writeFileSync(publicKeyPath, publicKey);
+
+            return { privateKey, publicKey };
+        } catch (error) {
+            console.log(error);
+            return { privateKey: "", publicKey: "" };
+        }
     }
 
-    static async createJWToken({
+    public static async createJWToken({
         privateKey,
         header,
         payload,
         exiprationTime,
     }: CreateTokenArgs): Promise<string> {
         try {
+            if (this.header === undefined) {
+                this.header = header;
+            }
+
+            if (this.payload === undefined) {
+                this.payload = {
+                    aud: payload.aud,
+                    sub: payload.sub,
+                    iss: payload.iss,
+                };
+            }
+
             const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
-
-            console.log({
-                privateKey,
-                header,
-                payload,
-                exiprationTime,
-            });
-
             const signature = await new jose.SignJWT({
                 ...payload,
-                aud: "urn:example:client",
             })
                 .setProtectedHeader({
-                    alg: "RS256",
+                    alg: header.alg,
                     typ: "JWT",
-                    kid: !header.kid ? this.keyId : header.kid,
+                    kid: header.kid,
                 })
-                .setAudience("urn:example:client")
+                .setAudience(<string>payload.aud)
                 .setExpirationTime(exiprationTime)
-                .setIssuer(
-                    `urn:server-1:${config.environment.host}:${config.environment.port}`
-                )
-                .setSubject("urn:example:subject")
-                .setIssuedAt()
+                .setIssuer(<string>payload.iss)
+                .setSubject(<string>payload.sub)
+                .setIssuedAt(<number>header.iat)
                 .sign(privateKeyImport);
 
             return signature;
@@ -130,19 +157,41 @@ class JOSEToken {
     static async buildJWKSPublicKey(): Promise<void> {
         try {
             const keysDirPath = join(process.cwd(), `/keys`);
-            const keysCounter = fileUtils.getFolderNames(keysDirPath);
+            const rsakeysCounter = fileUtils.getFolderNames(`${keysDirPath}/RSA`);
+            const ecsdakeysCounter = fileUtils.getFolderNames(`${keysDirPath}/ECSDA`);
+
             const keysList: JWK[] = [];
 
-            if (keysCounter.length === 0) return;
+            if (rsakeysCounter.length === 0) return;
+            if (ecsdakeysCounter.length === 0) return;
 
             await Promise.all(
-                keysCounter.map(async (keyId) => {
+                rsakeysCounter.map(async (keyId) => {
                     const publicKeyPath = join(
                         process.cwd(),
-                        `/keys/${keyId}/public.pem.key`
+                        `/keys/RSA/${keyId}/public.pem.key`
                     );
                     const publicKey = fileUtils.readFile(publicKeyPath, "utf-8");
-                    const jwk = await this.JWKFromPEM(publicKey);
+                    console.log(this.rsakeyId);
+                    const jwk = await this.JWKFromPEM(publicKey, this.rsakeyId, "RS256");
+                    keysList.push(jwk);
+                })
+            );
+
+            await Promise.all(
+                ecsdakeysCounter.map(async (keyId) => {
+                    const publicKeyPath = join(
+                        process.cwd(),
+                        `/keys/ECSDA/${keyId}/public.pem.key`
+                    );
+                    const publicKey = fileUtils.readFile(publicKeyPath, "utf-8");
+                    console.log(this.ecsdakeyId);
+                    const jwk = await this.JWKFromPEM(
+                        publicKey,
+                        this.ecsdakeyId,
+                        "ES256"
+                    );
+
                     keysList.push(jwk);
                 })
             );
@@ -162,111 +211,36 @@ class JOSEToken {
         }
     }
 
-    static async JWKFromPEM(pemKey: string): Promise<JWK> {
+    static async JWKFromPEM(pemKey: string, keyId: string, alg: string): Promise<JWK> {
         const jwk = await jose.exportJWK(createPublicKey({ key: pemKey, format: "pem" }));
+
         return {
             use: "sig",
-            alg: "RS256",
-            kid: this.keyId,
+            alg,
+            kid: keyId,
             ...jwk,
         };
     }
 
-    static async createToken({
-        privateKey,
-        header,
-        payload,
-        exiprationTime,
-    }: CreateTokenArgs): Promise<string> {
-        const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
-
-        /*  const encryptedPayload = await new jose.CompactEncrypt(
-         new TextEncoder().encode(JSON.stringify(payload))
-      )
-         .setProtectedHeader({
-            alg: "RSA-OAEP-256",
-            enc: "A256GCM",
-         })
-         .encrypt(publicKeyImport); */
-
-        const token = await new jose.SignJWT(payload)
-            .setProtectedHeader({ alg: "RS256" })
-            .setIssuedAt()
-            .setIssuer(
-                `urn:server-1:${config.environment.host}:${config.environment.port}`
-            )
-            .setAudience("urn:client-1")
-            .setSubject("urn:example:subject")
-            .setExpirationTime(exiprationTime)
-            .sign(privateKeyImport);
-
-        return token;
+    public static decodeJwt(token: string): JWTPayload {
+        return jose.decodeJwt(token);
     }
 
-    public static async verifyAndValidateJWT(
-        jwtToken: string,
+    public static async verifyJWT(
+        token: string,
         publicKey: string,
-        options?: jose.JWTVerifyOptions
+        algorithm: string,
+        options: JWTVerifyOptions,
+        identity: TokenPayloadIdentity & { jti: string; kid: string }
     ): Promise<boolean> {
         try {
-            /* const JWKS = jose.createRemoteJWKSet(
-                new URL("http://127.0.0.1:4334/oauth2/v1/certs")
-            ); */
-
-            const publicKeyImport = await jose.importSPKI(publicKey, "RS256");
-
-            const { payload, protectedHeader } = await jose.jwtVerify(
-                jwtToken,
-                publicKeyImport,
-                options
-            );
-
-            const { iat, exp, nbf, aud, iss, jti, sub } = payload;
-
-            console.log(iat, exp, nbf, aud, iss, jti, sub);
-            console.log(payload, protectedHeader);
-
-            // Validate 'not before' and 'expiration' claims
-            const currentTime = Math.floor(Date.now() / 1000);
-            if (nbf && currentTime < nbf) {
-                console.log("Token is not yet valid");
-                return false;
-            }
-            if (exp && currentTime >= exp) {
-                console.log("Token has expired");
-                return false;
-            }
-
-            // Additional validation logic for other claims
-
-            return true;
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error("Error occurred during JWT verification:", error);
-                throw new Error(error.message);
-            }
-            return false;
-        }
-    }
-
-    static async verificationToken({
-        publicKey,
-        algorithm,
-        token,
-        options,
-    }: VerifyTokenArgs): Promise<
-        | {
-              payload: JWTPayload;
-              header: JWTHeaderParameters;
-          }
-        | undefined
-    > {
-        if (!publicKey || !algorithm || !token) {
-            throw new Error("Invalid input parameters");
-        }
-
-        try {
             const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
+
+            console.log({ identity });
+
+            if (!publicKeyImport) {
+                throw new Error("Internal server error: Invalid public key!");
+            }
 
             const { payload, protectedHeader } = await jose.jwtVerify(
                 token,
@@ -275,26 +249,194 @@ class JOSEToken {
             );
 
             if (!payload || !protectedHeader) {
-                throw new Error("Invalid token: Missing payload or header");
+                console.log("Payload or protected header is missing");
+                throw new ForbiddenException(
+                    "Invalid token: or Payload or protected header is missing"
+                );
             }
 
-            if (payload.expiresAt && <number>payload.exp < Date.now() / 1000) {
-                throw new Error("Invalid token: Token has expired");
+            const { iat, exp, nbf, aud, iss, jti, sub } = payload;
+
+            console.log(iat, exp, nbf, aud, iss, jti, sub);
+            console.log({ payload, protectedHeader });
+
+            const isValidate = this.validateTokenPayload(
+                payload,
+                options,
+                algorithm,
+                identity,
+                protectedHeader
+            );
+
+            if (!isValidate) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
             }
 
-            return { payload, header: protectedHeader };
+            if (payload.id && payload.id !== identity.id) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
+            }
+
+            if (payload.resource && payload.resource !== identity.resource) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
+            }
+
+            return true;
         } catch (error) {
-            if (error instanceof Error) {
-                console.error(error);
-                throw new Error("Token verification failed");
+            console.dir({ error }, { depth: Infinity });
+            if (error instanceof jose.errors.JWSInvalid) {
+                throw new ForbiddenException("Invalid token: Invalid signature");
             }
-            return {
-                payload: {},
-                header: {
-                    alg: "",
-                },
-            };
+
+            if (error instanceof jose.errors.JOSEError) {
+                throw new ForbiddenException(`Invalid token: ${error.message}`);
+            }
+
+            if (error instanceof Error) {
+                console.error("Error occurred during JWT verification:", error);
+                throw new Error(error.message);
+            }
+
+            return false;
         }
+    }
+
+    public static async verifyJWTByJWKS(
+        token: string,
+        publicKey: string,
+        algorithm: string,
+        options: JWTVerifyOptions,
+        identity: TokenPayloadIdentity & { jti: string; kid: string }
+    ): Promise<boolean> {
+        try {
+            const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
+            const jwks = jose.createRemoteJWKSet(
+                new URL("http://127.0.0.1:4334/oauth2/v1/jwks/keys")
+            );
+
+            if (!publicKeyImport) {
+                throw new Error("Internal server error: Invalid public key!");
+            }
+
+            const { payload, protectedHeader } = await jose.jwtVerify(
+                token,
+                jwks,
+                options
+            );
+
+            if (!payload || !protectedHeader) {
+                console.log("Payload or protected header is missing");
+                throw new ForbiddenException(
+                    "Invalid token: or Payload or protected header is missing"
+                );
+            }
+
+            const isValidate = this.validateTokenPayload(
+                payload,
+                options,
+                algorithm,
+                identity,
+                protectedHeader
+            );
+
+            if (!isValidate) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
+            }
+
+            if (payload.id && payload.id !== identity.id) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
+            }
+
+            if (payload.resource && payload.resource !== identity.resource) {
+                throw new ForbiddenException("Invalid token: Invalid identity token");
+            }
+
+            return true;
+        } catch (error) {
+            console.dir({ error }, { depth: Infinity });
+
+            if (error instanceof jose.errors.JWSInvalid) {
+                throw new ForbiddenException("Invalid token: Invalid signature");
+            }
+
+            if (error instanceof jose.errors.JOSEError) {
+                throw new ForbiddenException(`Invalid token: ${error.message}`);
+            }
+
+            if (error instanceof Error) {
+                console.error("Error occurred during JWT verification:", error);
+                throw new Error(error.message);
+            }
+
+            return false;
+        }
+    }
+
+    public static validateTokenPayload(
+        payload: JWTPayload,
+        options: JWTVerifyOptions,
+        algorithm: string,
+        identity: TokenPayloadIdentity & { jti: string; kid: string },
+        protectedHeader: JWTHeaderParameters
+    ): boolean {
+        if (payload.jti && payload.jti !== identity.jti) {
+            throw new ForbiddenException("Invalid token: Invalid jti token");
+        }
+
+        if (protectedHeader.kid && protectedHeader.kid !== identity.kid) {
+            throw new ForbiddenException("Invalid token: Invalid kid token");
+        }
+
+        // Perform additional payload checks/validation
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+
+        // Check issued at time (iat)
+        if (payload.iat && payload.iat > currentTimestamp) {
+            throw new ForbiddenException("Invalid token: Issued in the future");
+        }
+
+        if (
+            protectedHeader.alg &&
+            options.algorithms &&
+            protectedHeader.alg !== algorithm
+        ) {
+            console.log({ a: protectedHeader.alg, b: options.algorithms });
+            throw new ForbiddenException("Invalid token: Invalid algorithm");
+        }
+
+        if (protectedHeader.typ && protectedHeader.typ !== options.typ) {
+            throw new ForbiddenException("Invalid token: Invalid type");
+        }
+
+        // Check expiration time (exp)
+        if (payload.exp && payload.exp <= currentTimestamp) {
+            throw new ForbiddenException("Invalid token: Expired");
+        }
+
+        // Check not before (nbf)
+        if (payload.nbf && payload.nbf > currentTimestamp) {
+            throw new ForbiddenException("Invalid token: Not yet valid");
+        }
+
+        // Check audience (aud)
+        if (payload.aud && payload.aud !== options.audience) {
+            throw new ForbiddenException("Invalid token: Invalid audience");
+        }
+
+        // Check issuer (iss)
+        if (payload.iss && payload.iss !== options.issuer) {
+            throw new ForbiddenException("Invalid token: Invalid issuer");
+        }
+
+        // Check subject (sub)
+        if (payload.sub && payload.sub !== options.subject) {
+            throw new ForbiddenException("Invalid token: Missing subject");
+        }
+
+        if (payload.sid && payload.sid !== "active") {
+            throw new ForbiddenException("Invalid token: Expired");
+        }
+
+        return true;
     }
 }
 

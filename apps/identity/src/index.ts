@@ -8,7 +8,6 @@ async function main() {
         host: <string>server.config.environment.host,
     });
 
-    // eslint-disable-next-line no-console
     console.log(`🐢 Server listening on ${app}`);
 }
 

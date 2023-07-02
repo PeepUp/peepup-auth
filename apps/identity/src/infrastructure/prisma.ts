@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { PrismaClient } from "@prisma/client";
-import { passwordUtils } from "../common";
-
 import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
+import { passwordUtils } from "../common";
 
 const prisma = new PrismaClient();
 
@@ -10,10 +9,10 @@ const prisma = new PrismaClient();
  * @todo
  *  ☐ encapsulte custom method into prisma model
  * @figure
- *  🤔 rather the password
+ *  🤔 figure out how to extend prisma model with custom methods, so we can used by modules declared in the domain layer
  *  🤔 idk why readonly in string with method replace*() dont respect readonly
+ *
  */
-
 prisma.$extends({
     model: {
         identity: {
@@ -27,7 +26,6 @@ prisma.$extends({
             },
 
             async verifyPassword(data: VerifyHashPasswordUtils) {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 const { _, __ } = data;
                 const verified = await passwordUtils.verify({
                     _,

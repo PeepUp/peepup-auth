@@ -1,3 +1,7 @@
+import type { FastifyInstance } from "fastify";
+import type { IncomingMessage, Server, ServerResponse } from "http";
+import type { IdentityRoutes } from "@/types/types";
+
 import dependencies from "../../infrastructure/diConfig";
 import localIdentityRoutes from "./auth/local.identity";
 import jwksRoutes from "./certs/jwks";
@@ -6,8 +10,8 @@ import checkhealthRoutes from "./metadata/checkhealth";
 import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
-
-import type { IdentityRoutes } from "@/types/types";
+import jwt from "../middleware/authentication/jwt";
+import tokenRoutes from "./token/token";
 
 /**
  *
@@ -17,10 +21,17 @@ import type { IdentityRoutes } from "@/types/types";
  *  ☐ [SOON] may be i need to add some prefix to routes
  *
  */
-export function routes(): { routes: IdentityRoutes } {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function routes(
+    server: FastifyInstance<Server, IncomingMessage, ServerResponse>
+): { routes: IdentityRoutes } {
     const { identityService, authenticationService, tokenManagementService } =
         dependencies;
+
+    server.addHook("onRequest", (request, reply) =>
+        jwt(request, reply, tokenManagementService)
+    );
+
+    const token = tokenRoutes(tokenManagementService).routes;
     const localStrategy = localIdentityRoutes(authenticationService).routes;
     const identity = identityRoutes(identityService).routes;
     const checkhealth = checkhealthRoutes().routes;
@@ -33,6 +44,7 @@ export function routes(): { routes: IdentityRoutes } {
         routes: [
             ...main,
             ...jwks,
+            ...token,
             ...openapi,
             ...checkhealth,
             ...version,

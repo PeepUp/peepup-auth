@@ -1,4 +1,3 @@
-import { buildJsonSchemas } from "fastify-zod";
 import { z } from "zod";
 
 export const password = z.string().min(8).max(72);
@@ -47,11 +46,3 @@ export type GetIdentityResponse = z.infer<typeof GET_IDENTITY_RESPONSE_SCHEMA>;
 export type GetIdentitiesResponse = z.infer<typeof GET_IDENTITY_RESPONSE_SCHEMA>;
 export type IdentityQueryPartial = z.infer<typeof GET_IDENTITY_PARTIAL_QUERY_SCHEMA>;
 export type PutIdentityBody = z.infer<typeof PUT_IDENTITY_BODY_SCHEMA>;
-
-export const { schemas: identitiesSchema, $ref: refIdentities } = buildJsonSchemas({
-    // Identities Management Schemas
-    // PUT_IDENTITY_BODY_SCHEMA,
-    // GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
-    // GET_IDENTITY_RESPONSE_SCHEMA,
-    // // Identities Management Schemas REST
-});
