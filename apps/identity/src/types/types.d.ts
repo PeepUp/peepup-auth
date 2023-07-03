@@ -11,6 +11,9 @@ export interface Serializable {
     readonly id?: ID;
 }
 
+export type WildcardParams = {
+    "*": string;
+};
 export type RequestHandler<
     Headers = unknown,
     RawQuery = unknown,
@@ -154,7 +157,7 @@ export interface DataSourceSQLGeneric<T> {
     find(id: ID): Promise<Readonly<T> | null>;
     findMany(): Promise<Readonly<T>[] | null>;
     findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
-    update(id: ID, data: T): Promise<T>;
+    update(id: ID, data: T): Promise<Readonly<T> | null>;
     delete(id: ID): Promise<void>;
     query(query: Partial<T>): Promise<T | T[] | null>;
 }
@@ -164,8 +167,10 @@ export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token> {
     findUniqueInWhiteListed(
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null>;
+    revoke(jti: ID): Promise<Readonly<T> | null>;
     find(identityId: ID): Promise<Readonly<Token> | null>;
     findMany(identityId: ID, tokenValue?: string): Promise<Readonly<T>[] | null>;
+    getAllWhiteListedToken(identityId): Promise<Readonly<Token>[] | null>;
 }
 
 export interface RoleContract extends EntityContract {
@@ -238,12 +243,20 @@ export interface AccountAccessor {
 }
 
 export interface TokenAccessor {
+    updateWhiteListedToken(
+        token: Token,
+        newToken: Token
+    ): Promise<Readonly<Token> | null>;
+
+    revokeToken(jti: ID): Promise<Readonly<Token> | null>;
+    deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void>;
+    getAllWhiteListedToken(identityId: ID): Promise<Readonly<Token>[] | null>;
     saveToken(token: Token, identityId: ID): Promise<Readonly<Token>>;
     WhitelistedToken(token: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     generateToken(token: Token, identityId: ID): Promise<Token>;
     rotateToken(token: Token, identityId: ID): Promise<Token>;
     verifyToken(token: Token, identityId: ID): Promise<Token>;
-    revokeToken(token: Token, identityId: ID): Promise<void>;
+
     revokeAllToken(identityId: ID): Promise<Token[]>;
     getTokens(identityId: ID): Promise<Token[]>;
     findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null>;

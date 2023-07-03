@@ -10,10 +10,11 @@ import type AuthenticationService from "../service/authentication";
 class AuthLocalStrategyHandler {
     constructor(private readonly authService: AuthenticationService) {}
 
-    login: RequestHandler<{ Body: LoginIdentityBody }> = async (request, reply) => {
-        const { traits, password, password_identifier, method } = <LoginIdentityBody>(
-            request.body
-        );
+    login: RequestHandler<unknown, unknown, LoginIdentityBody> = async (
+        request,
+        reply
+    ) => {
+        const { traits, password, password_identifier, method } = request.body;
 
         const result = await this.authService.login({
             traits,
@@ -38,8 +39,11 @@ class AuthLocalStrategyHandler {
         });
     };
 
-    registration: RequestHandler<RegisterIdentityBody> = async (request, reply) => {
-        const { traits, password, method } = <RegisterIdentityBody>request.body;
+    registration: RequestHandler<unknown, unknown, RegisterIdentityBody> = async (
+        request,
+        reply
+    ) => {
+        const { traits, password, method } = request.body;
 
         await this.authService.registration({
             password,
@@ -47,16 +51,12 @@ class AuthLocalStrategyHandler {
             method,
         });
 
-        setImmediate(() => {
-            reply.status(201).send({
-                status: "ok",
-                code: 201,
-                codeStatus: "created",
-                message: "successfull creating identity",
-            });
+        return reply.status(201).send({
+            status: "ok",
+            code: 201,
+            codeStatus: "created",
+            message: "successfull creating identity",
         });
-
-        return reply;
     };
 }
 
