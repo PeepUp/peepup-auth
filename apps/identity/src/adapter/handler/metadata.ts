@@ -2,7 +2,6 @@ import type { RequestHandler } from "@/types/types";
 import openapi from "../../application/config/openapi.json";
 import { clientUrl } from "../../common/constant";
 
-
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {
     alive: RequestHandler = async (_, reply) =>
@@ -10,7 +9,8 @@ class MetadataHandler {
             status: "ok",
         });
 
-    docs: RequestHandler = async (_, reply) => reply.code(200).send({
+    docs: RequestHandler = async (_, reply) =>
+        reply.code(200).send({
             docs: `${clientUrl}/docs`,
             openapi: `${clientUrl}/openapi`,
         });

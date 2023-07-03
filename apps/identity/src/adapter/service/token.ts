@@ -15,7 +15,6 @@ import {
 } from "../../common/constant";
 import ForbiddenException from "../middleware/error/forbidden-exception";
 
-
 import type { PostRefreshTokenParams } from "../schema/token";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import type { Identity } from "../../domain/entity/identity";
