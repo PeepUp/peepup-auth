@@ -14,6 +14,42 @@ export type QueryWhitelistedTokenArgs = Prisma.WhitelistedTokenWhereUniqueInput;
 class TokenStoreAdapter implements TokenDataSourceAdapter {
     constructor(private readonly dataSource: PrismaClient) {}
 
+    async update(id: ID, data: Token): Promise<Readonly<Token> | null> {
+        const result = await this.dataSource.token.update({
+            where: {
+                jti: <string>id,
+            },
+            data: {
+                value: data.value,
+                tokenTypes: data.tokenTypes,
+                header: <Prisma.JsonObject>data.header,
+                jti: data.jti,
+                payload: <Prisma.JsonObject>data.payload,
+                kid: data.kid,
+                nbf: data.nbf,
+                tokenStatus: data.tokenStatus,
+                createdAt: new Date(data.createdAt),
+                expirationTime: data.expirationTime,
+                expires_at: data.expires_at,
+            },
+        });
+
+        return result ?? null;
+    }
+
+    async revoke(jti: ID): Promise<Readonly<Token> | null> {
+        const result = await this.dataSource.token.update({
+            where: {
+                jti: <string>jti,
+            },
+            data: {
+                tokenStatus: "revoked",
+            },
+        });
+
+        return result ?? null;
+    }
+
     async query(query: QueryTokenArgs): Promise<Token[]> {
         const result: Readonly<Token>[] = await this.dataSource.token.findMany({
             where: query,
@@ -28,6 +64,21 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         });
 
         return result;
+    }
+
+    async getAllWhiteListedToken(identityId: ID): Promise<Readonly<Token>[] | null> {
+        const results = await this.dataSource.whitelistedToken.findMany({
+            where: {
+                identityId: <string>identityId,
+            },
+            include: {
+                token: true,
+            },
+        });
+
+        const tokens: Readonly<Token>[] | null =
+            results.length > 0 ? results.map((result) => <Token>result.token) : null;
+        return tokens ?? null;
     }
 
     async findUniqueInWhiteListed(
@@ -53,7 +104,6 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     }
 
     async create<R>(data: Token, identity: R): Promise<Readonly<Token>> {
-        console.log({ data, identity });
         const result: Readonly<Token> = await this.dataSource.token.create({
             data: {
                 value: data.value,
@@ -115,34 +165,17 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         return result;
     }
 
-    async update(jti: ID, token: Token): Promise<Token> {
-        const result: Readonly<Token> = await this.dataSource.token.update({
-            where: {
-                jti: <string>jti,
-            },
-            data: {
-                value: token.value,
-                tokenTypes: token.tokenTypes,
-                header: <Prisma.JsonObject>token.header,
-                jti: token.jti,
-                payload: <Prisma.JsonObject>token.payload,
-                kid: token.kid,
-                nbf: token.nbf,
-                tokenStatus: token.tokenStatus,
-                createdAt: new Date(token.createdAt),
-                expirationTime: token.expirationTime,
-                expires_at: token.expires_at,
-            },
-        });
-
-        return result;
-    }
-
     async delete(jti: ID): Promise<void> {
         await this.dataSource.token.delete({
             where: {
                 jti: <string>jti,
             },
+        });
+    }
+
+    async deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void> {
+        await this.dataSource.whitelistedToken.delete({
+            where: query,
         });
     }
 }

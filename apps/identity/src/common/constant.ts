@@ -1,5 +1,7 @@
 import config from "../application/config/api.config";
 
+export const jwksPath = "/.well-known/jwks.json";
+export const clientUrl = process.env.CLIENT_URL || "http://127.0.0.1:3000";
 export const issuer =
     (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
     ("urn:server-1:http://127.0.0.1:4334" as const);

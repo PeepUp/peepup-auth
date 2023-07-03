@@ -1,5 +1,6 @@
 import type { RequestHandler } from "@/types/types";
 import openapi from "../../application/config/openapi.json";
+import { clientUrl } from "../../common/constant";
 
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {
@@ -8,14 +9,11 @@ class MetadataHandler {
             status: "ok",
         });
 
-    docs: RequestHandler = async (_, reply) => {
-        const clientUrl = process.env.CLIENT_URL || "http://127.0.0.1:3000";
-
-        return reply.code(200).send({
+    docs: RequestHandler = async (_, reply) =>
+        reply.code(200).send({
             docs: `${clientUrl}/docs`,
             openapi: `${clientUrl}/openapi`,
         });
-    };
 
     ready: RequestHandler = async (_, reply) =>
         reply.code(200).send({

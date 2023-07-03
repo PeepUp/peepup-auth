@@ -4,9 +4,6 @@ import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/t
 import { fileUtils } from "../../common";
 import JOSEToken from "../../common/token.util";
 import { cryptoUtils } from "../../common/crypto";
-import { Identity } from "../../domain/entity/identity";
-
-import { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import {
     audience,
     clientId,
@@ -17,7 +14,10 @@ import {
     requiredClaims,
 } from "../../common/constant";
 import ForbiddenException from "../middleware/error/forbidden-exception";
-import { PostRefreshTokenParams } from "../schema/token";
+
+import type { PostRefreshTokenParams } from "../schema/token";
+import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
+import type { Identity } from "../../domain/entity/identity";
 
 export type TokenPayloadIdentity = Pick<Identity, "email" | "id"> &
     Pick<AccessInfo, "resource">;
@@ -93,6 +93,21 @@ export default class TokenManagementService {
             });
         }
 
+        if (!createdToken) {
+            throw new Error("Error: cannot create token");
+        }
+
+        const existingToken = await this.tokenRepository.WhitelistedToken({
+            tokenId_identityId: {
+                tokenId: payload.jti,
+                identityId: identity.id,
+            },
+        });
+
+        if (existingToken) {
+            throw new Error("Error: token already exists");
+        }
+
         const signingToken: Token = {
             nbf: <number>payload.nbf,
             kid: header.kid,
@@ -108,10 +123,7 @@ export default class TokenManagementService {
             expirationTime: new Date(expirationTime * 1000),
         };
 
-        const result = await this.tokenRepository.saveToken(
-            signingToken,
-            <ID>identity.id
-        );
+        const result = await this.addTokenToWhiteList(signingToken, <ID>identity.id);
 
         if (!result) {
             throw new Error("Error: cannot save token");
@@ -120,9 +132,37 @@ export default class TokenManagementService {
         return result;
     }
 
+    async addTokenToWhiteList(
+        token: Token,
+        identityId: ID
+    ): Promise<Readonly<Token> | null> {
+        const data = await this.tokenRepository.saveToken(token, identityId);
+        return data;
+    }
+
+    async allWhiteListedToken(identityId: ID): Promise<Readonly<Token[]> | null> {
+        const data = await this.tokenRepository.getAllWhiteListedToken(identityId);
+
+        if (!data) {
+            throw new ForbiddenException("Invalid token: token is expired or invalid");
+        }
+
+        return data;
+    }
+
+    async revokeToken(jti: ID): Promise<boolean> {
+        const result = await this.tokenRepository.revokeToken(jti);
+
+        if (!result) {
+            throw new Error("Error: cannot revoke token");
+        }
+
+        return result !== null;
+    }
+
     async generateTokenFromRefreshToken(
         params: PostRefreshTokenParams
-    ): Promise<Readonly<Token>> {
+    ): Promise<Readonly<{ access_token: string }>> {
         const { refresh_token: token } = params;
         const decode = JOSEToken.decodeJwt(token);
 
@@ -130,35 +170,70 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const verifyToken = await this.verifyToken(token, {
+        // verify token using decode jti and id
+        await this.verifyToken(token, {
             tokenId_identityId: {
                 tokenId: <string>decode.jti,
                 identityId: <string>decode.id,
             },
         });
 
-        if (!verifyToken) {
+        // check token in database
+        const tokenInDatabase = await this.allWhiteListedToken(<string>decode.id);
+
+        if (!tokenInDatabase) {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const data = await this.tokenRepository.WhitelistedToken({
+        const data = tokenInDatabase.filter((t: Token) => t.tokenTypes === "access")[0];
+
+        await this.revokeToken(data.jti);
+
+        await this.deleteTokenInWhiteListed({
             tokenId_identityId: {
-                tokenId: <string>decode.jti,
-                identityId: <string>decode.id,
+                tokenId: <string>data.jti,
+                identityId: <string>data.identityId,
             },
         });
 
-        if (!data) {
+        const { tokenStatus, payload, header } = data;
+
+        if (tokenStatus !== "active") {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        throw new Error("Method not implemented.");
+        const jsonPayload: TokenPayloadIdentity = await JSON.parse(<string>payload);
+        const jsonHeader = await JSON.parse(<string>header);
+
+        const identity: TokenPayloadIdentity = {
+            email: jsonPayload.email,
+            id: jsonPayload.id,
+            resource: jsonPayload.resource,
+        };
+
+        const accessToken = await this.generateToken({
+            identity,
+            tokenType: "access",
+            algorithm: jsonHeader.alg,
+            expiresIn: Math.floor(Date.now() / 1000) + 24 * 60 * 60 * 1000,
+        });
+
+        if (!accessToken) {
+            throw new Error("Error: cannot generate access token");
+        }
+
+        return { access_token: accessToken.value };
+    }
+
+    async deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void> {
+        await this.tokenRepository.deleteTokenInWhiteListed(query);
     }
 
     async verifyToken(
         token: string,
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
+        const { rsakeyId } = JOSEToken;
         const data = await this.tokenRepository.WhitelistedToken(query);
 
         if (!data) {
@@ -166,8 +241,6 @@ export default class TokenManagementService {
         }
 
         const { payload, header } = data;
-        const { rsakeyId } = JOSEToken;
-
         const jsonPayload: TokenPayloadIdentity = await JSON.parse(<string>payload);
         const jsonHeader = await JSON.parse(<string>header);
 
@@ -175,7 +248,7 @@ export default class TokenManagementService {
             process.cwd(),
             "keys",
             jsonHeader.alg === "RS256" ? "RSA" : "ECSDA",
-            rsakeyId,
+            jsonHeader.kid === rsakeyId ? rsakeyId : jsonHeader.kid,
             publicKeyFile
         );
 

@@ -9,6 +9,10 @@ import type {
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
 
+    async revokeToken(jti: ID): Promise<Readonly<Token> | null> {
+        return await this.tokenDataSource.revoke(jti);
+    }
+
     async revokeAllToken(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");
     }
@@ -25,6 +29,21 @@ export class TokenRepository implements TokenAccessor {
         token: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
         return this.tokenDataSource.findUniqueInWhiteListed(token);
+    }
+
+    async getAllWhiteListedToken(identityId: ID): Promise<Readonly<Token>[] | null> {
+        return this.tokenDataSource.getAllWhiteListedToken(identityId);
+    }
+
+    async deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void> {
+        return await this.tokenDataSource.deleteTokenInWhiteListed(query);
+    }
+
+    updateWhiteListedToken(
+        token: Token,
+        newToken: Token
+    ): Promise<Readonly<Token> | null> {
+        throw new Error("Method not implemented.");
     }
 
     // async findTokens(identityId: ID): Promise<Readonly<Tokens>[] | null> {
@@ -56,10 +75,10 @@ export class TokenRepository implements TokenAccessor {
         return this.tokenDataSource.create<ID>(token, identityId);
     }
 
-    async revokeToken(token: Token, identityId: ID): Promise<void> {
-        await this.tokenDataSource.update(identityId, token);
+    /*     async revokeToken(token: Token, identityId: ID): Promise<void> {
+        await this.tokenDataSource.update(token, token);
         throw new Error("Method not implemented.");
-    }
+    } */
 
     async getTokens(identityId: ID): Promise<Token[]> {
         throw new Error("Method not implemented.");

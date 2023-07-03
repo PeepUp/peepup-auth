@@ -24,15 +24,12 @@ class IdentityHandler {
     identities: RequestHandler<unknown, unknown, unknown, unknown, IdentityQueryPartial> =
         async (request, reply) => {
             const { email, username } = request.query;
-
             const hasKeys = Object.values(request.query).length > 0;
 
             if (hasKeys) {
                 const parseQuery = GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(
                     request.query
                 );
-                console.log("email", email);
-                console.log("username", username);
 
                 if (!parseQuery.success) {
                     return reply.code(400).send({
@@ -50,18 +47,16 @@ class IdentityHandler {
                 });
 
                 if (data === null || Object.entries(data).length <= 0) {
-                    reply.code(200).send({
+                    return reply.code(200).send({
                         code: 404,
                         message: "data identity record not found",
                         data: [],
                     });
                 }
 
-                reply.code(200).send({
+                return reply.code(200).send({
                     data,
                 });
-
-                return reply;
             }
 
             const data = await this.identitiesService.getIdentities();
@@ -72,50 +67,43 @@ class IdentityHandler {
                  *  ☐ make this as error no data found
                  *
                  */
-                reply.code(200).send({
+                return reply.code(200).send({
                     code: 404,
                     message: "data identity record not found",
                     data,
                 });
             }
 
-            reply.code(200).send({
+            return reply.code(200).send({
                 data,
             });
-
-            return reply;
         };
 
     getIdentityById: RequestHandler<unknown, unknown, unknown, GetIdentityParamsId> =
         async (request, reply) => {
             const { id } = request.params;
-
             const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
             if (!parseId.success) {
-                reply.code(400).send({
+                return reply.code(400).send({
                     code: 400,
                     message: "bad request",
                 });
-
-                return reply;
             }
 
             const data = await this.identitiesService.getIdentityById(id);
 
             if (!data) {
-                reply.code(200).send({
+                return reply.code(200).send({
                     code: 404,
                     message: "data identity record not found",
                     data: [],
                 });
             }
 
-            reply.code(200).send({
+            return reply.code(200).send({
                 data,
             });
-
-            return reply;
         };
 
     updateIdentityById: RequestHandler<
@@ -129,12 +117,10 @@ class IdentityHandler {
         const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
         if (!parseId.success) {
-            reply.code(400).send({
+            return reply.code(400).send({
                 code: 400,
                 message: "bad request",
             });
-
-            return reply;
         }
 
         const data = await this.identitiesService.updateIdentityById(id, {
@@ -143,21 +129,17 @@ class IdentityHandler {
             avatar,
         });
 
-        console.log({ data });
-
         if (!data) {
-            reply.code(400).send({
+            return reply.code(400).send({
                 code: 400,
                 status: "bad request",
                 message: "cannot update identity record",
             });
         }
 
-        reply.code(200).send({
+        return reply.code(200).send({
             data,
         });
-
-        return reply;
     };
 
     deleteIdentityById: RequestHandler<{ Params: GetIdentityParamsId }> = async (
