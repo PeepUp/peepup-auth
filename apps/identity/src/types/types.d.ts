@@ -20,7 +20,7 @@ export type RequestHandler<
     Body = unknown,
     Params = unknown,
     Querystring = unknown,
-    Url = unknown
+    Url = unknown,
 > = (
     request: FastifyRequest<{
         Headers: Headers;

@@ -2,9 +2,9 @@
 
 import { existsSync } from "fs";
 import { join } from "path";
+import type { RequestHandler } from "@/types/types";
 import { fileUtils } from "../../common/utils/utils";
 
-import type { RequestHandler } from "@/types/types";
 
 class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
