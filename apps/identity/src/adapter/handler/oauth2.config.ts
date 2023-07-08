@@ -5,7 +5,6 @@ import { join } from "path";
 import type { RequestHandler } from "@/types/types";
 import { fileUtils } from "../../common/utils/utils";
 
-
 class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
         const jwksPath = join(process.cwd(), "public/.well-known/jwks.json");

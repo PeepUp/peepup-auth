@@ -2,7 +2,6 @@ import type { RequestHandler } from "@/types/types";
 import { clientUrl } from "../../common/constant";
 import openapi from "../../application/config/openapi.json";
 
-
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {
     alive: RequestHandler = async (_, reply) =>
