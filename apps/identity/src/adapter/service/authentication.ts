@@ -1,7 +1,7 @@
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
 
-import { passwordUtils } from "../../common";
+import { passwordUtils } from "../../common/utils/utils";
 import BadCredentialsException from "../middleware/error/bad-credential-exception";
 import ResourceAlreadyExistException from "../middleware/error/resource-exists";
 

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "@/types/types";
-import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
-import type AuthenticationService from "../service/authentication";
+import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
+import type AuthenticationService from "@/adapter/service/authentication";
 
 /**
  * @todo:

@@ -2,16 +2,16 @@ import type { FastifyInstance } from "fastify";
 import type { IncomingMessage, Server, ServerResponse } from "http";
 import type { IdentityRoutes } from "@/types/types";
 
-import dependencies from "../../infrastructure/diConfig";
-import localIdentityRoutes from "./auth/local.identity";
 import jwksRoutes from "./certs/jwks";
-import identityRoutes from "./identity/identity";
-import checkhealthRoutes from "./metadata/checkhealth";
+import tokenRoutes from "./token/token";
 import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
+import identityRoutes from "./identity/identity";
 import jwt from "../middleware/authentication/jwt";
-import tokenRoutes from "./token/token";
+import checkhealthRoutes from "./metadata/checkhealth";
+import localIdentityRoutes from "./auth/local.identity";
+import dependencies from "../../infrastructure/diConfig";
 
 /**
  *

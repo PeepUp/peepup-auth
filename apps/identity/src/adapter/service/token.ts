@@ -1,9 +1,9 @@
 import { join } from "path";
-import type { JWTPayload, JWTVerifyOptions } from "jose";
-import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
-import { fileUtils } from "../../common";
-import JOSEToken from "../../common/token.util";
-import { cryptoUtils } from "../../common/crypto";
+
+import { fileUtils } from "../../common/utils/utils";
+import JOSEToken from "../../common/utils/token.util";
+import { cryptoUtils } from "../../common/utils/crypto";
+import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
     audience,
     clientId,
@@ -13,8 +13,9 @@ import {
     publicKeyFile,
     requiredClaims,
 } from "../../common/constant";
-import ForbiddenException from "../middleware/error/forbidden-exception";
 
+import type { JWTPayload, JWTVerifyOptions } from "jose";
+import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
 import type { PostRefreshTokenParams } from "../schema/token";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import type { Identity } from "../../domain/entity/identity";

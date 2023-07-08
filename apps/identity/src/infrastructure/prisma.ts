@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { PrismaClient } from "@prisma/client";
 import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
-import { passwordUtils } from "../common";
+import { passwordUtils } from "../common/utils/utils";
 
 const prisma = new PrismaClient();
 
