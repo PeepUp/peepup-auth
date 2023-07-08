@@ -1,5 +1,7 @@
 import { join } from "path";
 
+import type { JWTPayload, JWTVerifyOptions } from "jose";
+import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
 import { fileUtils } from "../../common/utils/utils";
 import JOSEToken from "../../common/utils/token.util";
 import { cryptoUtils } from "../../common/utils/crypto";
@@ -14,8 +16,6 @@ import {
     requiredClaims,
 } from "../../common/constant";
 
-import type { JWTPayload, JWTVerifyOptions } from "jose";
-import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
 import type { PostRefreshTokenParams } from "../schema/token";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import type { Identity } from "../../domain/entity/identity";

@@ -1,8 +1,3 @@
-import {
-    GET_IDENTITY_PARAMS_ID_SCHEMA,
-    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
-} from "../schema/identity";
-
 import type {
     GetIdentityParamsId,
     IdentityQueryPartial,
@@ -10,6 +5,10 @@ import type {
 } from "@/adapter/schema/identity";
 import type { RequestHandler } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
+import {
+    GET_IDENTITY_PARAMS_ID_SCHEMA,
+    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
+} from "../schema/identity";
 
 /**
  * @todo:
