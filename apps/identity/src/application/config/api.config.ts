@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+
 import type { Identity } from "@/types/main";
 
 dotenv.config({

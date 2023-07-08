@@ -9,7 +9,7 @@ import type {
     ID,
     VerifyHashPasswordUtils,
 } from "@/types/types";
-import { passwordUtils } from "../../common";
+import { passwordUtils } from "../../common/utils/utils";
 
 /**
  * @todo:

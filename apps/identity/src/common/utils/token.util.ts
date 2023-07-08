@@ -6,8 +6,8 @@ import { createPublicKey, generateKeyPairSync } from "crypto";
 import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
 import { fileUtils } from "./utils";
 
-import type { TokenPayloadIdentity } from "../adapter/service/token";
-import ForbiddenException from "../adapter/middleware/error/forbidden-exception";
+import type { TokenPayloadIdentity } from "../../adapter/service/token";
+import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 
 class JOSEToken {
     public static rsakeyId: string;

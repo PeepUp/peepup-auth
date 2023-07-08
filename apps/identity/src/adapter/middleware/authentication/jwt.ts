@@ -1,8 +1,9 @@
 /* eslint-disable consistent-return */
 import { FastifyReply, FastifyRequest } from "fastify";
-import type TokenManagementService from "@/adapter/service/token";
-import JOSEToken from "../../../common/token.util";
+import JOSEToken from "../../../common/utils/token.util";
 import { protectedResource } from "../../../common/constant";
+
+import type TokenManagementService from "../../service/token";
 
 async function jwt(
     request: FastifyRequest,

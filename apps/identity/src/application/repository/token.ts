@@ -1,10 +1,10 @@
 /* eslint-disable */
-import type { ID, Token, TokenAccessor, WhiteListedToken } from "@/types/types";
-import type TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";
 import type {
     QueryTokenArgs,
     QueryWhitelistedTokenArgs,
 } from "@/infrastructure/data-source/token.data-source";
+import type { ID, Token, TokenAccessor, WhiteListedToken } from "@/types/types";
+import type TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";
 
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
