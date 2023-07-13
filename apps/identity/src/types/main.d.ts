@@ -1,4 +1,5 @@
-import { RouteOptions } from "fastify";
+import type { RouteOptions } from "fastify";
+import type { JwtToken } from "./token";
 
 declare namespace Identity {
     namespace Config {
@@ -21,7 +22,13 @@ declare namespace Identity {
                 prefix: string;
             };
         }
+
+        interface Certs {
+            rsa: JwtToken;
+            ecsda: JwtToken;
+        }
     }
+
     namespace Core {
         namespace Hook {
             interface HookFactory {

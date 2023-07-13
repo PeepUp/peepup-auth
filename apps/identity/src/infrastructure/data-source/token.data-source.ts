@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
 
@@ -13,6 +14,13 @@ export type QueryWhitelistedTokenArgs = Prisma.WhitelistedTokenWhereUniqueInput;
 
 class TokenStoreAdapter implements TokenDataSourceAdapter {
     constructor(private readonly dataSource: PrismaClient) {}
+
+    async query(
+        query: Partial<Token | Token[]>
+    ): Promise<Token | Token[] | (Token | Token[])[] | null> {
+        console.log(query);
+        throw new Error("Method not implemented.");
+    }
 
     async update(id: ID, data: Token): Promise<Readonly<Token> | null> {
         const result = await this.dataSource.token.update({
@@ -48,14 +56,6 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         });
 
         return result ?? null;
-    }
-
-    async query(query: QueryTokenArgs): Promise<Token[]> {
-        const result: Readonly<Token>[] = await this.dataSource.token.findMany({
-            where: query,
-        });
-
-        return result;
     }
 
     async findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null> {

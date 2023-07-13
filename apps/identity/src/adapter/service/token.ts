@@ -1,9 +1,10 @@
 import { join } from "path";
 
-import type { JWTPayload, JWTVerifyOptions } from "jose";
+import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
 import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
+
+import JwtToken from "../../common/utils/token";
 import { fileUtils } from "../../common/utils/utils";
-import JOSEToken from "../../common/utils/token.util";
 import { cryptoUtils } from "../../common/utils/crypto";
 import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
@@ -11,6 +12,7 @@ import {
     clientId,
     issuer,
     jwtType,
+    keysPath,
     privateKeyFile,
     publicKeyFile,
     requiredClaims,
@@ -36,13 +38,27 @@ export type GenerateTokenArgs = {
 };
 
 export default class TokenManagementService {
-    constructor(private readonly tokenRepository: TokenAccessor) {}
+    private readonly rsa256KeyId: string = "";
+
+    private readonly ecsdaKeyId: string = "";
+
+    constructor(private readonly tokenRepository: TokenAccessor) {
+        const firstRsa = fileUtils.checkDirectory(join(keysPath, "RSA"));
+        const firstEcsda = fileUtils.checkDirectory(join(keysPath, "ECSDA"));
+
+        if (firstRsa && firstEcsda) {
+            const [ecsdaKeyId] = fileUtils.getFolderNames(join(keysPath, "ECSDA"));
+            const [rsa256KeyId] = fileUtils.getFolderNames(join(keysPath, "RSA"));
+            this.rsa256KeyId = rsa256KeyId;
+            this.ecsdaKeyId = ecsdaKeyId;
+        }
+    }
 
     async generateToken(data: GenerateTokenArgs): Promise<Readonly<Token>> {
         const { identity, tokenType, expiresIn, algorithm } = data;
-        const { rsakeyId, ecsdakeyId } = JOSEToken;
-
-        const keyId = algorithm === "RS256" ? rsakeyId : ecsdakeyId;
+        const keyId = algorithm === "RS256" ? this.rsa256KeyId : this.ecsdaKeyId;
+        const jwt = new JwtToken(keyId, {}, <JWTHeaderParameters>{});
+        console.log("algo", algorithm);
         const expirationTime =
             expiresIn ?? Math.floor(Date.now() / 1000) + 24 * 60 * 60 * 1000;
 
@@ -79,14 +95,14 @@ export default class TokenManagementService {
         let createdToken;
 
         if (algorithm === "ES256") {
-            createdToken = await JOSEToken.createJWToken({
+            createdToken = await jwt.createJWToken({
                 privateKey,
                 payload,
                 header,
                 exiprationTime: expiresIn,
             });
         } else if (algorithm === "RS256") {
-            createdToken = await JOSEToken.createJWToken({
+            createdToken = await jwt.createJWToken({
                 privateKey,
                 payload,
                 header,
@@ -165,7 +181,7 @@ export default class TokenManagementService {
         params: PostRefreshTokenParams
     ): Promise<Readonly<{ access_token: string }>> {
         const { refresh_token: token } = params;
-        const decode = JOSEToken.decodeJwt(token);
+        const decode = JwtToken.decodeJwt(token);
 
         if (!decode) {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
@@ -234,7 +250,7 @@ export default class TokenManagementService {
         token: string,
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
-        const { rsakeyId } = JOSEToken;
+        const jwt = new JwtToken(this.rsa256KeyId, {}, <JWTHeaderParameters>{});
         const data = await this.tokenRepository.WhitelistedToken(query);
 
         if (!data) {
@@ -249,7 +265,7 @@ export default class TokenManagementService {
             process.cwd(),
             "keys",
             jsonHeader.alg === "RS256" ? "RSA" : "ECSDA",
-            jsonHeader.kid === rsakeyId ? rsakeyId : jsonHeader.kid,
+            jsonHeader.kid === this.rsa256KeyId ? this.rsa256KeyId : jsonHeader.kid,
             publicKeyFile
         );
 
@@ -274,7 +290,7 @@ export default class TokenManagementService {
             kid: data.kid,
         };
 
-        const result = await JOSEToken.verifyJWTByJWKS(
+        const result = await jwt.verifyJWTByJWKS(
             token,
             publicKey,
             jsonHeader.alg,

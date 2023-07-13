@@ -162,7 +162,7 @@ export interface DataSourceSQLGeneric<T> {
     query(query: Partial<T>): Promise<T | T[] | null>;
 }
 
-export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token> {
+export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Token[]> {
     findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     findUniqueInWhiteListed(
         query: QueryWhitelistedTokenArgs

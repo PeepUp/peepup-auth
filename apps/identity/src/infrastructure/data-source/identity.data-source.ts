@@ -59,7 +59,10 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
 
     async findUnique(query: FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
-            where: query,
+            where: {
+                email: query.email,
+                username: query.username,
+            },
         });
 
         return result;

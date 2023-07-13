@@ -1,133 +1,39 @@
+/* eslint-disable class-methods-use-this */
+
 import * as jose from "jose";
 import { JWK } from "jose";
 import { join } from "path";
 import { mkdirSync, writeFileSync } from "fs";
-import { createPublicKey, generateKeyPairSync } from "crypto";
+import { createPublicKey } from "crypto";
+
 import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
+import type { CreateTokenArgs, TokenPayload } from "@/types/token";
+
+import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 import { fileUtils } from "./utils";
 
-import type { TokenPayloadIdentity } from "../../adapter/service/token";
-import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
+class JwtToken {
+    constructor(
+        public keyId: string,
+        public payload: JWTPayload,
+        public header: JWTHeaderParameters
+    ) {}
 
-class JOSEToken {
-    public static rsakeyId: string;
-
-    public static ecsdakeyId: string;
-
-    public static payload: JWTPayload;
-
-    public static header: JWTHeaderParameters;
-
-    constructor(rsakeyId?: string, ecsdaKeyId?: string) {
-        JOSEToken.rsakeyId = <string>rsakeyId;
-        JOSEToken.ecsdakeyId = <string>ecsdaKeyId;
+    public setHeader(header: JWTHeaderParameters): void {
+        this.header = header;
     }
 
-    public static generateKeyPairECDSA(keyId: string = this.ecsdakeyId): KeyPair {
-        try {
-            const { privateKey, publicKey } = generateKeyPairSync("ec", {
-                namedCurve: "prime256v1",
-                publicKeyEncoding: {
-                    type: "spki",
-                    format: "pem",
-                },
-                privateKeyEncoding: {
-                    type: "pkcs8",
-                    format: "pem",
-                },
-            });
-
-            const rootDirPath = join(process.cwd(), `/keys/ECSDA`);
-            const dirPath = join(process.cwd(), `/keys/ECSDA/${keyId}`);
-            const privateKeyPath = join(dirPath, "private.pem.key");
-            const publicKeyPath = join(dirPath, "public.pem.key");
-
-            if (
-                fileUtils.checkDirectory(rootDirPath) &&
-                fileUtils.countFilesAndDirectories(rootDirPath).directories > 5
-            ) {
-                fileUtils.deleteFolderRecursive(rootDirPath);
-            }
-
-            if (!fileUtils.checkDirectory(dirPath)) {
-                console.log(`📁 created new directory : ${dirPath}`);
-                mkdirSync(dirPath, { recursive: true });
-            }
-
-            console.log(`🔑 Keys generated: ${privateKeyPath} and ${publicKeyPath}`);
-
-            writeFileSync(privateKeyPath, privateKey);
-            writeFileSync(publicKeyPath, publicKey);
-
-            return { privateKey, publicKey };
-        } catch (error) {
-            console.log(error);
-            return { privateKey: "", publicKey: "" };
-        }
+    public setPayload(payload: JWTPayload): void {
+        this.payload = payload;
     }
 
-    public static generateKeyPair(modulusLength = 4096, keyId = this.rsakeyId): KeyPair {
-        try {
-            const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-                modulusLength,
-                publicKeyEncoding: {
-                    type: "spki",
-                    format: "pem",
-                },
-                privateKeyEncoding: {
-                    type: "pkcs8",
-                    format: "pem",
-                },
-            });
-
-            const rootDirPath = join(process.cwd(), `/keys/RSA`);
-            const dirPath = join(process.cwd(), `/keys/RSA/${keyId}`);
-            const privateKeyPath = join(dirPath, "private.pem.key");
-            const publicKeyPath = join(dirPath, "public.pem.key");
-
-            if (
-                fileUtils.checkDirectory(rootDirPath) &&
-                fileUtils.countFilesAndDirectories(rootDirPath).directories > 5
-            ) {
-                fileUtils.deleteFolderRecursive(rootDirPath);
-            }
-
-            if (!fileUtils.checkDirectory(dirPath)) {
-                console.log(`📁 created new directory : ${dirPath}`);
-                mkdirSync(dirPath, { recursive: true });
-            }
-
-            console.log(`🔑 Keys generated: ${privateKeyPath} and ${publicKeyPath}`);
-
-            writeFileSync(privateKeyPath, privateKey);
-            writeFileSync(publicKeyPath, publicKey);
-
-            return { privateKey, publicKey };
-        } catch (error) {
-            console.log(error);
-            return { privateKey: "", publicKey: "" };
-        }
-    }
-
-    public static async createJWToken({
+    public async createJWToken({
         privateKey,
         header,
         payload,
         exiprationTime,
     }: CreateTokenArgs): Promise<string> {
         try {
-            if (this.header === undefined) {
-                this.header = header;
-            }
-
-            if (this.payload === undefined) {
-                this.payload = {
-                    aud: payload.aud,
-                    sub: payload.sub,
-                    iss: payload.iss,
-                };
-            }
-
             const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
             const signature = await new jose.SignJWT({
                 ...payload,
@@ -143,23 +49,23 @@ class JOSEToken {
                 .setSubject(<string>payload.sub)
                 .setIssuedAt(<number>header.iat)
                 .sign(privateKeyImport);
+            console.log(`🔑 JWT created: ${signature}`);
 
             return signature;
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                throw new Error(error.message);
+            if (error) {
+                console.log({ error });
             }
 
             return "";
         }
     }
 
-    static async buildJWKSPublicKey(): Promise<void> {
+    async buildJWKSPublicKey(rsaKeyId: string, ecsdaKeyId: string): Promise<void> {
         try {
             const keysDirPath = join(process.cwd(), `/keys`);
             const rsakeysCounter = fileUtils.getFolderNames(`${keysDirPath}/RSA`);
             const ecsdakeysCounter = fileUtils.getFolderNames(`${keysDirPath}/ECSDA`);
-
             const keysList: JWK[] = [];
 
             if (rsakeysCounter.length === 0) return;
@@ -172,8 +78,7 @@ class JOSEToken {
                         `/keys/RSA/${keyId}/public.pem.key`
                     );
                     const publicKey = fileUtils.readFile(publicKeyPath, "utf-8");
-                    console.log(this.rsakeyId);
-                    const jwk = await this.JWKFromPEM(publicKey, this.rsakeyId, "RS256");
+                    const jwk = await this.JWKFromPEM(publicKey, rsaKeyId, "RS256");
                     keysList.push(jwk);
                 })
             );
@@ -185,12 +90,7 @@ class JOSEToken {
                         `/keys/ECSDA/${keyId}/public.pem.key`
                     );
                     const publicKey = fileUtils.readFile(publicKeyPath, "utf-8");
-                    console.log(this.ecsdakeyId);
-                    const jwk = await this.JWKFromPEM(
-                        publicKey,
-                        this.ecsdakeyId,
-                        "ES256"
-                    );
+                    const jwk = await this.JWKFromPEM(publicKey, ecsdaKeyId, "ES256");
 
                     keysList.push(jwk);
                 })
@@ -211,14 +111,14 @@ class JOSEToken {
         }
     }
 
-    static async JWKFromPEM(pemKey: string, keyId: string, alg: string): Promise<JWK> {
+    public async JWKFromPEM(pemKey: string, keyId: string, alg: string): Promise<JWK> {
         const jwk = await jose.exportJWK(createPublicKey({ key: pemKey, format: "pem" }));
 
         return {
+            ...jwk,
             use: "sig",
             alg,
             kid: keyId,
-            ...jwk,
         };
     }
 
@@ -226,12 +126,12 @@ class JOSEToken {
         return jose.decodeJwt(token);
     }
 
-    public static async verifyJWT(
+    public async verifyJWT(
         token: string,
         publicKey: string,
         algorithm: string,
         options: JWTVerifyOptions,
-        identity: TokenPayloadIdentity & { jti: string; kid: string }
+        identity: TokenPayload & { jti: string; kid: string }
     ): Promise<boolean> {
         try {
             const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
@@ -300,12 +200,12 @@ class JOSEToken {
         }
     }
 
-    public static async verifyJWTByJWKS(
+    public async verifyJWTByJWKS(
         token: string,
         publicKey: string,
         algorithm: string,
         options: JWTVerifyOptions,
-        identity: TokenPayloadIdentity & { jti: string; kid: string }
+        identity: TokenPayload & { jti: string; kid: string }
     ): Promise<boolean> {
         try {
             const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
@@ -371,11 +271,11 @@ class JOSEToken {
         }
     }
 
-    public static validateTokenPayload(
+    private validateTokenPayload(
         payload: JWTPayload,
         options: JWTVerifyOptions,
         algorithm: string,
-        identity: TokenPayloadIdentity & { jti: string; kid: string },
+        identity: TokenPayload & { jti: string; kid: string },
         protectedHeader: JWTHeaderParameters
     ): boolean {
         if (payload.jti && payload.jti !== identity.jti) {
@@ -388,11 +288,6 @@ class JOSEToken {
 
         // Perform additional payload checks/validation
         const currentTimestamp = Math.floor(Date.now() / 1000);
-
-        // Check issued at time (iat)
-        if (payload.iat && payload.iat > currentTimestamp) {
-            throw new ForbiddenException("Invalid token: Issued in the future");
-        }
 
         if (
             protectedHeader.alg &&
@@ -440,26 +335,4 @@ class JOSEToken {
     }
 }
 
-export interface VerifyTokenArgs {
-    publicKey: string;
-    privateKey: string;
-    algorithm: string;
-    token: string;
-    issuer?: string;
-    audience?: string;
-    options?: jose.JWTVerifyOptions;
-}
-
-export interface CreateTokenArgs {
-    privateKey: string;
-    payload: JWTPayload;
-    header: JWTHeaderParameters;
-    exiprationTime: number;
-}
-
-export interface KeyPair {
-    privateKey: string;
-    publicKey: string;
-}
-
-export default JOSEToken;
+export default JwtToken;
