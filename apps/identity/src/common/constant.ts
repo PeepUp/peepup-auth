@@ -1,3 +1,4 @@
+import { join } from "path";
 import config from "../application/config/api.config";
 
 export const jwksPath = "/.well-known/jwks.json";
@@ -20,6 +21,7 @@ export const requiredClaims = [
     "exp",
 ];
 
+export const keysPath = join(process.cwd(), "/keys");
 export const privateKeyFile = "private.pem.key";
 export const publicKeyFile = "public.pem.key";
 export const jwtType = "JWT" as const;

@@ -49,7 +49,6 @@ export const fileUtils = {
         try {
             return fs.statSync(path).isDirectory();
         } catch (error) {
-            console.log("directory not found");
             return false;
         }
     },

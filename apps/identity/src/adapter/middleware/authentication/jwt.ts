@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 import { FastifyReply, FastifyRequest } from "fastify";
-import JOSEToken from "../../../common/utils/token.util";
+import JwtToken from "../../../common/utils/token";
 import { protectedResource } from "../../../common/constant";
 
 import type TokenManagementService from "../../service/token";
@@ -13,33 +13,39 @@ async function jwt(
     const { headers, routerPath } = request;
     const { authorization } = headers;
 
-    console.log("url: ", routerPath);
-
     if (protectedResource.includes(routerPath)) {
-        console.log("authorization bearer: ", authorization);
-
         if (!authorization) {
             return reply.code(401).send({
                 ok: false,
                 code: 401,
                 codeStatus: "Unauthorized",
+                message: "Token Authorization header is missing or invalid",
             });
         }
 
-        const token = authorization.split(" ")[1];
-        const decode = JOSEToken.decodeJwt(token);
+        const token = authorization.split(" ");
 
-        console.log({ decode });
+        if (token[0] !== "Bearer") {
+            return reply.code(401).send({
+                ok: false,
+                code: 401,
+                codeStatus: "Unauthorized",
+                message: "Token Authorization is missing or invalid",
+            });
+        }
+
+        const decode = JwtToken.decodeJwt(token[1]);
 
         if (!decode) {
             return reply.code(401).send({
                 ok: false,
                 code: 401,
                 codeStatus: "Unauthorized",
+                message: "Token Authorization is missing or invalid",
             });
         }
 
-        const data = await tokenManagementService.verifyToken(token, {
+        const data = await tokenManagementService.verifyToken(token[1], {
             tokenId_identityId: {
                 tokenId: <string>decode.jti,
                 identityId: <string>decode.id,
