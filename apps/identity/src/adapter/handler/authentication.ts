@@ -1,7 +1,7 @@
 import type { RequestHandler } from "@/types/types";
-import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
+import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 
 /**
  * @todo:
