@@ -1,29 +1,30 @@
 {
+    "compilerOptions": {
+        "baseUrl": ".",
+        "declaration": true,
+        "declarationDir": "dist",
+        "noUncheckedIndexedAccess": true,
+        "outDir": "./dist",
+        "paths": {
+            "@/*": ["src/*"],
+            "application/*": ["src/application/*"],
+            "common/*": ["src/common/*"],
+            "config/*": ["src/config/*"],
+            "domain/*": ["src/domain/*"],
+            "infrastructure/*": ["src/infrastructure/*"],
+            "interfaces/*": ["src/adapter/*"],
+            "tests/*": ["src/__tests__/*"],
+            "types/*": ["src/types/*"]
+        },
+        "typeRoots": ["node_modules/@types", "src/types/*.d.ts"],
+        "types": ["node", "jest"]
+    },
+    "exclude": ["node_modules", "**/*.test.ts", "jest.config*", "prisma/seed.ts"],
     "extends": "@dofavour/tsconfig/common.json",
+    "include": ["src/**/*"],
     "ts-node": {
         "esm": true,
         "files": true,
         "transpileOnly": true
-    },
-    "compilerOptions": {
-        "typeRoots": ["node_modules/@types", "src/types/*.d.ts"],
-        "declaration": true,
-        "declarationDir": "dist",
-        "outDir": "./dist",
-        "types": ["node", "jest"],
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"],
-            "domain/*": ["src/domain/*"],
-            "types/*": ["src/types/*"],
-            "tests/*": ["src/__tests__/*"],
-            "common/*": ["src/common/*"],
-            "config/*": ["src/config/*"],
-            "application/*": ["src/application/*"],
-            "infrastructure/*": ["src/infrastructure/*"],
-            "interfaces/*": ["src/adapter/*"]
-        }
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.test.ts", "jest.config*", "prisma/seed.ts"]
+    }
 }

@@ -7,36 +7,6 @@ import { join } from "path";
 
 import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
 
-export const utils = {
-    type(o: unknown): string {
-        if (o === null) {
-            return "null";
-        }
-        if (o === undefined) {
-            return "undefined";
-        }
-        return (
-            Object.prototype.toString
-                .call(o)
-                .match(/\s(\w+)/i)?.[1]
-                .toLowerCase() ?? ""
-        );
-    },
-    deepFreeze(o: any): any {
-        if (utils.type(o) !== "object") return;
-        const props = Object.getOwnPropertyNames(o);
-        props.forEach((key: string) => {
-            const sub = o[key];
-            if (Array.isArray(sub)) Object.freeze(sub);
-            if (utils.type(sub) === "object") {
-                utils.deepFreeze(sub);
-            }
-        });
-        // eslint-disable-next-line consistent-return
-        return Object.freeze(o);
-    },
-};
-
 export const fileUtils = {
     readFile(path: string, encoding: BufferEncoding): string {
         try {

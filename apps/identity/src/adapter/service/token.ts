@@ -49,8 +49,8 @@ export default class TokenManagementService {
         if (firstRsa && firstEcsda) {
             const [ecsdaKeyId] = fileUtils.getFolderNames(join(keysPath, "ECSDA"));
             const [rsa256KeyId] = fileUtils.getFolderNames(join(keysPath, "RSA"));
-            this.rsa256KeyId = rsa256KeyId;
-            this.ecsdaKeyId = ecsdaKeyId;
+            this.rsa256KeyId = <string>rsa256KeyId;
+            this.ecsdaKeyId = <string>ecsdaKeyId;
         }
     }
 
@@ -202,7 +202,13 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const data = tokenInDatabase.filter((t: Token) => t.tokenTypes === "access")[0];
+        const data = tokenInDatabase.filter(
+            (t: Token) => t.tokenTypes === "access" && t.tokenStatus === "active"
+        )[0];
+
+        if (!data) {
+            throw new ForbiddenException("Invalid token: token is expired or invalid");
+        }
 
         await this.revokeToken(data.jti);
 
@@ -219,8 +225,8 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const jsonPayload: TokenPayloadIdentity = await JSON.parse(<string>payload);
-        const jsonHeader = await JSON.parse(<string>header);
+        const jsonPayload: TokenPayloadIdentity = await JSON.parse(payload as string);
+        const jsonHeader = await JSON.parse(header as string);
 
         const identity: TokenPayloadIdentity = {
             email: jsonPayload.email,

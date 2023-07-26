@@ -1,6 +1,7 @@
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
+import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 
 /**
  * @todo:
@@ -15,6 +16,16 @@ class AuthLocalStrategyHandler {
         reply
     ) => {
         const { traits, password, password_identifier, method } = request.body;
+        const parsedBody = POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(request.body);
+
+        if (!parsedBody.success) {
+            return reply.status(400).send({
+                status: "failed",
+                code: 400,
+                codeStatus: "Bad Request",
+                message: "bad request",
+            });
+        }
 
         const result = await this.authService.login({
             traits,

@@ -200,25 +200,3 @@ export type ERROR_REGISTRATION_FLOW_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.inf
 export type REGISTRATION_ACCOUNT_REQUEST_BODY_SCHEMA = z.infer<
     typeof registration_account_request_body_schema
 >;
-
-/* export const { schemas: accountSchema, $ref } = buildJsonSchemas({
-    account_schema,
-    create_account_body_schema,
-    get_account_params_id_schema,
-    get_account_params_email_schema,
-    get_account_params_username_schema,
-    get_account_response_schema,
-    create_account_response_schema,
-    get_user_profile_response_schema,
-    create_account_request_body_schema,
-    login_account_request_body_schema,
-    login_account_response_schema,
-    registration_account_request_body_schema,
-
-    // error
-    error_registration_flow_response_registration_account_schema,
-    gone_response_registration_account_schema,
-    error_unprocessable_content_response_registration_account_schema,
-    default_error_response_registration_account_schema,
-});
- */

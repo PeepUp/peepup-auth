@@ -6,7 +6,14 @@ export const state = z.enum(["active", "inactive", "disabled"]);
 const identitySchema = z.object({
     password,
     state,
-    id: z.string().uuid(),
+    id: z
+        .string({
+            invalid_type_error: "invalid identity id",
+            required_error: "identity id is required or cannot be empty",
+        })
+        .uuid({
+            message: "identity id are invalid or required or cannot be empty!",
+        }),
     username: z.string().optional(),
     lastName: z.string().optional(),
     firstName: z.string().optional(),
