@@ -23,9 +23,9 @@ async function jwt(
             });
         }
 
-        const token = authorization.split(" ");
+        const token: string[] = authorization.split(" ");
 
-        if (token[0] !== "Bearer") {
+        if (token[0] !== "Bearer" && token[1] === undefined) {
             return reply.code(401).send({
                 ok: false,
                 code: 401,
@@ -34,7 +34,7 @@ async function jwt(
             });
         }
 
-        const decode = JwtToken.decodeJwt(token[1]);
+        const decode = JwtToken.decodeJwt(token[1] as string);
 
         if (!decode) {
             return reply.code(401).send({
@@ -45,7 +45,7 @@ async function jwt(
             });
         }
 
-        const data = await tokenManagementService.verifyToken(token[1], {
+        const data = await tokenManagementService.verifyToken(<string>token[1], {
             tokenId_identityId: {
                 tokenId: <string>decode.jti,
                 identityId: <string>decode.id,
@@ -59,8 +59,6 @@ async function jwt(
                 codeStatus: "Unauthorized",
             });
         }
-
-        console.log("data in middleware: ", data);
     }
 }
 

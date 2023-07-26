@@ -7,7 +7,14 @@ export const issuer =
     (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
     ("urn:server-1:http://127.0.0.1:4334" as const);
 
-export const protectedResource = ["/identities", "/identities/:id"];
+const identitiesPath = "/identities";
+
+export const protectedResource = [
+    identitiesPath,
+    join(identitiesPath, "/:id"),
+    join(identitiesPath, "/:id", "/inactivate"),
+];
+
 export const requiredClaims = [
     "jti",
     "email",

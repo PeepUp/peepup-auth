@@ -9,6 +9,7 @@ import {
     GET_IDENTITY_PARAMS_ID_SCHEMA,
     GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
 } from "../schema/identity";
+import { InactivatedIdentityBody } from "../schema/auth";
 
 /**
  * @todo:
@@ -84,6 +85,16 @@ class IdentityHandler {
             const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
             if (!parseId.success) {
+                if (parseId.error) {
+                    return reply.code(400).send({
+                        code: 400,
+                        message: "bad request",
+                        details: parseId.error.issues.map(
+                            (issue) => `${issue.message} \n`
+                        ),
+                    });
+                }
+
                 return reply.code(400).send({
                     code: 400,
                     message: "bad request",
@@ -167,6 +178,17 @@ class IdentityHandler {
         }
 
         return reply.code(204).send();
+    };
+
+    // eslint-disable-next-line class-methods-use-this
+    inactivated: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (
+        request,
+        reply
+    ) => {
+        const { password, method, traits } = request.body;
+        console.log(password, method, traits);
+
+        reply.code(200);
     };
 }
 

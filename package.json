@@ -1,57 +1,57 @@
 {
     "name": "@dofavour/app",
-    "private": true,
     "version": "0.0.0",
-    "main": "index.js",
-    "scripts": {
-        "build": "turbo build",
-        "dev": "turbo dev --no-daemon",
-        "lint": "turbo lint",
-        "clean": "turbo clean",
-        "test": "turbo test",
-        "pretty": "turbo pretty",
-        "migrate": "turbo db:migrate",
-        "format": "turbo db:format",
-        "seed": "turbo db:seed",
-        "generate": "turbo db:generate",
-        "studio": "turbo db:studio",
-        "precommit": "pnpm run --filter \"@dofavour/*\" pre-commit",
-        "prepare": "husky install"
-    },
-    "devDependencies": {
-        "@testing-library/jest-dom": "^5.16.5",
-        "@testing-library/react": "^14.0.0",
-        "@testing-library/react-hooks": "^8.0.1",
-        "@testing-library/user-event": "^14.4.3",
-        "@types/jest": "^29.5.3",
-        "cz-conventional-changelog": "3.3.0",
-        "esbuild": "^0.18.12",
-        "esbuild-jest": "^0.5.0",
-        "eslint": "^8.44.0",
-        "husky": "8.0.3",
-        "identity-obj-proxy": "^3.0.0",
-        "jest": "^29.6.1",
-        "jest-watch-typeahead": "^2.2.2",
-        "lint-staged": "^13.2.3",
-        "msw": "^1.2.2",
-        "prettier": "^3.0.0",
-        "prettier-plugin-tailwindcss": "^0.4.0",
-        "turbo": "^1.10.7"
-    },
     "engines": {
         "node": ">=14.0.0",
-        "yarn": ">=1.20.0",
+        "npm": "use yarn or pnpm",
         "pnpm": ">=8.0.0",
-        "npm": "use yarn or pnpm"
+        "yarn": ">=1.20.0"
     },
     "husky": {
         "hooks": {
             "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
         }
     },
+    "main": "index.js",
     "pnpm": {
         "overrides": {
             "semver@<7.5.2": ">=7.5.2"
         }
+    },
+    "private": true,
+    "scripts": {
+        "build": "turbo build",
+        "clean": "turbo clean",
+        "dev": "turbo dev --no-daemon",
+        "format": "turbo db:format",
+        "generate": "turbo db:generate",
+        "lint": "turbo lint",
+        "migrate": "turbo db:migrate",
+        "precommit": "pnpm run --filter \"@dofavour/*\" pre-commit",
+        "prepare": "husky install",
+        "pretty": "turbo pretty",
+        "seed": "turbo db:seed",
+        "studio": "turbo db:studio",
+        "test": "turbo test"
+    },
+    "devDependencies": {
+        "@testing-library/jest-dom": "^5.17.0",
+        "@testing-library/react": "^14.0.0",
+        "@testing-library/react-hooks": "^8.0.1",
+        "@testing-library/user-event": "^14.4.3",
+        "@types/jest": "^29.5.3",
+        "cz-conventional-changelog": "3.3.0",
+        "esbuild": "^0.18.16",
+        "esbuild-jest": "^0.5.0",
+        "eslint": "^8.45.0",
+        "husky": "8.0.3",
+        "identity-obj-proxy": "^3.0.0",
+        "jest": "^29.6.1",
+        "jest-watch-typeahead": "^2.2.2",
+        "lint-staged": "^13.2.3",
+        "msw": "^1.2.3",
+        "prettier": "^3.0.0",
+        "prettier-plugin-tailwindcss": "^0.4.1",
+        "turbo": "^1.10.11"
     }
 }

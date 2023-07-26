@@ -13,7 +13,15 @@ export const localStrategy = z.object({
     method,
 });
 
+export const authHeader = z.object({
+    Authorization: z.string().startsWith("Bearer"),
+});
+
 export const POST_REGISTER_IDENTITY_BODY_SCHEMA = localStrategy
+    .omit({ password_identifier: true })
+    .merge(z.object({ password }));
+
+export const POST_INACTIVATED_IDENTITY_BODY_SCHEMA = localStrategy
     .omit({ password_identifier: true })
     .merge(z.object({ password }));
 
@@ -21,5 +29,6 @@ export const POST_LOGIN_IDENTITY_BODY_SCHEMA = localStrategy.merge(
     z.object({ password })
 );
 
+export type InactivatedIdentityBody = z.infer<typeof POST_REGISTER_IDENTITY_BODY_SCHEMA>;
 export type RegisterIdentityBody = z.infer<typeof POST_REGISTER_IDENTITY_BODY_SCHEMA>;
 export type LoginIdentityBody = z.infer<typeof POST_LOGIN_IDENTITY_BODY_SCHEMA>;

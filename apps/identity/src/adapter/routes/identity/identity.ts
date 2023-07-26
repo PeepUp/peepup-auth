@@ -49,6 +49,16 @@ export default (identitiesService: IdentityService): { routes: IdentityRoutes } 
                     },
                 },
             },
+            {
+                method: "POST",
+                url: "/identities/:id/inactivate",
+                handler: identityHandler.inactivated,
+                schema: {
+                    request: {
+                        body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
+                    },
+                },
+            },
         ],
     };
 };

@@ -35,25 +35,28 @@ model Identity {
 }
 
 model Role {
-  id          Int           @id @default(autoincrement())
-  type        UserRoleTypes @default(volunteer)
-  permissions Permission[]
+  id   Int           @id @default(autoincrement())
+  type UserRoleTypes @default(volunteer)
 
   // relation fields
-  identityId String?   @unique
-  identity   Identity? @relation(fields: [identityId], references: [id])
+  identityId String?      @unique
+  identity   Identity?    @relation(fields: [identityId], references: [id])
+  Permission Permission[]
 }
 
 model Permission {
-  id       Int     @id @default(autoincrement())
-  action   String?
-  resource String?
+  id         String   @id @default(cuid())
+  action     Action
+  subject    String
+  fields     String[]
+  conditions Json?
+  inverted   Boolean? @default(false)
+  reason     String?
 
   // relation fields
-  attributes Attribute[]
-
-  roleId Int?
-  role   Role? @relation(fields: [roleId], references: [id])
+  roleId    Int?
+  role      Role?       @relation(fields: [roleId], references: [id])
+  Attribute Attribute[]
 
   @@map(name: "permissions")
 }
@@ -66,7 +69,7 @@ model Attribute {
   updatedAt DateTime @updatedAt
 
   // relation fields
-  permissionId Int?
+  permissionId String?
   permission   Permission? @relation(fields: [permissionId], references: [id])
 
   @@map("attributes")
@@ -164,4 +167,12 @@ enum TokenStatusTypes {
   queued
   unknown
   rotated
+}
+
+enum Action {
+  Manage
+  Create
+  Update
+  Read
+  Delete
 }
