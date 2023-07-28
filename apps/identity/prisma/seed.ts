@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, Action } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -18,24 +18,14 @@ const identity: Prisma.IdentityCreateInput = {
             permissions: {
                 create: [
                     {
-                        action: "create",
-                        resource: "account",
-                        attributes: {
-                            create: {
-                                name: "subject",
-                                value: "volunteer",
-                            },
-                        },
+                        action: Action.read,
+                        subject: "identity",
+                        fields: ["id"],
                     },
                     {
-                        action: "block",
-                        resource: "account",
-                        attributes: {
-                            create: {
-                                name: "subject",
-                                value: "volunteer",
-                            },
-                        },
+                        action: Action.update,
+                        subject: "identity",
+                        fields: ["id"],
                     },
                 ],
             },
