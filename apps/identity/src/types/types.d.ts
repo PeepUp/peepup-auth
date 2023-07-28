@@ -1,9 +1,9 @@
+import type { Identity } from "@domain/entity/identity";
 import type { Prisma } from "@prisma/client";
-import type { RouteOptions } from "fastify/types/route";
-import type { FastifyBaseLogger } from "fastify/types/logger";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import type { FastifyBaseLogger } from "fastify/types/logger";
 import type { FastifyReply, FastifyRequest } from "fastify/types/request";
-import type { Identity } from "@/domain/entity/identity";
+import type { RouteOptions } from "fastify/types/route";
 import type { QueryTokenArgs } from "../infrastructure/data-source/token.data-source";
 
 export type ID = number | string;
@@ -41,9 +41,9 @@ export type IdentityRoutes = Array<
         http.Server,
         Request,
         Reply,
-        any,
-        any,
-        any,
+        never,
+        never,
+        never,
         ZodTypeProvider,
         FastifyBaseLogger
     >
@@ -179,11 +179,15 @@ export interface RoleContract extends EntityContract {
 }
 
 export interface AccessInfo extends EntityContract {
-    action: string;
-    scope: string;
     resource: string;
+    action: Action;
+    subject: string;
+    fields?: string[];
     possession?: string;
-    attributes?: { [key: string]: string };
+    conditions?: { [key: string]: string };
+    inverted?: boolean;
+    reason?: string;
+    roleId?: ID;
 }
 
 export interface AccessControl {
@@ -337,14 +341,15 @@ export type IdentityCreateFirst = {
 export enum RoleType {
     ADMIN = "admin",
     VOLUNTEER = "volunteer",
-    ORGANIZATION = "Organization",
+    ORGANIZATION = "organization",
 }
 
 export enum Action {
-    CREATE = "create",
-    READ = "read",
-    UPDATE = "update",
-    DELETE = "delete",
+    create = "create",
+    read = "read",
+    update = "update",
+    delete = "delete",
+    manage = "manage",
 }
 
 export enum Possession {
