@@ -40,7 +40,7 @@ class AuthLocalStrategyHandler {
                 code: 401,
                 codeStatus: "Unauthorized",
                 message:
-                    "failed logged in identity, check username, email or password are incorrect",
+                    "Please cross check again! username, email or password are incorrect!",
             });
         }
 

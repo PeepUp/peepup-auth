@@ -1,14 +1,14 @@
+import type { TokenContract } from "@/types/types";
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
-
 import { passwordUtils } from "../../common/utils/utils";
-import BadCredentialsException from "../middleware/error/bad-credential-exception";
+import TokenFactory from "../../domain/factory/token";
+import IdentityFactory from "../../domain/factory/identity";
 import ResourceAlreadyExistException from "../middleware/error/resource-exists";
-
-import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
+import BadCredentialsException from "../middleware/error/bad-credential-exception";
 
 import type TokenManagementService from "./token";
-import { LoginToken } from "./token";
+import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
 
 export default class AuthenticationService {
     constructor(
@@ -23,7 +23,7 @@ export default class AuthenticationService {
             traits
         );
 
-        if (existingIdentity !== null) {
+        if (existingIdentity) {
             throw new ResourceAlreadyExistException("identity already exists");
         }
 
@@ -32,37 +32,35 @@ export default class AuthenticationService {
             salt: await passwordUtils.generateSalt(32),
         });
 
-        const identity: Identity = {
-            id: "",
-            email: <string>traits.email,
+        const identity = IdentityFactory.createIdentity({
+            email: traits.email as string,
             password: hashed,
-            avatar: "",
-            username: <string>traits.username ?? <string>traits.email?.split("@")[0],
-            lastName: "",
-            firstName: "",
-            phoneNumber: null,
-            state: "active",
-            providerId: null,
-            emailVerified: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+            username: traits.username as string,
+        });
 
         const data = await this.identityRepository.create<Identity>(identity);
 
-        if (!data) {
-            throw new Error("Error: cannot creating identity");
-        }
+        if (!data) throw new Error("Error: cannot creating identity");
     }
 
-    async login(body: LoginIdentityBody): Promise<Readonly<LoginToken> | null> {
+    async login(body: LoginIdentityBody): Promise<Readonly<TokenContract> | null> {
         const { traits, password } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
             data: { password },
         });
 
-        if (identity === null) return null;
+        if (!identity) {
+            throw new BadCredentialsException(
+                "Please cross check again! username, email or password are not exist!"
+            );
+        }
+
+        const identityPayload = Object.freeze({
+            id: identity.id,
+            email: identity.email,
+            resource: "profile",
+        });
 
         const verify = await passwordUtils.verify({
             _: password,
@@ -71,35 +69,20 @@ export default class AuthenticationService {
 
         if (!verify) {
             throw new BadCredentialsException(
-                "Please check credentials of password, username, email are incorrect"
+                "Please cross check again! username, email or password are incorrect!"
             );
         }
 
-        const { value: access_token } = await this.tokenManagementService.generateToken({
-            identity: {
-                email: <string>identity.email,
-                id: <string>identity.id,
-                resource: "profile,post,event",
-            },
-            tokenType: "access",
-            expiresIn: Math.floor(Date.now() / 1000) + 1 * 1 * 3 * 60 * 1000,
-            algorithm: "RS256",
-        });
+        const [{ value: access_token }, { value: refresh_token }] = await Promise.all([
+            this.tokenManagementService.generateToken(
+                TokenFactory.createAccessToken(identityPayload)
+            ),
+            this.tokenManagementService.generateToken(
+                TokenFactory.createRefreshToken(identityPayload)
+            ),
+        ]);
 
-        const { value: refresh_token } = await this.tokenManagementService.generateToken({
-            identity: {
-                email: <string>identity.email,
-                id: <string>identity.id,
-                resource: "profile,post,event",
-            },
-            tokenType: "refresh",
-            expiresIn: Math.floor(Date.now() / 1000) + 1 * 1 * 60 * 60 * 1000,
-            algorithm: "ES256",
-        });
-
-        if (!access_token) {
-            throw new Error("Error: cannot generating token");
-        }
+        if (!access_token) throw new Error("Error: cannot generating token!");
 
         return {
             access_token,

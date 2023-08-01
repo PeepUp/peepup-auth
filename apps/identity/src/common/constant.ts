@@ -1,4 +1,5 @@
 import { join } from "path";
+import { JWTVerifyOptions } from "jose";
 import config from "../application/config/api.config";
 
 export const jwksPath = "/.well-known/jwks.json";
@@ -7,12 +8,14 @@ export const issuer =
     (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
     ("urn:server-1:http://127.0.0.1:4334" as const);
 
-const identitiesPath = "/identities";
+const identityPath = "/identities";
+const tokenPath = "/token";
 
 export const protectedResource = [
-    identitiesPath,
-    join(identitiesPath, "/:id"),
-    join(identitiesPath, "/:id", "/inactivate"),
+    identityPath,
+    join(identityPath, "/:id"),
+    join(identityPath, "/:id", "/inactivate"),
+    join(tokenPath, "/histories"),
 ];
 
 export const requiredClaims = [
@@ -29,10 +32,34 @@ export const requiredClaims = [
 ];
 
 export const keysPath = join(process.cwd(), "/keys");
-export const privateKeyFile = "private.pem.key";
-export const publicKeyFile = "public.pem.key";
+export const privateKeyFile = "private.pem.key" as const;
+export const publicKeyFile = "public.pem.key" as const;
 export const jwtType = "JWT" as const;
-export const jwtAlgorithms = ["RS256", "ES256"];
+export const jwtAlgorithms = ["RS256", "ES256"] as const;
 export const maxTokenAge = "30 seconds" as const;
-export const audience = process.env.AUDIENCE ?? "https://dofavour.com";
-export const clientId = process.env.CLIENT_ID ?? "dofavourMobileApp";
+export const audience = process.env.AUDIENCE ?? ("https://dofavour.com" as const);
+export const clientId = process.env.CLIENT_ID ?? ("dofavourMobileApp" as const);
+export enum ExipirationTime {
+    access = Math.floor(Date.now() / 1000) + 21600000,
+    refresh = Math.floor(Date.now() / 1000) + 86400000,
+}
+
+export enum TokenTypeEnum {
+    access = "access",
+    refresh = "refresh",
+}
+
+export enum TokenAlgorithm {
+    RS256 = "RS256",
+    ES256 = "ES256",
+}
+
+export enum CertAlgorithm {
+    RSA = "RSA",
+    EC = "ECSDA",
+}
+
+export enum TokenSID {
+    active = "active",
+    inactive = "inactive",
+}

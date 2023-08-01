@@ -104,6 +104,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     }
 
     async create<R>(data: Token, identity: R): Promise<Readonly<Token>> {
+        console.log(data);
         const result: Readonly<Token> = await this.dataSource.token.create({
             data: {
                 value: data.value,

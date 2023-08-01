@@ -16,7 +16,7 @@ module.exports = {
                 message: "Unexpected property on console object was called",
             },
         ],
-
+        "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/naming-convention": "off",
         "import/no-extraneous-dependencies": [
             "off",

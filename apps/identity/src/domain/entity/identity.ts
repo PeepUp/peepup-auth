@@ -1,4 +1,4 @@
-import type { Entity, RoleType } from "@/types/types";
+import type { Entity } from "@/types/types";
 
 export interface Identity extends Entity {
     avatar: string;
@@ -13,6 +13,5 @@ export interface Identity extends Entity {
     isAdmin: boolean;
     readonly createdAt?: Date;
     readonly updatedAt?: Date;
-    readonly role: RoleType;
     readonly providerId: number | null;
 }

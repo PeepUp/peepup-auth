@@ -7,7 +7,7 @@ import type { PostRefreshTokenParams } from "../schema/token";
 class TokenHandler {
     constructor(private tokenManagementService: TokenManagementService) {}
 
-    createToken: RequestHandler<
+    generateAccessToken: RequestHandler<
         unknown,
         unknown,
         unknown,
@@ -16,9 +16,9 @@ class TokenHandler {
     > = async (request, reply) => {
         const { query } = request;
         const { refresh_token: token } = query;
+        const valid = POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA.safeParse(request.query);
 
         console.log({ query });
-        const valid = POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA.safeParse(request.query);
 
         if (!valid) {
             return reply.code(400).send({
@@ -41,6 +41,21 @@ class TokenHandler {
 
         return reply.code(200).send(data);
     };
+
+    getHistories: RequestHandler = async (_, reply) => reply.code(200).send({
+            data: [
+                {
+                    id: "1",
+                    valid: true,
+                    jti: "1",
+                    user_id: "1",
+                    value: "random string",
+                    token_type: "access_token",
+                    created_at: "2021-08-01T00:00:00.000Z",
+                    expires_at: "2021-08-01T00:00:00.000Z",
+                },
+            ],
+        });
 }
 
 export default TokenHandler;

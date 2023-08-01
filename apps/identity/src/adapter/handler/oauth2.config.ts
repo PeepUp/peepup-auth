@@ -34,8 +34,6 @@ class OAuthConfigurationHandler {
         const { "*": path } = request.params;
         const jwksPath = join(process.cwd(), "public/.well-known", path);
 
-        console.log(jwksPath, path);
-
         if (!existsSync(jwksPath)) {
             return reply.code(404).send({
                 status: "not found",

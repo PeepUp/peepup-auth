@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey } from "crypto";
 
 import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
-import type { CreateTokenArgs, TokenPayload } from "@/types/token";
+import type { CreateTokenArgs, JWTHeader, TokenPayload } from "@/types/token";
 
 import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 import { fileUtils } from "./utils";
@@ -31,25 +31,17 @@ class JwtToken {
         privateKey,
         header,
         payload,
-        exiprationTime,
     }: CreateTokenArgs): Promise<string> {
         try {
             const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
-            const signature = await new jose.SignJWT({
-                ...payload,
-            })
-                .setProtectedHeader({
-                    alg: header.alg,
-                    typ: "JWT",
-                    kid: header.kid,
-                })
-                .setAudience(<string>payload.aud)
-                .setExpirationTime(exiprationTime)
-                .setIssuer(<string>payload.iss)
-                .setSubject(<string>payload.sub)
-                .setIssuedAt(<number>header.iat)
+            const signature = await new jose.SignJWT(payload)
+                .setProtectedHeader(header)
+                .setAudience(payload.aud)
+                .setExpirationTime(payload.exp)
+                .setIssuer(payload.iss)
+                .setSubject(payload.sub)
+                .setIssuedAt(header.iat)
                 .sign(privateKeyImport);
-            console.log(`🔑 JWT created: ${signature}`);
 
             return signature;
         } catch (error: unknown) {
@@ -202,20 +194,14 @@ class JwtToken {
 
     public async verifyJWTByJWKS(
         token: string,
-        publicKey: string,
         algorithm: string,
         options: JWTVerifyOptions,
         identity: TokenPayload & { jti: string; kid: string }
     ): Promise<boolean> {
         try {
-            const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
             const jwks = jose.createRemoteJWKSet(
                 new URL("http://127.0.0.1:4334/oauth2/v1/jwks/keys")
             );
-
-            if (!publicKeyImport) {
-                throw new Error("Internal server error: Invalid public key!");
-            }
 
             const { payload, protectedHeader } = await jose.jwtVerify(
                 token,
