@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey } from "crypto";
 
 import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
-import type { CreateTokenArgs, JWTHeader, TokenPayload } from "@/types/token";
+import type { CreateTokenArgs, TokenPayload } from "@/types/token";
 
 import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 import { fileUtils } from "./utils";

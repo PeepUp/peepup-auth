@@ -1,5 +1,4 @@
 import { join } from "path";
-
 import type { JWTHeaderParameters } from "jose";
 import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
 import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
@@ -10,9 +9,9 @@ import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
     CertAlgorithm,
     TokenAlgorithm,
+    privateKeyFile,
     jwtType,
     keysPath,
-    requiredClaims,
 } from "../../common/constant";
 
 import type { PostRefreshTokenParams } from "../schema/token";
@@ -145,7 +144,7 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const [revokedToken, _deletedToken] = await Promise.all([
+        const [revokedToken] = await Promise.all([
             this.revokeToken(data.jti),
             this.deleteTokenInWhiteListed({
                 tokenId_identityId: {
@@ -233,6 +232,7 @@ export default class TokenManagementService {
         return data;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     async getTokenHistories(): Promise<Readonly<Token[]> | null> {
         throw new Error("Method not implemented!");
     }

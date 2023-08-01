@@ -1,7 +1,7 @@
-
-import type { Token } from "@/types/types";
 import type { JWTPayload, JWTVerifyOptions } from "jose";
-import type { GenerateTokenArgs, TokenPayloadIdentity } from "@/types/token";
+import type { Token } from "@/types/types";
+import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
+
 import { cryptoUtils } from "../../common/utils/crypto";
 import {
     ExipirationTime,
@@ -57,7 +57,7 @@ class TokenFactory {
         };
     }
 
-    static genereteToken(payload: JWTPayload, header: any, value: string): Token {
+    static genereteToken(payload: JWTPayload, header: JWTHeader, value: string): Token {
         return <Token>{
             nbf: payload.nbf as number,
             kid: header.kid,

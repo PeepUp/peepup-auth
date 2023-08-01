@@ -42,7 +42,9 @@ class TokenHandler {
         return reply.code(200).send(data);
     };
 
-    getHistories: RequestHandler = async (_, reply) => reply.code(200).send({
+    // eslint-disable-next-line class-methods-use-this
+    getHistories: RequestHandler = async (_, reply) =>
+        reply.code(200).send({
             data: [
                 {
                     id: "1",

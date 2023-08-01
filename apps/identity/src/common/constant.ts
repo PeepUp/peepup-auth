@@ -1,5 +1,4 @@
 import { join } from "path";
-import { JWTVerifyOptions } from "jose";
 import config from "../application/config/api.config";
 
 export const jwksPath = "/.well-known/jwks.json";
