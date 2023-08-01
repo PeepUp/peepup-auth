@@ -21,12 +21,17 @@ export default (
             {
                 method: "POST",
                 url: "/token",
-                handler: handler.createToken,
+                handler: handler.generateAccessToken,
                 schema: {
                     request: {
                         querystring: $ref("POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"),
                     },
                 },
+            },
+            {
+                method: "GET",
+                url: "/token/histories",
+                handler: handler.getHistories,
             },
         ],
     };

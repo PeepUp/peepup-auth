@@ -28,8 +28,10 @@ const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResp
 async function initRoutes(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
-    routes(server).routes.forEach((route) => {
-        server.withTypeProvider<ZodTypeProvider>().route(route);
+    server.after(() => {
+        routes(server).routes.forEach((route) => {
+            server.withTypeProvider<ZodTypeProvider>().route(route);
+        });
     });
 }
 
@@ -51,13 +53,24 @@ async function initSchemaValidatorAndSerializer(
 
 async function initJWKS() {
     const checkKeysDirectory = fileUtils.checkDirectory("keys");
-    const checkWellKnownDirectory = fileUtils.checkDirectory("public/well-known");
+    const checkWellKnownDirectory = fileUtils.checkDirectory("public/.well-known");
+
+    console.log({
+        checkKeysDirectory,
+        checkWellKnownDirectory,
+    });
+
     let rsa256KeyId: string | string[] = "";
     let ecsdaKeyId: string | string[] = "";
 
     if (!checkKeysDirectory) {
         const ecsda: Certificate = new Certificate(keysPath);
         const rsa256: Certificate = new Certificate(keysPath);
+        console.log("Generating RSA256 and ECSDA keys...");
+        console.log({
+            rsa256,
+            ecsda,
+        });
 
         rsa256KeyId = cryptoUtils.generateRandomSHA256(32);
         ecsdaKeyId = cryptoUtils.generateRandomSHA256(32);
@@ -74,10 +87,18 @@ async function initJWKS() {
     if (checkKeysDirectory) {
         rsa256KeyId = fileUtils.getFolderNames("keys/RSA");
         ecsdaKeyId = fileUtils.getFolderNames("keys/ECSDA");
+        console.log({ message: "jwt setup OK!" });
     }
 
     if (!checkWellKnownDirectory) {
         if (rsa256KeyId[0] && ecsdaKeyId[0]) {
+            console.log("Generating JWKS...");
+
+            console.log({
+                rsa256KeyId,
+                ecsdaKeyId,
+            });
+
             new JwtToken(rsa256KeyId[0], {}, <JWTHeaderParameters>{}).buildJWKSPublicKey(
                 rsa256KeyId[0],
                 ecsdaKeyId[0]
@@ -93,10 +114,10 @@ async function setup() {
     await server.register(fastifyPlugin.configPlugin);
     await server.register(fastifyPlugin.signal, { timeout: 10000 });
 
+    await initSchemaValidatorAndSerializer(server);
+
     await initRoutes(server);
     await server.after();
-
-    await initSchemaValidatorAndSerializer(server);
 
     await initSchema(server);
     await initJWKS();

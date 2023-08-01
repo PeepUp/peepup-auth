@@ -8,10 +8,10 @@ import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
 import identityRoutes from "./identity/identity";
-import jwt from "../middleware/authentication/jwt";
 import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
+import AuthenticationMiddleware from "../middleware/authentication";
 
 /**
  *
@@ -28,7 +28,7 @@ export function routes(
         dependencies;
 
     server.addHook("onRequest", (request, reply) =>
-        jwt(request, reply, tokenManagementService)
+        AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
     );
 
     const token = tokenRoutes(tokenManagementService).routes;

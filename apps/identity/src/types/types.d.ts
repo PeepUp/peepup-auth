@@ -14,6 +14,7 @@ export interface Serializable {
 export type WildcardParams = {
     "*": string;
 };
+
 export type RequestHandler<
     Headers = unknown,
     RawQuery = unknown,
@@ -36,14 +37,19 @@ export type RequestHandler<
 type Request = http.IncomingMessage;
 type Reply = http.ServerResponse;
 
+export interface TokenContract {
+    access_token: string;
+    refresh_token: string;
+}
+
 export type IdentityRoutes = Array<
     RouteOptions<
         http.Server,
         Request,
         Reply,
-        never,
-        never,
-        never,
+        any,
+        unknown,
+        any,
         ZodTypeProvider,
         FastifyBaseLogger
     >
@@ -66,6 +72,7 @@ export interface UserQuery {
     };
 }
 
+export type RegisterIdentityBody = Pick<Identity, "email" | "password" | "username">;
 export type EntityContract = Serializable;
 export type Entity = Serializable;
 
@@ -175,15 +182,15 @@ export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Tok
 
 export interface RoleContract extends EntityContract {
     type: RoleType;
-    permissions: AccessInfo[];
+    identityId?: ID;
+    permissions?: AccessInfo[];
 }
 
 export interface AccessInfo extends EntityContract {
     resource: string;
     action: Action;
     subject: string;
-    fields?: string[];
-    possession?: string;
+    fields: string[];
     conditions?: { [key: string]: string };
     inverted?: boolean;
     reason?: string;
@@ -339,9 +346,9 @@ export type IdentityCreateFirst = {
 };
 
 export enum RoleType {
-    ADMIN = "admin",
-    VOLUNTEER = "volunteer",
-    ORGANIZATION = "organization",
+    admin = "admin",
+    volunteer = "volunteer",
+    organization = "organization",
 }
 
 export enum Action {

@@ -74,6 +74,7 @@ class IdentityService {
             state: "active",
             providerId: null,
             emailVerified: null,
+            isAdmin: false,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

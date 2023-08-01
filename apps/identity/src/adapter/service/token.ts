@@ -1,118 +1,63 @@
 import { join } from "path";
-
-import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
-import type { AccessInfo, ID, Token, TokenAccessor, TokenTypes } from "@/types/types";
-
+import type { JWTHeaderParameters } from "jose";
+import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
+import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
 import JwtToken from "../../common/utils/token";
+import TokenFactory from "../../domain/factory/token";
 import { fileUtils } from "../../common/utils/utils";
-import { cryptoUtils } from "../../common/utils/crypto";
 import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
-    audience,
-    clientId,
-    issuer,
+    CertAlgorithm,
+    TokenAlgorithm,
+    privateKeyFile,
     jwtType,
     keysPath,
-    privateKeyFile,
-    publicKeyFile,
-    requiredClaims,
 } from "../../common/constant";
 
 import type { PostRefreshTokenParams } from "../schema/token";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
-import type { Identity } from "../../domain/entity/identity";
-
-export type TokenPayloadIdentity = Pick<Identity, "email" | "id"> &
-    Pick<AccessInfo, "resource">;
-
-export type LoginToken = {
-    access_token: string;
-    refresh_token: string;
-};
-
-export type GenerateTokenArgs = {
-    identity: TokenPayloadIdentity;
-    tokenType: TokenTypes;
-    algorithm: string;
-    expiresIn: number;
-};
 
 export default class TokenManagementService {
-    private readonly rsa256KeyId: string = "";
+    private rsa256KeyId: string = "";
 
-    private readonly ecsdaKeyId: string = "";
+    private ecsdaKeyId: string = "";
 
     constructor(private readonly tokenRepository: TokenAccessor) {
-        const firstRsa = fileUtils.checkDirectory(join(keysPath, "RSA"));
-        const firstEcsda = fileUtils.checkDirectory(join(keysPath, "ECSDA"));
-
-        if (firstRsa && firstEcsda) {
-            const [ecsdaKeyId] = fileUtils.getFolderNames(join(keysPath, "ECSDA"));
-            const [rsa256KeyId] = fileUtils.getFolderNames(join(keysPath, "RSA"));
-            this.rsa256KeyId = <string>rsa256KeyId;
-            this.ecsdaKeyId = <string>ecsdaKeyId;
-        }
+        this.setupKID();
     }
 
     async generateToken(data: GenerateTokenArgs): Promise<Readonly<Token>> {
         const { identity, tokenType, expiresIn, algorithm } = data;
-        const keyId = algorithm === "RS256" ? this.rsa256KeyId : this.ecsdaKeyId;
+        const keyId =
+            algorithm === TokenAlgorithm.RS256 ? this.rsa256KeyId : this.ecsdaKeyId;
         const jwt = new JwtToken(keyId, {}, <JWTHeaderParameters>{});
-        console.log("algo", algorithm);
-        const expirationTime =
-            expiresIn ?? Math.floor(Date.now() / 1000) + 24 * 60 * 60 * 1000;
-
+        const expirationTime = expiresIn;
         const path = join(
             process.cwd(),
             "keys",
-            algorithm === "RS256" ? "RSA" : "ECSDA",
+            algorithm === TokenAlgorithm.RS256 ? CertAlgorithm.RSA : CertAlgorithm.EC,
             keyId,
             privateKeyFile
         );
 
         const privateKey = fileUtils.readFile(path, "utf-8");
 
-        const payload: JWTPayload = {
+        const identityPayload = Object.freeze({
             email: identity.email,
             id: identity.id,
             resource: identity.resource,
-            sid: "active",
-            aud: audience,
-            iat: Math.floor(Date.now() / 1000),
-            nbf: Math.floor(Date.now() / 1000),
-            exp: expirationTime,
-            iss: issuer,
-            sub: clientId,
-            jti: cryptoUtils.generateCUID(),
-        };
+        });
 
-        const header = {
-            alg: algorithm,
-            typ: tokenType,
-            kid: keyId,
-        };
+        const payload = TokenFactory.createPayload(identityPayload, expirationTime);
+        const header = TokenFactory.createHeader(algorithm, tokenType, keyId);
 
-        let createdToken;
+        const createdToken = await jwt.createJWToken({
+            privateKey,
+            payload,
+            header,
+        });
 
-        if (algorithm === "ES256") {
-            createdToken = await jwt.createJWToken({
-                privateKey,
-                payload,
-                header,
-                exiprationTime: expiresIn,
-            });
-        } else if (algorithm === "RS256") {
-            createdToken = await jwt.createJWToken({
-                privateKey,
-                payload,
-                header,
-                exiprationTime: expiresIn,
-            });
-        }
-
-        if (!createdToken) {
-            throw new Error("Error: cannot create token");
-        }
+        if (!createdToken) throw new Error("Error: cannot create token");
 
         const existingToken = await this.tokenRepository.WhitelistedToken({
             tokenId_identityId: {
@@ -121,30 +66,19 @@ export default class TokenManagementService {
             },
         });
 
-        if (existingToken) {
-            throw new Error("Error: token already exists");
-        }
+        /*
+         *  Figure out how to handle if token already exists
+         *
+         *  TODO:
+         */
+        if (existingToken) throw new Error("Error: token already exists");
 
-        const signingToken: Token = {
-            nbf: <number>payload.nbf,
-            kid: header.kid,
-            expires_at: expirationTime,
-            value: <string>createdToken,
-            tokenTypes: tokenType,
-            tokenStatus: "active",
-            createdAt: new Date(),
-            jti: <string>payload.jti,
-            header: JSON.stringify(header),
-            payload: JSON.stringify(payload),
-            identityId: <string>identity.id,
-            expirationTime: new Date(expirationTime * 1000),
-        };
+        const result = await this.addTokenToWhiteList(
+            TokenFactory.genereteToken(payload, header, createdToken),
+            identity.id
+        );
 
-        const result = await this.addTokenToWhiteList(signingToken, <ID>identity.id);
-
-        if (!result) {
-            throw new Error("Error: cannot save token");
-        }
+        if (!result) throw new Error("Error: cannot save token");
 
         return result;
     }
@@ -179,7 +113,7 @@ export default class TokenManagementService {
 
     async generateTokenFromRefreshToken(
         params: PostRefreshTokenParams
-    ): Promise<Readonly<{ access_token: string }>> {
+    ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
         const { refresh_token: token } = params;
         const decode = JwtToken.decodeJwt(token);
 
@@ -210,19 +144,24 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        await this.revokeToken(data.jti);
+        const [revokedToken] = await Promise.all([
+            this.revokeToken(data.jti),
+            this.deleteTokenInWhiteListed({
+                tokenId_identityId: {
+                    tokenId: <string>data.jti,
+                    identityId: <string>data.identityId,
+                },
+            }),
+        ]);
 
-        await this.deleteTokenInWhiteListed({
-            tokenId_identityId: {
-                tokenId: <string>data.jti,
-                identityId: <string>data.identityId,
-            },
-        });
+        if (!revokedToken) {
+            throw new ForbiddenException("Invalid token: token cannot be revoked");
+        }
 
         const { tokenStatus, payload, header } = data;
 
         if (tokenStatus !== "active") {
-            throw new ForbiddenException("Invalid token: token is expired or invalid");
+            throw new ForbiddenException("Invalid token: token is expired or invalid!");
         }
 
         const jsonPayload: TokenPayloadIdentity = await JSON.parse(payload as string);
@@ -242,7 +181,7 @@ export default class TokenManagementService {
         });
 
         if (!accessToken) {
-            throw new Error("Error: cannot generate access token");
+            throw new Error("Error: cannot generate access token!");
         }
 
         return { access_token: accessToken.value };
@@ -263,51 +202,50 @@ export default class TokenManagementService {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const { payload, header } = data;
-        const jsonPayload: TokenPayloadIdentity = await JSON.parse(<string>payload);
-        const jsonHeader = await JSON.parse(<string>header);
-
-        const path = join(
-            process.cwd(),
-            "keys",
-            jsonHeader.alg === "RS256" ? "RSA" : "ECSDA",
-            jsonHeader.kid === this.rsa256KeyId ? this.rsa256KeyId : jsonHeader.kid,
-            publicKeyFile
+        const { payload: stringPayload, header: stringHeader } = data;
+        const payload: TokenPayloadIdentity = await JSON.parse(
+            JSON.stringify(stringPayload)
         );
 
-        const publicKey = fileUtils.readFile(path, "utf-8");
+        const header: JWTHeader = await JSON.parse(JSON.stringify(stringHeader));
 
-        const options: JWTVerifyOptions = {
-            audience,
-            issuer,
-            algorithms: [jsonHeader.alg],
-            currentDate: new Date(),
-            subject: clientId,
-            maxTokenAge: "1 hours",
-            typ: jwtType,
-            requiredClaims,
-        };
+        if (!payload || !header) {
+            throw new ForbiddenException("Invalid token: token is corrupted!");
+        }
 
-        const identity = {
-            email: jsonPayload.email,
-            id: jsonPayload.id,
-            resource: jsonPayload.resource,
+        const identity = Object.freeze({
+            email: payload.email,
+            id: payload.id,
+            resource: payload.resource,
             jti: data.jti,
             kid: data.kid,
-        };
+        });
 
-        const result = await jwt.verifyJWTByJWKS(
-            token,
-            publicKey,
-            jsonHeader.alg,
-            options,
-            identity
-        );
+        const options = TokenFactory.generateJWTOption(header.alg, jwtType);
+
+        const result = await jwt.verifyJWTByJWKS(token, header.alg, options, identity);
 
         if (!result) {
             throw new ForbiddenException("Invalid token: verification failed");
         }
 
         return data;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    async getTokenHistories(): Promise<Readonly<Token[]> | null> {
+        throw new Error("Method not implemented!");
+    }
+
+    setupKID(): void {
+        const isRSADirectoryExist = fileUtils.checkDirectory(join(keysPath, "RSA"));
+        const isECSDADirectoryExist = fileUtils.checkDirectory(join(keysPath, "ECSDA"));
+
+        if (isRSADirectoryExist && isECSDADirectoryExist) {
+            const [ecsdaKeyId] = fileUtils.getFolderNames(join(keysPath, "ECSDA"));
+            const [rsa256KeyId] = fileUtils.getFolderNames(join(keysPath, "RSA"));
+            this.rsa256KeyId = <string>rsa256KeyId;
+            this.ecsdaKeyId = <string>ecsdaKeyId;
+        }
     }
 }

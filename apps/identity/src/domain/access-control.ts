@@ -7,13 +7,13 @@ import type {
     RoleContract,
 } from "@/types/types";
 
-class RBAC implements AccessControl {
+class RBAC {
     constructor(
         private readonly roleRepository: RoleAccessor,
         private readonly accessControlRepository: AccessControlAccessor
     ) {}
 
-    async grant(role: RoleContract, access: AccessInfo): Promise<void> {
+    /* async grant(role: RoleContract, access: AccessInfo): Promise<void> {
         try {
             const existRole = await this.roleRepository.getRole(role);
 
@@ -157,7 +157,7 @@ class RBAC implements AccessControl {
         };
 
         await this.roleRepository.upsertRole(role, updatedRole);
-    }
+    } */
 }
 
 export default RBAC;

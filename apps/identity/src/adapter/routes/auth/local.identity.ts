@@ -24,9 +24,7 @@ export default (
                 url: "/local/registration",
                 handler: handler.registration,
                 schema: {
-                    request: {
-                        body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
-                    },
+                    body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
                 },
             },
             {

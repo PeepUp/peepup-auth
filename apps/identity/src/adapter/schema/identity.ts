@@ -8,13 +8,18 @@ const identitySchema = z.object({
     state,
     id: z
         .string({
-            invalid_type_error: "invalid identity id",
-            required_error: "identity id is required or cannot be empty",
+            invalid_type_error: "invalid identity id!",
+            required_error: "identity id is required or cannot be empty!",
         })
         .uuid({
             message: "identity id are invalid or required or cannot be empty!",
         }),
-    username: z.string().optional(),
+    username: z
+        .string({
+            invalid_type_error: "invalid username!",
+            required_error: "username is required or cannot be empty!",
+        })
+        .optional(),
     lastName: z.string().optional(),
     firstName: z.string().optional(),
     avatar: z.string().url().optional(),
