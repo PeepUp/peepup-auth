@@ -41,6 +41,7 @@ class JwtToken {
                 .setIssuer(payload.iss)
                 .setSubject(payload.sub)
                 .setIssuedAt(header.iat)
+                .setJti(payload.jti)
                 .sign(privateKeyImport);
 
             return signature;
@@ -140,17 +141,14 @@ class JwtToken {
                 options
             );
 
+            console.log({ payload, protectedHeader });
+
             if (!payload || !protectedHeader) {
                 console.log("Payload or protected header is missing");
                 throw new ForbiddenException(
                     "Invalid token: or Payload or protected header is missing"
                 );
             }
-
-            const { iat, exp, nbf, aud, iss, jti, sub } = payload;
-
-            console.log(iat, exp, nbf, aud, iss, jti, sub);
-            console.log({ payload, protectedHeader });
 
             const isValidate = this.validateTokenPayload(
                 payload,
@@ -225,15 +223,21 @@ class JwtToken {
             );
 
             if (!isValidate) {
-                throw new ForbiddenException("Invalid token: Invalid identity token");
+                throw new ForbiddenException("Invalid token: Invalid identity token all");
             }
 
-            if (payload.id && payload.id !== identity.id) {
-                throw new ForbiddenException("Invalid token: Invalid identity token");
+            if (payload.id === undefined && payload.id !== identity.id) {
+                console.log({ id: payload.id });
+                throw new ForbiddenException("Invalid token: Invalid identity token id!");
             }
 
-            if (payload.resource && payload.resource !== identity.resource) {
-                throw new ForbiddenException("Invalid token: Invalid identity token");
+            if (
+                payload.resource === undefined &&
+                payload.resource !== identity.resource
+            ) {
+                throw new ForbiddenException(
+                    "Invalid token: Invalid identity token resource"
+                );
             }
 
             return true;
@@ -260,7 +264,7 @@ class JwtToken {
     private validateTokenPayload(
         payload: JWTPayload,
         options: JWTVerifyOptions,
-        algorithm: string,
+        _algorithm: string,
         identity: TokenPayload & { jti: string; kid: string },
         protectedHeader: JWTHeaderParameters
     ): boolean {
@@ -278,9 +282,8 @@ class JwtToken {
         if (
             protectedHeader.alg &&
             options.algorithms &&
-            protectedHeader.alg !== algorithm
+            options.algorithms.includes(protectedHeader.alg) === false
         ) {
-            console.log({ a: protectedHeader.alg, b: options.algorithms });
             throw new ForbiddenException("Invalid token: Invalid algorithm");
         }
 

@@ -21,7 +21,7 @@ export default (
             {
                 method: "POST",
                 url: "/token",
-                handler: handler.generateAccessToken,
+                handler: handler.roteteToken,
                 schema: {
                     request: {
                         querystring: $ref("POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"),

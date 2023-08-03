@@ -91,7 +91,7 @@ export interface AccountContract extends EntityContract {
 
 export interface Token extends EntityContract {
     value: string;
-    tokenTypes: TokenTypes;
+    type: TokenTypes;
     header: Prisma.JsonValue;
     payload: Prisma.JsonValue;
     kid: string;

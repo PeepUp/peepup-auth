@@ -29,7 +29,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             },
             data: {
                 value: data.value,
-                tokenTypes: data.tokenTypes,
+                type: data.type,
                 header: <Prisma.JsonObject>data.header,
                 jti: data.jti,
                 payload: <Prisma.JsonObject>data.payload,
@@ -104,11 +104,10 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     }
 
     async create<R>(data: Token, identity: R): Promise<Readonly<Token>> {
-        console.log(data);
         const result: Readonly<Token> = await this.dataSource.token.create({
             data: {
                 value: data.value,
-                tokenTypes: data.tokenTypes,
+                type: data.type,
                 header: <Prisma.JsonObject>data.header,
                 jti: data.jti,
                 payload: <Prisma.JsonObject>data.payload,
