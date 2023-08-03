@@ -34,13 +34,14 @@ export const keysPath = join(process.cwd(), "/keys");
 export const privateKeyFile = "private.pem.key" as const;
 export const publicKeyFile = "public.pem.key" as const;
 export const jwtType = "JWT" as const;
-export const jwtAlgorithms = ["RS256", "ES256"] as const;
+export const jwtAlgorithms = ["RS256", "ES256"];
 export const maxTokenAge = "30 seconds" as const;
 export const audience = process.env.AUDIENCE ?? ("https://dofavour.com" as const);
 export const clientId = process.env.CLIENT_ID ?? ("dofavourMobileApp" as const);
+
 export enum ExipirationTime {
-    access = Math.floor(Date.now() / 1000) + 21600000,
-    refresh = Math.floor(Date.now() / 1000) + 86400000,
+    access = Math.floor(new Date().getTime() / 1000 + 1 * 60 * 60),
+    refresh = Math.floor(new Date().getTime() / 1000 + 1 * 24 * 60 * 60),
 }
 
 export enum TokenTypeEnum {

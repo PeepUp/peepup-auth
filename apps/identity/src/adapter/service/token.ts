@@ -2,6 +2,7 @@ import { join } from "path";
 import type { JWTHeaderParameters } from "jose";
 import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
 import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
+import { TokenTypes } from "@prisma/client";
 import JwtToken from "../../common/utils/token";
 import TokenFactory from "../../domain/factory/token";
 import { fileUtils } from "../../common/utils/utils";
@@ -9,9 +10,13 @@ import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
     CertAlgorithm,
     TokenAlgorithm,
+    ExipirationTime,
     privateKeyFile,
-    jwtType,
     keysPath,
+    requiredClaims,
+    audience,
+    clientId,
+    issuer,
 } from "../../common/constant";
 
 import type { PostRefreshTokenParams } from "../schema/token";
@@ -27,7 +32,7 @@ export default class TokenManagementService {
     }
 
     async generateToken(data: GenerateTokenArgs): Promise<Readonly<Token>> {
-        const { identity, tokenType, expiresIn, algorithm } = data;
+        const { identity, type, expiresIn, algorithm } = data;
         const keyId =
             algorithm === TokenAlgorithm.RS256 ? this.rsa256KeyId : this.ecsdaKeyId;
         const jwt = new JwtToken(keyId, {}, <JWTHeaderParameters>{});
@@ -48,8 +53,8 @@ export default class TokenManagementService {
             resource: identity.resource,
         });
 
-        const payload = TokenFactory.createPayload(identityPayload, expirationTime);
-        const header = TokenFactory.createHeader(algorithm, tokenType, keyId);
+        const payload = TokenFactory.createPayload(identityPayload, type, expirationTime);
+        const header = TokenFactory.createHeader(algorithm, keyId);
 
         const createdToken = await jwt.createJWToken({
             privateKey,
@@ -74,7 +79,13 @@ export default class TokenManagementService {
         if (existingToken) throw new Error("Error: token already exists");
 
         const result = await this.addTokenToWhiteList(
-            TokenFactory.genereteToken(payload, header, createdToken),
+            TokenFactory.genereteToken(
+                payload,
+                header,
+                TokenTypes.access,
+                createdToken,
+                ExipirationTime.access
+            ),
             identity.id
         );
 
@@ -111,7 +122,7 @@ export default class TokenManagementService {
         return result !== null;
     }
 
-    async generateTokenFromRefreshToken(
+    async rotateToken(
         params: PostRefreshTokenParams
     ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
         const { refresh_token: token } = params;
@@ -137,7 +148,7 @@ export default class TokenManagementService {
         }
 
         const data = tokenInDatabase.filter(
-            (t: Token) => t.tokenTypes === "access" && t.tokenStatus === "active"
+            (t: Token) => t.type === "access" && t.tokenStatus === "active"
         )[0];
 
         if (!data) {
@@ -175,9 +186,9 @@ export default class TokenManagementService {
 
         const accessToken = await this.generateToken({
             identity,
-            tokenType: "access",
+            type: TokenTypes.access,
             algorithm: jsonHeader.alg,
-            expiresIn: Math.floor(Date.now() / 1000) + 24 * 60 * 60 * 1000,
+            expiresIn: ExipirationTime.access,
         });
 
         if (!accessToken) {
@@ -196,10 +207,11 @@ export default class TokenManagementService {
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
         const jwt = new JwtToken(this.rsa256KeyId, {}, <JWTHeaderParameters>{});
+
         const data = await this.tokenRepository.WhitelistedToken(query);
 
         if (!data) {
-            throw new ForbiddenException("Invalid token: token is expired or invalid");
+            throw new ForbiddenException("Invalid token: token is invalid");
         }
 
         const { payload: stringPayload, header: stringHeader } = data;
@@ -221,7 +233,18 @@ export default class TokenManagementService {
             kid: data.kid,
         });
 
-        const options = TokenFactory.generateJWTOption(header.alg, jwtType);
+        const options = {
+            audience,
+            issuer,
+            algorithms: ["RS256"],
+            currentDate: new Date(),
+            subject: clientId,
+            maxTokenAge: "1 hours",
+            clockTolerance: "1 minutes",
+            typ: "jwt",
+            nbf: true,
+            requiredClaims,
+        };
 
         const result = await jwt.verifyJWTByJWKS(token, header.alg, options, identity);
 

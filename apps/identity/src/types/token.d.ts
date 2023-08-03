@@ -16,7 +16,7 @@ export interface JwtToken extends KeyPair {
 
 export type GenerateTokenArgs = {
     identity: TokenPayload;
-    readonly tokenType: TokenTypes;
+    type: TokenTypes;
     readonly algorithm: string;
     readonly expiresIn: number;
 };

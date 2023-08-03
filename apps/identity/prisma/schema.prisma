@@ -103,7 +103,7 @@ model Provider {
 model Token {
   jti            String           @id
   value          String           @unique
-  tokenTypes     TokenTypes
+  type           TokenTypes
   header         Json
   payload        Json
   kid            String

@@ -7,37 +7,25 @@ import type { PostRefreshTokenParams } from "../schema/token";
 class TokenHandler {
     constructor(private tokenManagementService: TokenManagementService) {}
 
-    generateAccessToken: RequestHandler<
+    roteteToken: RequestHandler<
         unknown,
         unknown,
         unknown,
         unknown,
         PostRefreshTokenParams
     > = async (request, reply) => {
-        const { query } = request;
-        const { refresh_token: token } = query;
         const valid = POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA.safeParse(request.query);
-
-        console.log({ query });
 
         if (!valid) {
             return reply.code(400).send({
                 code: 400,
-                message: "bad request",
+                message: "Bad Request",
             });
         }
 
-        if (!token) {
-            return reply.code(401).send({ code: 401, message: "unauthorized" });
-        }
+        const data = await this.tokenManagementService.rotateToken(request.query);
 
-        const data = await this.tokenManagementService.generateTokenFromRefreshToken(
-            query
-        );
-
-        if (!data) {
-            return reply.code(401).send({ code: 401, message: "unauthorized" });
-        }
+        if (!data) return reply.code(401).send({ code: 401, message: "unauthorized" });
 
         return reply.code(200).send(data);
     };

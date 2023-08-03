@@ -8,7 +8,8 @@ async function main() {
         host: <string>server.config.environment.host,
     });
 
-    /* console.log(server.printRoutes()); console.log(server.getSchemas()); */
+    /* conflictsconflictsconsole.log(server.printRoutes()); 
+      console.log(server.getSchemas()); */
 
     console.log(`🐢 Server listening on ${app}`);
 }
