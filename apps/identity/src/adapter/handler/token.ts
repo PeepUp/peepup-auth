@@ -32,7 +32,7 @@ class TokenHandler {
         const { headers } = request;
 
         const data = await this.tokenManagementService.getWhitelistedTokens(
-            headers["authorization"] as string
+            headers.authorization as string
         );
 
         reply.code(200).send({
@@ -44,7 +44,7 @@ class TokenHandler {
         const { headers } = request;
 
         const data = await this.tokenManagementService.getTokenHistories(
-            headers["authorization"] as string
+            headers.authorization as string
         );
 
         reply.code(200).send({
@@ -52,8 +52,11 @@ class TokenHandler {
         });
     };
 
+    // eslint-disable-next-line class-methods-use-this
     deleteSessions: RequestHandler = async (request, reply) => {
         const { headers } = request;
+
+        console.log(headers);
 
         reply.code(200).send({
             message: "success",

@@ -1,5 +1,15 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import { join } from "path";
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
+import type {
+    GenerateTokenArgs,
+    JWTHeader,
+    TokenPayloadIdentity,
+    TokenPayloadWithIdentity,
+} from "@/types/token";
+import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
 import {
     CertAlgorithm,
     ExipirationTime,
@@ -16,14 +26,6 @@ import { fileUtils } from "../../common/utils/utils";
 import TokenFactory from "../../domain/factory/token";
 import ForbiddenException from "../middleware/error/forbidden-exception";
 
-import type {
-    GenerateTokenArgs,
-    JWTHeader,
-    TokenPayloadIdentity,
-    TokenPayloadWithIdentity,
-} from "@/types/token";
-import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
-import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import type { PostRefreshTokenParams } from "../schema/token";
 import UnauthorizedException from "../middleware/error/unauthorized";
@@ -36,7 +38,9 @@ export type GetKeyFileArgs = {
 
 export default class TokenManagementService {
     private rsa256KeyId: string = "";
+
     private ecsdaKeyId: string = "";
+
     private verifyOptions: JWTVerifyOptions = {};
 
     constructor(private readonly tokenRepository: TokenAccessor) {
@@ -125,7 +129,7 @@ export default class TokenManagementService {
         if (!data) return [];
 
         const result: Readonly<Token>[] = data.filter(
-            (token: Token) => token.tokenStatus === TokenStatusTypes.revoked
+            (t: Token) => t.tokenStatus === TokenStatusTypes.revoked
         );
 
         return result;
@@ -138,13 +142,11 @@ export default class TokenManagementService {
 
         if (!data) return [];
 
-        const result: Readonly<Token>[] = data.map((token: Token) => {
-            return {
-                ...token,
-                payload: JSON.parse(token.payload as string),
-                header: JSON.parse(token.header as string),
-            };
-        });
+        const result: Readonly<Token>[] = data.map((t: Token) => ({
+            ...t,
+            payload: JSON.parse(t.payload as string),
+            header: JSON.parse(t.header as string),
+        }));
 
         return result;
     }

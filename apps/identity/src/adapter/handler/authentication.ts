@@ -1,8 +1,8 @@
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
-import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 import { z } from "zod";
+import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 
 const ip = z.string().ip();
 /**
@@ -70,8 +70,8 @@ class AuthLocalStrategyHandler {
 
     logout: RequestHandler<unknown> = async (request, reply) => {
         const { headers } = request;
-        console.log(headers["authorization"]);
-        await this.authService.logout(headers["authorization"] as string);
+        console.log(headers.authorization);
+        await this.authService.logout(headers.authorization as string);
 
         return reply.status(204).send();
     };

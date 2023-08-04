@@ -1,16 +1,16 @@
 import type { TokenContract } from "@/types/types";
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
-import { passwordUtils } from "../../common/utils/utils";
-import TokenFactory from "../../domain/factory/token";
-import IdentityFactory from "../../domain/factory/identity";
-import ResourceAlreadyExistException from "../middleware/error/resource-exists";
-import BadCredentialsException from "../middleware/error/bad-credential-exception";
-
 import type TokenManagementService from "./token";
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
+
+import TokenFactory from "../../domain/factory/token";
+import { passwordUtils } from "../../common/utils/utils";
+import IdentityFactory from "../../domain/factory/identity";
 import UnauthorizedException from "../middleware/error/unauthorized";
-import { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
+import ResourceAlreadyExistException from "../middleware/error/resource-exists";
+import BadCredentialsException from "../middleware/error/bad-credential-exception";
+import { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 
 export default class AuthenticationService {
     constructor(
@@ -139,6 +139,8 @@ export default class AuthenticationService {
         const deleted = await this.tokenManagementService.deleteWhitelistedToken(
             tokenJtiAndIdentityId
         );
+
+        console.log(deleted);
 
         if (!revoked) throw new Error("Error: cannot revoke token!");
     }
