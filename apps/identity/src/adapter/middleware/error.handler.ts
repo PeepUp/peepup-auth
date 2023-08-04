@@ -35,7 +35,7 @@ export async function errorHandler(
             ok: false,
             code: error.statusCode,
             codeStatus: "Bad Request",
-            errors: {
+            error: {
                 context: error.validationContext,
                 message: error.message,
             },
@@ -47,8 +47,19 @@ export async function errorHandler(
             ok: false,
             code: 403,
             codeStatus: "Forbidden",
-            errors: {
-                error: <string>error.message,
+            error: {
+                message: error.message,
+            },
+        });
+    }
+
+    if (error.statusCode === 401 && error.name === "UnauthorizedException") {
+        return reply.code(401).send({
+            ok: false,
+            code: 401,
+            codeStatus: "Unauthorized",
+            error: {
+                message: error.message,
             },
         });
     }
@@ -66,7 +77,9 @@ export async function errorHandler(
 
         return reply.code(500).send({
             code: 500,
-            message: error.message,
+            error: {
+                message: error.message,
+            },
         });
     }
 

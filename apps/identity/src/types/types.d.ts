@@ -151,12 +151,12 @@ export interface FindLoginIdentityQuery {
 }
 
 export interface DataSourceSQL<T> {
-    create(data: T): Promise<T>;
+    create(data: T): Promise<Readonly<T>>;
     find(id: ID): Promise<Readonly<T> | null>;
     findMany(): Promise<Readonly<T>[] | null>;
-    update(id: ID, data: T): Promise<T>;
+    update(id: ID, data: T): Promise<Readonly<T>>;
     delete(id: ID): Promise<void>;
-    query(query: Partial<T>): Promise<T | T[] | null>;
+    query(query: Partial<T>): Promise<Readonly<T> | Readonly<T>[] | null>;
 }
 
 export interface DataSourceSQLGeneric<T> {
@@ -166,7 +166,7 @@ export interface DataSourceSQLGeneric<T> {
     findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     update(id: ID, data: T): Promise<Readonly<T> | null>;
     delete(id: ID): Promise<void>;
-    query(query: Partial<T>): Promise<T | T[] | null>;
+    query(query: Partial<T>): Promise<Readonly<T> | Readonly<T>[] | null>;
 }
 
 export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Token[]> {
@@ -174,10 +174,11 @@ export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Tok
     findUniqueInWhiteListed(
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null>;
+    createMany<R = unknown>(data: T[], _: R): Promise<void>;
     revoke(jti: ID): Promise<Readonly<T> | null>;
     find(identityId: ID): Promise<Readonly<Token> | null>;
     findMany(identityId: ID, tokenValue?: string): Promise<Readonly<T>[] | null>;
-    getAllWhiteListedToken(identityId): Promise<Readonly<Token>[] | null>;
+    getWhitelistedTokens(identityId): Promise<Readonly<Token>[] | null>;
 }
 
 export interface RoleContract extends EntityContract {
@@ -260,16 +261,17 @@ export interface TokenAccessor {
     ): Promise<Readonly<Token> | null>;
 
     revokeToken(jti: ID): Promise<Readonly<Token> | null>;
-    deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void>;
-    getAllWhiteListedToken(identityId: ID): Promise<Readonly<Token>[] | null>;
+    deleteWhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<void>;
+    getWhitelistedTokens(identityId: ID): Promise<Readonly<Token>[] | null>;
     saveToken(token: Token, identityId: ID): Promise<Readonly<Token>>;
+    saveTokens(token: Token[], identityId: ID): Promise<Readonly<Token[]> | null>;
     WhitelistedToken(token: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     generateToken(token: Token, identityId: ID): Promise<Token>;
     rotateToken(token: Token, identityId: ID): Promise<Token>;
     verifyToken(token: Token, identityId: ID): Promise<Token>;
+    getTokens(identityId: ID, value?: string): Promise<Readonly<Token>[] | null>;
 
     revokeAllToken(identityId: ID): Promise<Token[]>;
-    getTokens(identityId: ID): Promise<Token[]>;
     findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     cleanUpExpiredToken(): Promise<void>;
     cleanupRevokedTokens(): Promise<void>;

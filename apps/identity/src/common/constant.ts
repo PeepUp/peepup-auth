@@ -3,18 +3,23 @@ import config from "../application/config/api.config";
 
 export const jwksPath = "/.well-known/jwks.json";
 export const clientUrl = process.env.CLIENT_URL || "http://127.0.0.1:3000";
-export const issuer =
+export const issuer: string =
     (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
     ("urn:server-1:http://127.0.0.1:4334" as const);
 
+const localAuthPath = "/local";
 const identityPath = "/identities";
 const tokenPath = "/token";
 
 export const protectedResource = [
     identityPath,
+    tokenPath,
+    localAuthPath,
     join(identityPath, "/:id"),
     join(identityPath, "/:id", "/inactivate"),
-    join(tokenPath, "/histories"),
+    join(tokenPath, "/sessions"),
+    join(tokenPath, "/sessions", "/histories"),
+    join(localAuthPath, "/logout", "/api"),
 ];
 
 export const requiredClaims = [

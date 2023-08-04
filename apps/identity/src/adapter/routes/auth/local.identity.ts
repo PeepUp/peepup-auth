@@ -37,6 +37,12 @@ export default (
                     },
                 },
             },
+
+            {
+                method: "DELETE",
+                url: "/local/logout/api",
+                handler: handler.logout,
+            },
         ],
     };
 };

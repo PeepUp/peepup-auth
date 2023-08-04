@@ -1,8 +1,10 @@
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
+import { z } from "zod";
 import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 
+const ip = z.string().ip();
 /**
  * @todo:
  *  ☐ clean up this mess (code smells & clean code)
@@ -15,7 +17,8 @@ class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        const { traits, password, password_identifier, method } = request.body;
+        const ip_address = ip.safeParse(request.ip).success === true ? request.ip : "";
+        const device_id = request.headers["x-device-id"] as string;
         const parsedBody = POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(request.body);
 
         if (!parsedBody.success) {
@@ -27,12 +30,7 @@ class AuthLocalStrategyHandler {
             });
         }
 
-        const result = await this.authService.login({
-            traits,
-            password_identifier,
-            method,
-            password,
-        });
+        const result = await this.authService.login(request.body, ip_address, device_id);
 
         if (!result) {
             return reply.status(401).send({
@@ -68,6 +66,14 @@ class AuthLocalStrategyHandler {
             codeStatus: "created",
             message: "successfull creating identity",
         });
+    };
+
+    logout: RequestHandler<unknown> = async (request, reply) => {
+        const { headers } = request;
+        console.log(headers.authorization);
+        await this.authService.logout(headers.authorization as string);
+
+        return reply.status(204).send();
     };
 }
 

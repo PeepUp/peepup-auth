@@ -66,7 +66,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         return result;
     }
 
-    async getAllWhiteListedToken(identityId: ID): Promise<Readonly<Token>[] | null> {
+    async getWhitelistedTokens(identityId: ID): Promise<Readonly<Token>[] | null> {
         const results = await this.dataSource.whitelistedToken.findMany({
             where: {
                 identityId: <string>identityId,
@@ -78,6 +78,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
 
         const tokens: Readonly<Token>[] | null =
             results.length > 0 ? results.map((result) => <Token>result.token) : null;
+
         return tokens ?? null;
     }
 
@@ -104,7 +105,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     }
 
     async create<R>(data: Token, identity: R): Promise<Readonly<Token>> {
-        const result: Readonly<Token> = await this.dataSource.token.create({
+        const result = await this.dataSource.token.create({
             data: {
                 value: data.value,
                 type: data.type,
@@ -137,30 +138,68 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         return result;
     }
 
+    async createMany<R>(data: Token[], identity: R): Promise<void> {
+        const tokens: Prisma.TokenCreateManyInput[] = data.map((token) => ({
+            value: token.value,
+            expirationTime: token.expirationTime,
+            type: token.type,
+            expires_at: token.expires_at,
+            header: <Prisma.JsonObject>token.header,
+            jti: token.jti,
+            payload: <Prisma.JsonObject>token.payload,
+            kid: token.kid,
+            nbf: token.nbf,
+            tokenStatus: token.tokenStatus,
+            createdAt: new Date(token.createdAt),
+            identity: {
+                connect: {
+                    id: identity,
+                },
+            },
+            WhitelistedToken: {
+                create: {
+                    identity: {
+                        connect: {
+                            id: token.identityId,
+                        },
+                    },
+                },
+            },
+        }));
+
+        await this.dataSource.token.createMany({
+            data: tokens,
+        });
+    }
+
     async findMany(
         identityId: ID,
         tokenValue: string
     ): Promise<Readonly<Token>[] | null> {
         const result: Readonly<Token>[] | null = await this.dataSource.token.findMany({
             where: {
-                value: tokenValue,
+                OR: [
+                    { value: tokenValue },
+                    {
+                        identity: {
+                            id: identityId as string,
+                        },
+                    },
+                ],
+            },
+        });
+
+        return result;
+    }
+
+    async find(identityId: ID): Promise<Readonly<Token> | null> {
+        const result: Readonly<Token> | null = await this.dataSource.token.findFirst({
+            where: {
                 identity: {
                     id: <string>identityId,
                 },
             },
         });
-        return result;
-    }
-
-    async find(identityId: ID): Promise<Readonly<Token> | null> {
-        const result: Readonly<Token> | null =
-            await this.dataSource.token.findFirstOrThrow({
-                where: {
-                    identity: {
-                        id: <string>identityId,
-                    },
-                },
-            });
 
         return result;
     }
@@ -173,7 +212,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         });
     }
 
-    async deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void> {
+    async deleteWhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<void> {
         await this.dataSource.whitelistedToken.delete({
             where: query,
         });

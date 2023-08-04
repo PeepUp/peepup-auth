@@ -111,6 +111,8 @@ model Token {
   expires_at     Int
   tokenStatus    TokenStatusTypes
   expirationTime DateTime
+  ip_address     String?
+  device_id      String?
 
   createdAt DateTime @default(now())
 
