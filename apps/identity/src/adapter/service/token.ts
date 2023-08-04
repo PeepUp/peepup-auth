@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import { join } from "path";
+import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type {
     GenerateTokenArgs,
