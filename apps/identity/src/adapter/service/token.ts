@@ -1,115 +1,152 @@
+import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import { join } from "path";
-import type { JWTHeaderParameters } from "jose";
-import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
-import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
-import { TokenTypes } from "@prisma/client";
-import JwtToken from "../../common/utils/token";
-import TokenFactory from "../../domain/factory/token";
-import { fileUtils } from "../../common/utils/utils";
-import ForbiddenException from "../middleware/error/forbidden-exception";
 import {
     CertAlgorithm,
-    TokenAlgorithm,
     ExipirationTime,
-    privateKeyFile,
-    keysPath,
-    requiredClaims,
+    TokenAlgorithm,
     audience,
     clientId,
     issuer,
+    keysPath,
+    privateKeyFile,
+    requiredClaims,
 } from "../../common/constant";
+import JwtToken from "../../common/utils/token";
+import { fileUtils } from "../../common/utils/utils";
+import TokenFactory from "../../domain/factory/token";
+import ForbiddenException from "../middleware/error/forbidden-exception";
 
-import type { PostRefreshTokenParams } from "../schema/token";
+import type {
+    GenerateTokenArgs,
+    JWTHeader,
+    TokenPayloadIdentity,
+    TokenPayloadWithIdentity,
+} from "@/types/token";
+import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
+import type { PostRefreshTokenParams } from "../schema/token";
+import UnauthorizedException from "../middleware/error/unauthorized";
+
+export type GetKeyFileArgs = {
+    kid: string;
+    alg: TokenAlgorithm;
+    name: "private.pem.key" | "public.pem.key";
+};
 
 export default class TokenManagementService {
     private rsa256KeyId: string = "";
-
     private ecsdaKeyId: string = "";
+    private verifyOptions: JWTVerifyOptions = {};
 
     constructor(private readonly tokenRepository: TokenAccessor) {
         this.setupKID();
+        this.setupVerifyOptions();
     }
 
-    async generateToken(data: GenerateTokenArgs): Promise<Readonly<Token>> {
-        const { identity, type, expiresIn, algorithm } = data;
-        const keyId =
-            algorithm === TokenAlgorithm.RS256 ? this.rsa256KeyId : this.ecsdaKeyId;
-        const jwt = new JwtToken(keyId, {}, <JWTHeaderParameters>{});
-        const expirationTime = expiresIn;
-        const path = join(
-            process.cwd(),
-            "keys",
-            algorithm === TokenAlgorithm.RS256 ? CertAlgorithm.RSA : CertAlgorithm.EC,
-            keyId,
-            privateKeyFile
-        );
-
-        const privateKey = fileUtils.readFile(path, "utf-8");
-
-        const identityPayload = Object.freeze({
-            email: identity.email,
-            id: identity.id,
-            resource: identity.resource,
+    async generate(data: GenerateTokenArgs): Promise<Readonly<Token>> {
+        const { identity, type, expiresIn, algorithm: alg } = data;
+        const kid = alg === TokenAlgorithm.RS256 ? this.rsa256KeyId : this.ecsdaKeyId;
+        const payload = TokenFactory.createPayload(identity, type, expiresIn);
+        const header = TokenFactory.createHeader(alg, kid);
+        const jwt = new JwtToken(kid, {}, {});
+        const privateKey = this.getKeyFile({
+            kid,
+            alg,
+            name: privateKeyFile,
         });
-
-        const payload = TokenFactory.createPayload(identityPayload, type, expirationTime);
-        const header = TokenFactory.createHeader(algorithm, keyId);
-
-        const createdToken = await jwt.createJWToken({
+        const token = await jwt.createToken({
             privateKey,
             payload,
             header,
         });
 
-        if (!createdToken) throw new Error("Error: cannot create token");
+        if (!token) throw new Error("Error: failed create token!");
 
-        const existingToken = await this.tokenRepository.WhitelistedToken({
-            tokenId_identityId: {
-                tokenId: payload.jti,
-                identityId: identity.id,
-            },
-        });
-
-        /*
-         *  Figure out how to handle if token already exists
-         *
-         *  TODO:
-         */
-        if (existingToken) throw new Error("Error: token already exists");
-
-        const result = await this.addTokenToWhiteList(
-            TokenFactory.genereteToken(
-                payload,
-                header,
-                TokenTypes.access,
-                createdToken,
-                ExipirationTime.access
-            ),
-            identity.id
+        const tokenData = TokenFactory.genereteToken(
+            token,
+            payload,
+            header,
+            TokenTypes.access,
+            ExipirationTime.access
         );
+
+        const result = await this.saveToken(tokenData, identity.id);
 
         if (!result) throw new Error("Error: cannot save token");
 
         return result;
     }
 
-    async addTokenToWhiteList(
-        token: Token,
-        identityId: ID
-    ): Promise<Readonly<Token> | null> {
+    async saveToken(token: Token, identityId: ID): Promise<Readonly<Token> | null> {
         const data = await this.tokenRepository.saveToken(token, identityId);
         return data;
     }
 
-    async allWhiteListedToken(identityId: ID): Promise<Readonly<Token[]> | null> {
-        const data = await this.tokenRepository.getAllWhiteListedToken(identityId);
+    async saveTokens(tokens: Token[], identityId: ID): Promise<Readonly<Token> | null> {
+        throw new Error("Method not implemented.");
+    }
 
-        if (!data) {
-            throw new ForbiddenException("Invalid token: token is expired or invalid");
+    async saveTokensToWhitelist(
+        tokens: Token | Token[],
+        identityId: ID
+    ): Promise<Readonly<Token> | null> {
+        console.log(tokens);
+        throw new Error("Method not implemented.");
+    }
+
+    splitAuthzHeader(authorization: string): Readonly<string> {
+        const split = authorization.split(" ");
+
+        if (split[0] !== "Bearer") {
+            throw new UnauthorizedException(
+                "error: invalid header format for authorization"
+            );
         }
 
-        return data;
+        if (!split[1]) {
+            throw new UnauthorizedException("error: invalid token");
+        }
+
+        return split[1];
+    }
+
+    async saveTokenToWhitelist(
+        token: Token,
+        identityId: ID
+    ): Promise<Readonly<Token> | null> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getTokenHistories(access_token: string): Promise<Readonly<Token[]> | null> {
+        const token = this.splitAuthzHeader(access_token);
+        const decode = JwtToken.decodeJwt(token);
+        const data = await this.tokenRepository.getTokens(decode.id as string);
+        if (!data) return [];
+
+        const result: Readonly<Token>[] = data.filter(
+            (token: Token) => token.tokenStatus === TokenStatusTypes.revoked
+        );
+
+        return result;
+    }
+
+    async getWhitelistedTokens(access_token: string): Promise<Readonly<Token[]> | null> {
+        const token = this.splitAuthzHeader(access_token);
+        const decode = JwtToken.decodeJwt(token);
+        const data = await this.tokenRepository.getWhitelistedTokens(decode.id as string);
+
+        if (!data) return [];
+
+        const result: Readonly<Token>[] = data.map((token: Token) => {
+            return {
+                ...token,
+                payload: JSON.parse(token.payload as string),
+                header: JSON.parse(token.header as string),
+            };
+        });
+
+        return result;
     }
 
     async revokeToken(jti: ID): Promise<boolean> {
@@ -122,72 +159,85 @@ export default class TokenManagementService {
         return result !== null;
     }
 
+    async decodeToken(token: string): Promise<Readonly<TokenPayloadWithIdentity> | null> {
+        const decode = JwtToken.decodeJwt(token);
+
+        return <TokenPayloadWithIdentity>{
+            id: decode.id,
+            jti: decode.jti,
+            exp: decode.exp,
+            iat: decode.iat,
+            iss: decode.iss,
+            aud: decode.aud,
+            nbf: decode.nbf,
+            email: decode.email,
+            resource: decode.resource,
+            sub: decode.sub,
+            type: decode.type,
+        };
+    }
+
     async rotateToken(
         params: PostRefreshTokenParams
     ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
-        const { refresh_token: token } = params;
-        const decode = JwtToken.decodeJwt(token);
+        const { refresh_token } = params;
+        const decode = JwtToken.decodeJwt(refresh_token);
 
         if (!decode) {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        // verify token using decode jti and id
-        await this.verifyToken(token, {
+        const tokenJtiAndIdentityId: QueryWhitelistedTokenArgs = {
             tokenId_identityId: {
-                tokenId: <string>decode.jti,
-                identityId: <string>decode.id,
+                tokenId: decode.jti as string,
+                identityId: decode.id as string,
             },
-        });
+        };
 
-        // check token in database
-        const tokenInDatabase = await this.allWhiteListedToken(<string>decode.id);
+        const [_verifyToken, tokens] = await Promise.all([
+            this.verifyToken(refresh_token, tokenJtiAndIdentityId),
+            this.getWhitelistedTokens(decode.id as string),
+        ]);
 
-        if (!tokenInDatabase) {
+        if (!tokens || !tokens.length) {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const data = tokenInDatabase.filter(
-            (t: Token) => t.type === "access" && t.tokenStatus === "active"
+        const token = tokens.filter(
+            (t: Token) =>
+                t.type === TokenTypes.access &&
+                t.tokenStatus === TokenStatusTypes.active &&
+                t.jti === decode.jti &&
+                t.id === decode.id
         )[0];
 
-        if (!data) {
+        if (!token) {
             throw new ForbiddenException("Invalid token: token is expired or invalid");
         }
 
-        const [revokedToken] = await Promise.all([
-            this.revokeToken(data.jti),
-            this.deleteTokenInWhiteListed({
-                tokenId_identityId: {
-                    tokenId: <string>data.jti,
-                    identityId: <string>data.identityId,
-                },
-            }),
+        const [revokedToken, _deletedTokeninWL] = await Promise.all([
+            this.revokeToken(token.jti),
+            this.deleteWhitelistedToken(tokenJtiAndIdentityId),
         ]);
 
         if (!revokedToken) {
             throw new ForbiddenException("Invalid token: token cannot be revoked");
         }
 
-        const { tokenStatus, payload, header } = data;
-
-        if (tokenStatus !== "active") {
-            throw new ForbiddenException("Invalid token: token is expired or invalid!");
-        }
-
-        const jsonPayload: TokenPayloadIdentity = await JSON.parse(payload as string);
-        const jsonHeader = await JSON.parse(header as string);
+        const { payload, header } = token;
+        const parsedPayload = await JSON.parse(payload as string);
+        const parsedHeader: JWTHeaderParameters = await JSON.parse(header as string);
 
         const identity: TokenPayloadIdentity = {
-            email: jsonPayload.email,
-            id: jsonPayload.id,
-            resource: jsonPayload.resource,
+            email: parsedPayload.email,
+            id: parsedPayload.id,
+            resource: parsedPayload.resource,
         };
 
-        const accessToken = await this.generateToken({
+        const accessToken = await this.generate({
             identity,
             type: TokenTypes.access,
-            algorithm: jsonHeader.alg,
+            algorithm: parsedHeader.alg,
             expiresIn: ExipirationTime.access,
         });
 
@@ -198,8 +248,8 @@ export default class TokenManagementService {
         return { access_token: accessToken.value };
     }
 
-    async deleteTokenInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<void> {
-        await this.tokenRepository.deleteTokenInWhiteListed(query);
+    async deleteWhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<void> {
+        await this.tokenRepository.deleteWhitelistedToken(query);
     }
 
     async verifyToken(
@@ -215,11 +265,8 @@ export default class TokenManagementService {
         }
 
         const { payload: stringPayload, header: stringHeader } = data;
-        const payload: TokenPayloadIdentity = await JSON.parse(
-            JSON.stringify(stringPayload)
-        );
-
-        const header: JWTHeader = await JSON.parse(JSON.stringify(stringHeader));
+        const payload: TokenPayloadIdentity = await JSON.parse(stringPayload as string);
+        const header: JWTHeader = await JSON.parse(stringHeader as string);
 
         if (!payload || !header) {
             throw new ForbiddenException("Invalid token: token is corrupted!");
@@ -233,20 +280,12 @@ export default class TokenManagementService {
             kid: data.kid,
         });
 
-        const options = {
-            audience,
-            issuer,
-            algorithms: ["RS256"],
-            currentDate: new Date(),
-            subject: clientId,
-            maxTokenAge: "1 hours",
-            clockTolerance: "1 minutes",
-            typ: "jwt",
-            nbf: true,
-            requiredClaims,
-        };
-
-        const result = await jwt.verifyJWTByJWKS(token, header.alg, options, identity);
+        const result = await jwt.verifyJWTByJWKS(
+            token,
+            header.alg,
+            this.verifyOptions,
+            identity
+        );
 
         if (!result) {
             throw new ForbiddenException("Invalid token: verification failed");
@@ -256,9 +295,6 @@ export default class TokenManagementService {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    async getTokenHistories(): Promise<Readonly<Token[]> | null> {
-        throw new Error("Method not implemented!");
-    }
 
     setupKID(): void {
         const isRSADirectoryExist = fileUtils.checkDirectory(join(keysPath, "RSA"));
@@ -270,5 +306,40 @@ export default class TokenManagementService {
             this.rsa256KeyId = <string>rsa256KeyId;
             this.ecsdaKeyId = <string>ecsdaKeyId;
         }
+    }
+
+    setupVerifyOptions(): void {
+        this.verifyOptions = {
+            audience,
+            issuer,
+            algorithms: ["RS256"],
+            currentDate: new Date(),
+            subject: clientId,
+            maxTokenAge: "1 hours",
+            clockTolerance: "1 minutes",
+            typ: "jwt",
+            requiredClaims,
+        };
+    }
+
+    getKeyFile(data: {
+        kid: string;
+        alg: TokenAlgorithm | string;
+        name: string;
+    }): Readonly<string> {
+        const { kid, alg, name } = data;
+        const path = join(
+            process.cwd(),
+            "keys",
+            alg === TokenAlgorithm.RS256 ? CertAlgorithm.RSA : CertAlgorithm.EC,
+            kid,
+            name
+        );
+
+        const key = fileUtils.readFile(path, "utf-8");
+
+        if (!key) throw new Error(`Error: cannot read key file, with path: ${path}`);
+
+        return key;
     }
 }

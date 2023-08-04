@@ -25,27 +25,40 @@ class TokenHandler {
 
         const data = await this.tokenManagementService.rotateToken(request.query);
 
-        if (!data) return reply.code(401).send({ code: 401, message: "unauthorized" });
-
         return reply.code(200).send(data);
     };
 
-    // eslint-disable-next-line class-methods-use-this
-    getHistories: RequestHandler = async (_, reply) =>
+    getSessions: RequestHandler = async (request, reply) => {
+        const { headers } = request;
+
+        const data = await this.tokenManagementService.getWhitelistedTokens(
+            headers["authorization"] as string
+        );
+
         reply.code(200).send({
-            data: [
-                {
-                    id: "1",
-                    valid: true,
-                    jti: "1",
-                    user_id: "1",
-                    value: "random string",
-                    token_type: "access_token",
-                    created_at: "2021-08-01T00:00:00.000Z",
-                    expires_at: "2021-08-01T00:00:00.000Z",
-                },
-            ],
+            data,
         });
+    };
+
+    getSessionsHistories: RequestHandler = async (request, reply) => {
+        const { headers } = request;
+
+        const data = await this.tokenManagementService.getTokenHistories(
+            headers["authorization"] as string
+        );
+
+        reply.code(200).send({
+            data,
+        });
+    };
+
+    deleteSessions: RequestHandler = async (request, reply) => {
+        const { headers } = request;
+
+        reply.code(200).send({
+            message: "success",
+        });
+    };
 }
 
 export default TokenHandler;

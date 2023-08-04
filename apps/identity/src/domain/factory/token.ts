@@ -1,6 +1,11 @@
-import type { JWTPayload, JWTVerifyOptions } from "jose";
+import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
 import type { Token, TokenTypes } from "@/types/types";
-import type { GenerateTokenArgs, JWTHeader, TokenPayloadIdentity } from "@/types/token";
+import type {
+    GenerateTokenArgs,
+    JWTHeader,
+    TokenPayloadIdentity,
+    TokenPayloadWithIdentity,
+} from "@/types/token";
 
 import { cryptoUtils } from "../../common/utils/crypto";
 import {
@@ -37,12 +42,12 @@ class TokenFactory {
         type: TokenTypes,
         expirationTime: number
     ) {
-        return <JWTPayload>{
+        return <TokenPayloadWithIdentity>{
+            type,
             email: identity.email,
             id: identity.id,
             resource: identity.resource,
             sid: TokenSID.active,
-            type,
             aud: audience,
             iat: Math.floor(Date.now() / 1000),
             nbf: Date.now() / 1000,
@@ -53,7 +58,7 @@ class TokenFactory {
         };
     }
 
-    static createHeader(alg: string, kid: string) {
+    static createHeader(alg: string, kid: string): JWTHeaderParameters {
         return {
             alg,
             typ: "jwt",
@@ -62,10 +67,10 @@ class TokenFactory {
     }
 
     static genereteToken(
-        payload: JWTPayload,
-        header: JWTHeader,
-        type: string,
         value: string,
+        payload: JWTPayload,
+        header: JWTHeaderParameters | JWTHeader,
+        type: string,
         expirationTime: number
     ): Token {
         return <Token>{

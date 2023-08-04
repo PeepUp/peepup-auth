@@ -12,6 +12,7 @@ import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
 import AuthenticationMiddleware from "../middleware/authentication";
+import { deviceIdHook } from "../middleware/deviceId";
 
 /**
  *
@@ -27,6 +28,7 @@ export function routes(
     const { identityService, authenticationService, tokenManagementService } =
         dependencies;
 
+    server.addHook("preHandler", deviceIdHook);
     server.addHook("onRequest", (request, reply) =>
         AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
     );

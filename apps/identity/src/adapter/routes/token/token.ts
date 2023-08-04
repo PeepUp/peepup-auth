@@ -30,8 +30,13 @@ export default (
             },
             {
                 method: "GET",
-                url: "/token/histories",
-                handler: handler.getHistories,
+                url: "/token/sessions",
+                handler: handler.getSessions,
+            },
+            {
+                method: "GET",
+                url: "/token/sessions/histories",
+                handler: handler.getSessionsHistories,
             },
         ],
     };

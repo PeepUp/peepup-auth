@@ -9,6 +9,8 @@ import BadCredentialsException from "../middleware/error/bad-credential-exceptio
 
 import type TokenManagementService from "./token";
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
+import UnauthorizedException from "../middleware/error/unauthorized";
+import { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
 export default class AuthenticationService {
     constructor(
@@ -43,11 +45,20 @@ export default class AuthenticationService {
         if (!data) throw new Error("Error: cannot creating identity");
     }
 
-    async login(body: LoginIdentityBody): Promise<Readonly<TokenContract> | null> {
+    async login(
+        body: LoginIdentityBody,
+        ip_address: string,
+        device_id: string
+    ): Promise<Readonly<TokenContract> | null> {
         const { traits, password } = body;
         const identity = await this.identityRepository.getLoginIdentity<Identity>({
             where: traits,
             data: { password },
+        });
+
+        console.log({
+            ip_address,
+            device_id,
         });
 
         if (!identity) {
@@ -74,10 +85,10 @@ export default class AuthenticationService {
         }
 
         const [{ value: access_token }, { value: refresh_token }] = await Promise.all([
-            this.tokenManagementService.generateToken(
+            this.tokenManagementService.generate(
                 TokenFactory.createAccessToken(identityPayload)
             ),
-            this.tokenManagementService.generateToken(
+            this.tokenManagementService.generate(
                 TokenFactory.createRefreshToken(identityPayload)
             ),
         ]);
@@ -88,5 +99,47 @@ export default class AuthenticationService {
             access_token,
             refresh_token,
         };
+    }
+
+    async logout(access_token: string): Promise<void> {
+        const authorization: string[] = access_token.split(" ");
+
+        if (authorization[0] !== "Bearer" && authorization[1] === undefined) {
+            throw new UnauthorizedException("Error: invalid token!");
+        }
+
+        if (authorization[1] === undefined) {
+            throw new UnauthorizedException("Error: invalid token!");
+        }
+
+        const decoded = await this.tokenManagementService.decodeToken(authorization[1]);
+
+        if (!decoded) {
+            throw new UnauthorizedException("Error: invalid token!");
+        }
+
+        const tokenJtiAndIdentityId: QueryWhitelistedTokenArgs = {
+            tokenId_identityId: {
+                tokenId: decoded.jti as string,
+                identityId: decoded.id as string,
+            },
+        };
+
+        const token = await this.tokenManagementService.verifyToken(
+            authorization[1],
+            tokenJtiAndIdentityId
+        );
+
+        console.log(token);
+
+        const revoked = await this.tokenManagementService.revokeToken(
+            decoded.jti as string
+        );
+
+        const deleted = await this.tokenManagementService.deleteWhitelistedToken(
+            tokenJtiAndIdentityId
+        );
+
+        if (!revoked) throw new Error("Error: cannot revoke token!");
     }
 }

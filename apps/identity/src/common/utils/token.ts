@@ -6,17 +6,23 @@ import { join } from "path";
 import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey } from "crypto";
 
-import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose";
-import type { CreateTokenArgs, TokenPayload } from "@/types/token";
+import type {
+    JWTHeaderParameters,
+    JWTPayload,
+    JWTVerifyOptions,
+    JoseHeaderParameters,
+} from "jose";
+import type { CreateTokenArgs, JWTHeader, TokenPayload } from "@/types/token";
 
 import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 import { fileUtils } from "./utils";
+import UnauthorizedException from "../../adapter/middleware/error/unauthorized";
 
 class JwtToken {
     constructor(
         public keyId: string,
         public payload: JWTPayload,
-        public header: JWTHeaderParameters
+        public header: JWTHeaderParameters | JoseHeaderParameters | JWTHeader
     ) {}
 
     public setHeader(header: JWTHeaderParameters): void {
@@ -27,21 +33,21 @@ class JwtToken {
         this.payload = payload;
     }
 
-    public async createJWToken({
+    public async createToken({
         privateKey,
         header,
         payload,
-    }: CreateTokenArgs): Promise<string> {
+    }: CreateTokenArgs): Promise<Readonly<string> | null> {
         try {
             const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
             const signature = await new jose.SignJWT(payload)
+                .setAudience(payload.aud as string)
+                .setExpirationTime(payload.exp as number)
+                .setIssuer(payload.iss as string)
+                .setIssuedAt(payload.iat as number)
+                .setJti(payload.jti as string)
+                .setNotBefore(payload.nbf as number)
                 .setProtectedHeader(header)
-                .setAudience(payload.aud)
-                .setExpirationTime(payload.exp)
-                .setIssuer(payload.iss)
-                .setSubject(payload.sub)
-                .setIssuedAt(header.iat)
-                .setJti(payload.jti)
                 .sign(privateKeyImport);
 
             return signature;
@@ -129,8 +135,6 @@ class JwtToken {
         try {
             const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
 
-            console.log({ identity });
-
             if (!publicKeyImport) {
                 throw new Error("Internal server error: Invalid public key!");
             }
@@ -141,8 +145,6 @@ class JwtToken {
                 options
             );
 
-            console.log({ payload, protectedHeader });
-
             if (!payload || !protectedHeader) {
                 console.log("Payload or protected header is missing");
                 throw new ForbiddenException(
@@ -150,13 +152,13 @@ class JwtToken {
                 );
             }
 
-            const isValidate = this.validateTokenPayload(
+            const isValidate = this.validateTokenPayload({
                 payload,
                 options,
                 algorithm,
                 identity,
-                protectedHeader
-            );
+                protectedHeader,
+            });
 
             if (!isValidate) {
                 throw new ForbiddenException("Invalid token: Invalid identity token");
@@ -214,28 +216,32 @@ class JwtToken {
                 );
             }
 
-            const isValidate = this.validateTokenPayload(
+            const isValidate = this.validateTokenPayload({
                 payload,
                 options,
                 algorithm,
                 identity,
-                protectedHeader
-            );
+                protectedHeader,
+            });
 
             if (!isValidate) {
-                throw new ForbiddenException("Invalid token: Invalid identity token all");
+                throw new UnauthorizedException(
+                    "Invalid token: Invalid identity token all"
+                );
             }
 
             if (payload.id === undefined && payload.id !== identity.id) {
                 console.log({ id: payload.id });
-                throw new ForbiddenException("Invalid token: Invalid identity token id!");
+                throw new UnauthorizedException(
+                    "Invalid token: Invalid identity token id!"
+                );
             }
 
             if (
                 payload.resource === undefined &&
                 payload.resource !== identity.resource
             ) {
-                throw new ForbiddenException(
+                throw new UnauthorizedException(
                     "Invalid token: Invalid identity token resource"
                 );
             }
@@ -245,11 +251,11 @@ class JwtToken {
             console.dir({ error }, { depth: Infinity });
 
             if (error instanceof jose.errors.JWSInvalid) {
-                throw new ForbiddenException("Invalid token: Invalid signature");
+                throw new UnauthorizedException("Invalid token: Invalid signature");
             }
 
             if (error instanceof jose.errors.JOSEError) {
-                throw new ForbiddenException(`Invalid token: ${error.message}`);
+                throw new UnauthorizedException(`Invalid token: ${error.message}`);
             }
 
             if (error instanceof Error) {
@@ -261,19 +267,21 @@ class JwtToken {
         }
     }
 
-    private validateTokenPayload(
-        payload: JWTPayload,
-        options: JWTVerifyOptions,
-        _algorithm: string,
-        identity: TokenPayload & { jti: string; kid: string },
-        protectedHeader: JWTHeaderParameters
-    ): boolean {
+    private validateTokenPayload(data: {
+        payload: JWTPayload;
+        options: JWTVerifyOptions;
+        algorithm: string;
+        identity: TokenPayload & { jti: string; kid: string };
+        protectedHeader: JWTHeaderParameters;
+    }): boolean {
+        const { payload, options, identity, protectedHeader } = data;
+
         if (payload.jti && payload.jti !== identity.jti) {
-            throw new ForbiddenException("Invalid token: Invalid jti token");
+            throw new UnauthorizedException("Invalid token: Invalid jti token");
         }
 
         if (protectedHeader.kid && protectedHeader.kid !== identity.kid) {
-            throw new ForbiddenException("Invalid token: Invalid kid token");
+            throw new UnauthorizedException("Invalid token: Invalid kid token");
         }
 
         // Perform additional payload checks/validation
@@ -284,40 +292,40 @@ class JwtToken {
             options.algorithms &&
             options.algorithms.includes(protectedHeader.alg) === false
         ) {
-            throw new ForbiddenException("Invalid token: Invalid algorithm");
+            throw new UnauthorizedException("Invalid token: Invalid algorithm");
         }
 
         if (protectedHeader.typ && protectedHeader.typ !== options.typ) {
-            throw new ForbiddenException("Invalid token: Invalid type");
+            throw new UnauthorizedException("Invalid token: Invalid type");
         }
 
         // Check expiration time (exp)
         if (payload.exp && payload.exp <= currentTimestamp) {
-            throw new ForbiddenException("Invalid token: Expired");
+            throw new UnauthorizedException("Invalid token: Expired");
         }
 
         // Check not before (nbf)
         if (payload.nbf && payload.nbf > currentTimestamp) {
-            throw new ForbiddenException("Invalid token: Not yet valid");
+            throw new UnauthorizedException("Invalid token: Not yet valid");
         }
 
         // Check audience (aud)
         if (payload.aud && payload.aud !== options.audience) {
-            throw new ForbiddenException("Invalid token: Invalid audience");
+            throw new UnauthorizedException("Invalid token: Invalid audience");
         }
 
         // Check issuer (iss)
         if (payload.iss && payload.iss !== options.issuer) {
-            throw new ForbiddenException("Invalid token: Invalid issuer");
+            throw new UnauthorizedException("Invalid token: Invalid issuer");
         }
 
         // Check subject (sub)
         if (payload.sub && payload.sub !== options.subject) {
-            throw new ForbiddenException("Invalid token: Missing subject");
+            throw new UnauthorizedException("Invalid token: Missing subject");
         }
 
         if (payload.sid && payload.sid !== "active") {
-            throw new ForbiddenException("Invalid token: Expired");
+            throw new UnauthorizedException("Invalid token: Expired");
         }
 
         return true;

@@ -9,11 +9,14 @@ class MetadataHandler {
             status: "ok",
         });
 
-    docs: RequestHandler = async (_, reply) =>
+    docs: RequestHandler = async (request, reply) => {
+        console.log({ Headers: request.headers });
+
         reply.code(200).send({
             docs: `${clientUrl}/docs`,
             openapi: `http://127.0.0.1:4334/openapi/v1/schemas`,
         });
+    };
 
     ready: RequestHandler = async (_, reply) =>
         reply.code(200).send({
