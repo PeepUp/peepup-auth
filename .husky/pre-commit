@@ -1,9 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Hello bruh..."
-echo "Hello bruh..."
-echo "Hello bruh..."
+echo "Prepare ..."
 
 pnpm precommit
 pnpm pretty

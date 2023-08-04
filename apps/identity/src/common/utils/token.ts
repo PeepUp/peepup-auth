@@ -1,10 +1,10 @@
 /* eslint-disable class-methods-use-this */
 
-import * as jose from "jose";
-import { JWK } from "jose";
 import { join } from "path";
 import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey } from "crypto";
+import { JWK } from "jose";
+import * as jose from "jose";
 
 import type {
     JWTHeaderParameters,

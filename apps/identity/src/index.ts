@@ -1,15 +1,12 @@
 import server from "./infrastructure/http/app";
 
-async function main() {
+async function main(): Promise<void> {
     await server.ready();
 
     const app = await server.listen({
         port: <number>server.config.environment.port,
         host: <string>server.config.environment.host,
     });
-
-    /* conflictsconflictsconsole.log(server.printRoutes()); 
-      console.log(server.getSchemas()); */
 
     console.log(`🐢 Server listening on ${app}`);
 }

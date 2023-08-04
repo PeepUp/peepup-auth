@@ -1,7 +1,7 @@
+import { z } from "zod";
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
-import { z } from "zod";
 import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
 
 const ip = z.string().ip();
