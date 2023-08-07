@@ -1,14 +1,17 @@
 import type { Identity } from "@domain/entity/identity";
-import type { JWTPayload, JWTHeaderParameters } from "jose";
-import type { AccessInfo, TokenTypes } from "./types";
+import type { JWTPayload, JWTHeaderParameters, JWTVerifyOptions } from "jose";
+import type { AccessInfo, EmailAndIdentityId, TokenTypes } from "./types";
 
 import { TokenAlgorithm } from "../common/constant";
 
-export type TokenPayload = Pick<Identity, "email" | "id"> & Pick<AccessInfo, "resource">;
+export type TokenPayload = EmailAndIdentityId & Pick<AccessInfo, "resource">;
+
+export type AccessToken = string;
+export type RefreshToken = string;
 
 export type AuthToken = {
-    access_token: string;
-    refresh_token: string;
+    access_token: AccessToken;
+    refresh_token: RefreshToken;
 };
 
 export interface JwtToken extends KeyPair {
@@ -29,7 +32,7 @@ export type VerifyTokenArgs = KeyPair & {
     token: string;
     issuer?: string;
     audience?: string;
-    options?: jose.JWTVerifyOptions;
+    options?: JWTVerifyOptions;
 };
 
 export type CreateTokenArgs = Pick<KeyPair, "privateKey"> & {
@@ -37,16 +40,13 @@ export type CreateTokenArgs = Pick<KeyPair, "privateKey"> & {
     header: JWTHeaderParameters | JoseHeaderParameters;
 };
 
-export interface KeyPair {
+export type KeyPair = {
     privateKey: string;
     publicKey: string;
-}
+};
 
-export type TokenPayloadIdentity = Pick<Identity, "email" | "id"> &
-    Pick<AccessInfo, "resource">;
-
+export type TokenPayloadIdentity = EmailAndIdentityId & Pick<AccessInfo, "resource">;
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;
-
 export interface JWTHeader {
     alg: string;
     typ: string;

@@ -1,8 +1,8 @@
-import type { IdentityRoutes } from "@/types/types";
+import type { Routes, IdentityRoutes } from "@/types/types";
+import type AuthenticationService from "../../service/authentication";
+
 import { $ref } from "../../schema";
 import AuthLocalStrategyHandler from "../../handler/authentication";
-
-import type AuthenticationService from "../../service/authentication";
 
 /**
  * @todo
@@ -12,10 +12,8 @@ import type AuthenticationService from "../../service/authentication";
  *  ☐ add logging
  *  ☐ add tests
  */
-export default (
-    authenticationService: AuthenticationService
-): { routes: IdentityRoutes } => {
-    const handler = new AuthLocalStrategyHandler(authenticationService);
+export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
+    const handler = new AuthLocalStrategyHandler(authService);
 
     return {
         routes: [

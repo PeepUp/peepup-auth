@@ -1,7 +1,8 @@
-import type { IdentityRoutes } from "@/types/types";
+import type { IdentityRoutes, Routes } from "@/types/types";
+
+import { $ref } from "../../schema";
 import TokenHandler from "../../handler/token";
 import TokenManagementService from "../../service/token";
-import { $ref } from "../../schema";
 
 /**
  * @todo
@@ -11,10 +12,8 @@ import { $ref } from "../../schema";
  *  ☐ add logging
  *  ☐ add tests
  */
-export default (
-    tokenManagementService: TokenManagementService
-): { routes: IdentityRoutes } => {
-    const handler = new TokenHandler(tokenManagementService);
+export default (tokenService: TokenManagementService): Routes<IdentityRoutes> => {
+    const handler = new TokenHandler(tokenService);
 
     return {
         routes: [
