@@ -1,10 +1,11 @@
-import type { IdentityRoutes } from "@/types/types";
+import type { IdentityRoutes, Routes } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
-import IdentityHandler from "../../handler/identity";
-import { $ref } from "../../schema";
 
-export default (identitiesService: IdentityService): { routes: IdentityRoutes } => {
-    const identityHandler = new IdentityHandler(identitiesService);
+import { $ref } from "../../schema";
+import IdentityHandler from "../../handler/identity";
+
+export default (identityService: IdentityService): Routes<IdentityRoutes> => {
+    const identityHandler = new IdentityHandler(identityService);
 
     return {
         routes: [

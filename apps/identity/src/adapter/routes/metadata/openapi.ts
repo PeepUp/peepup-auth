@@ -1,7 +1,7 @@
-import type { IdentityRoutes } from "@/types/types";
+import type { Routes, IdentityRoutes } from "@/types/types";
 import MetadataHandler from "../../handler/metadata";
 
-export default (): { routes: IdentityRoutes } => ({
+export default (): Routes<IdentityRoutes> => ({
     routes: [
         {
             method: "GET",
