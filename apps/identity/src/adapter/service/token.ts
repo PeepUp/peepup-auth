@@ -1,18 +1,19 @@
-/* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable class-methods-use-this */
 
+import { join } from "path";
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
+import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import type {
     GenerateTokenArgs,
     JWTHeader,
     TokenPayloadIdentity,
     TokenPayloadWithIdentity,
 } from "@/types/token";
-import type { PostRefreshTokenParams } from "../schema/token";
-import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
+import type { PostRefreshTokenParams } from "../schema/token";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 
-import { join } from "path";
 import {
     CertAlgorithm,
     ExipirationTime,
@@ -27,13 +28,14 @@ import {
 import JwtToken from "../../common/utils/token";
 import { fileUtils } from "../../common/utils/utils";
 import TokenFactory from "../../domain/factory/token";
-import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import ForbiddenException from "../middleware/error/forbidden-exception";
 import UnauthorizedException from "../middleware/error/unauthorized";
 
 export default class TokenManagementService {
     private rsa256KeyId: string = "";
+
     private ecsdaKeyId: string = "";
+
     private verifyOptions: JWTVerifyOptions = {};
 
     constructor(private readonly tokenRepository: TokenAccessor) {
@@ -42,7 +44,7 @@ export default class TokenManagementService {
     }
 
     async generate(data: GenerateTokenArgs): Promise<Readonly<Token>> {
-        const { identity, type, expiresIn, algorithm: alg } = data;
+        const { identity, type, expiresIn, ip_address, device_id, algorithm: alg } = data;
         const kid = alg === TokenAlgorithm.RS256 ? this.rsa256KeyId : this.ecsdaKeyId;
         const payload = TokenFactory.createPayload(identity, type, expiresIn);
         const header = TokenFactory.createHeader(alg, kid);
@@ -64,8 +66,10 @@ export default class TokenManagementService {
             token,
             payload,
             header,
-            TokenTypes.access,
-            ExipirationTime.access
+            type,
+            expiresIn,
+            device_id,
+            ip_address
         );
 
         const result = await this.saveToken(tokenData, identity.id);
@@ -173,7 +177,9 @@ export default class TokenManagementService {
     }
 
     async rotateToken(
-        params: PostRefreshTokenParams
+        params: PostRefreshTokenParams,
+        ip_address: string,
+        device_id: string
     ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
         const { refresh_token } = params;
         const decode = JwtToken.decodeJwt(refresh_token);
@@ -234,6 +240,8 @@ export default class TokenManagementService {
             type: TokenTypes.access,
             algorithm: parsedHeader.alg,
             expiresIn: ExipirationTime.access,
+            device_id,
+            ip_address,
         });
 
         if (!accessToken) {

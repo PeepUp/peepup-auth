@@ -1,10 +1,8 @@
-import { z } from "zod";
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
-import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
+import { POST_LOGIN_IDENTITY_BODY_SCHEMA, ip_schema } from "../schema/auth";
 
-const ip = z.string().ip();
 /**
  * @todo:
  *  ☐ clean up this mess (code smells & clean code)
@@ -17,7 +15,8 @@ class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        const ip_address = ip.safeParse(request.ip).success === true ? request.ip : "";
+        const ip_address =
+            ip_schema.safeParse(request.ip).success === true ? request.ip : "";
         const device_id = request.headers["x-device-id"] as string;
         const parsedBody = POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(request.body);
 

@@ -106,6 +106,8 @@ export type Token = {
     expirationTime: Date;
     createdAt: Date;
     identityId: string | null;
+    device_id: string | null;
+    ip_address: string | null;
 } & Entity;
 
 type TokenTypes = "access" | "refresh";

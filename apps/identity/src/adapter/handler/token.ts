@@ -3,6 +3,7 @@ import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "../schema/token";
 import TokenManagementService from "../service/token";
 
 import type { PostRefreshTokenParams } from "../schema/token";
+import { ip_schema } from "../schema/auth";
 
 class TokenHandler {
     constructor(private tokenManagementService: TokenManagementService) {}
@@ -16,6 +17,10 @@ class TokenHandler {
     > = async (request, reply) => {
         const valid = POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA.safeParse(request.query);
 
+        const ip_address =
+            ip_schema.safeParse(request.ip).success === true ? request.ip : "";
+        const device_id = request.headers["x-device-id"] as string;
+
         if (!valid) {
             return reply.code(400).send({
                 code: 400,
@@ -23,7 +28,11 @@ class TokenHandler {
             });
         }
 
-        const data = await this.tokenManagementService.rotateToken(request.query);
+        const data = await this.tokenManagementService.rotateToken(
+            request.query,
+            ip_address,
+            device_id
+        );
 
         return reply.code(200).send(data);
     };

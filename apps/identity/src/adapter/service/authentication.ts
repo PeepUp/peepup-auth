@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { TokenContract } from "@/types/types";
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityRepository from "@/application/repository/identity";
@@ -63,7 +64,7 @@ export default class AuthenticationService {
 
         if (!identity) {
             throw new BadCredentialsException(
-                "Please cross check again! username, email or password are not exist!"
+                "Please cross check again! username, email or password are incorrect!"
             );
         }
 
@@ -71,6 +72,8 @@ export default class AuthenticationService {
             id: identity.id,
             email: identity.email,
             resource: "profile",
+            ip_address,
+            device_id: "",
         });
 
         const verify = await passwordUtils.verify({
@@ -130,17 +133,33 @@ export default class AuthenticationService {
             tokenJtiAndIdentityId
         );
 
-        console.log(token);
-
-        const revoked = await this.tokenManagementService.revokeToken(
-            decoded.jti as string
+        const userTokens = await this.tokenManagementService.getWhitelistedTokens(
+            access_token
         );
 
-        const deleted = await this.tokenManagementService.deleteWhitelistedToken(
-            tokenJtiAndIdentityId
-        );
+        const activeTokens = userTokens?.filter((t) => t.tokenStatus === "active");
 
-        console.log(deleted);
+        const refreshTokens = userTokens?.filter((t) => t.type === "refresh").at(0);
+
+        console.log({
+            token,
+            userTokens: activeTokens,
+        });
+
+        const revoked = await Promise.all([
+            this.tokenManagementService.revokeToken(decoded.jti as string),
+            this.tokenManagementService.revokeToken(refreshTokens?.jti as string),
+        ]);
+
+        const deleted = await Promise.all([
+            this.tokenManagementService.deleteWhitelistedToken(tokenJtiAndIdentityId),
+            this.tokenManagementService.deleteWhitelistedToken({
+                tokenId_identityId: {
+                    tokenId: refreshTokens?.jti as string,
+                    identityId: decoded.id as string,
+                },
+            }),
+        ]);
 
         if (!revoked) throw new Error("Error: cannot revoke token!");
     }

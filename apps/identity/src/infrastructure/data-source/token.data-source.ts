@@ -1,5 +1,7 @@
 /* eslint-disable class-methods-use-this */
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { TokenStatusTypes, type Prisma, type PrismaClient } from "@prisma/client";
+import { TokenQueryArgs } from "@/types/token";
+
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
 
 /**
@@ -16,25 +18,36 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     constructor(private readonly dataSource: PrismaClient) {}
 
     async query(
-        query: Partial<Token | Token[]>
-    ): Promise<Token | Token[] | (Token | Token[])[] | null> {
-        console.log(query);
-        throw new Error("Method not implemented.");
+        query: TokenQueryArgs
+    ): Promise<Readonly<Token>[] | Readonly<Token> | null> {
+        const results = await this.dataSource.token.findMany({
+            where: {
+                OR: [
+                    { jti: query.jti },
+                    { value: query.value },
+                    { identityId: query.identityId },
+                ],
+            },
+        });
+
+        return results;
     }
 
     async update(id: ID, data: Token): Promise<Readonly<Token> | null> {
         const result = await this.dataSource.token.update({
             where: {
-                jti: <string>id,
+                jti: id as string,
             },
             data: {
                 value: data.value,
                 type: data.type,
-                header: <Prisma.JsonObject>data.header,
+                header: data.header as Prisma.JsonObject,
                 jti: data.jti,
-                payload: <Prisma.JsonObject>data.payload,
+                payload: data.payload as Prisma.JsonObject,
                 kid: data.kid,
                 nbf: data.nbf,
+                ip_address: data.ip_address,
+                device_id: data.device_id,
                 tokenStatus: data.tokenStatus,
                 createdAt: new Date(data.createdAt),
                 expirationTime: data.expirationTime,
@@ -48,10 +61,10 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     async revoke(jti: ID): Promise<Readonly<Token> | null> {
         const result = await this.dataSource.token.update({
             where: {
-                jti: <string>jti,
+                jti: jti as string,
             },
             data: {
-                tokenStatus: "revoked",
+                tokenStatus: TokenStatusTypes.revoked,
             },
         });
 
@@ -63,21 +76,21 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             where: query,
         });
 
-        return result;
+        return result ?? null;
     }
 
     async getWhitelistedTokens(identityId: ID): Promise<Readonly<Token>[] | null> {
         const results = await this.dataSource.whitelistedToken.findMany({
-            where: {
-                identityId: <string>identityId,
-            },
             include: {
                 token: true,
+            },
+            where: {
+                identityId: identityId as string,
             },
         });
 
         const tokens: Readonly<Token>[] | null =
-            results.length > 0 ? results.map((result) => <Token>result.token) : null;
+            results.length > 0 ? results.map((result) => result.token as Token) : null;
 
         return tokens ?? null;
     }
@@ -93,6 +106,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         });
 
         if (result === null) return null;
+
         return result.token ?? null;
     }
 
@@ -101,7 +115,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             where: query,
         });
 
-        return result;
+        return result ?? null;
     }
 
     async create<R>(data: Token, identity: R): Promise<Readonly<Token>> {
@@ -109,25 +123,27 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             data: {
                 value: data.value,
                 type: data.type,
-                header: <Prisma.JsonObject>data.header,
+                header: data.header as Prisma.JsonObject,
                 jti: data.jti,
-                payload: <Prisma.JsonObject>data.payload,
+                payload: data.payload as Prisma.JsonObject,
                 kid: data.kid,
                 nbf: data.nbf,
+                ip_address: data.ip_address,
+                device_id: data.device_id,
                 tokenStatus: data.tokenStatus,
                 createdAt: new Date(data.createdAt),
                 expirationTime: data.expirationTime,
                 expires_at: data.expires_at,
                 identity: {
                     connect: {
-                        id: <string>identity,
+                        id: identity as string,
                     },
                 },
                 WhitelistedToken: {
                     create: {
                         identity: {
                             connect: {
-                                id: <string>data.identityId,
+                                id: data.identityId as string,
                             },
                         },
                     },
@@ -135,18 +151,20 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             },
         });
 
+        if (!result) throw new Error("Prisma: Token not created!");
+
         return result;
     }
 
     async createMany<R>(data: Token[], identity: R): Promise<void> {
-        const tokens: Prisma.TokenCreateManyInput[] = data.map((token) => ({
+        const tokens: Prisma.TokenCreateManyInput[] = data.map((token: Token) => ({
             value: token.value,
             expirationTime: token.expirationTime,
             type: token.type,
             expires_at: token.expires_at,
-            header: <Prisma.JsonObject>token.header,
+            header: token.header as Prisma.JsonObject,
             jti: token.jti,
-            payload: <Prisma.JsonObject>token.payload,
+            payload: token.payload as Prisma.JsonObject,
             kid: token.kid,
             nbf: token.nbf,
             tokenStatus: token.tokenStatus,
@@ -196,7 +214,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         const result: Readonly<Token> | null = await this.dataSource.token.findFirst({
             where: {
                 identity: {
-                    id: <string>identityId,
+                    id: identityId as string,
                 },
             },
         });
@@ -207,7 +225,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     async delete(jti: ID): Promise<void> {
         await this.dataSource.token.delete({
             where: {
-                jti: <string>jti,
+                jti: jti as string,
             },
         });
     }

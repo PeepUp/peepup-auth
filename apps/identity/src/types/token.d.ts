@@ -1,13 +1,15 @@
 import type { Identity } from "@domain/entity/identity";
 import type { JWTPayload, JWTHeaderParameters, JWTVerifyOptions } from "jose";
-import type { AccessInfo, EmailAndIdentityId, TokenTypes } from "./types";
+import type { AccessInfo, EmailAndIdentityId, Token, TokenTypes } from "./types";
 
 import { TokenAlgorithm } from "../common/constant";
 
 export type TokenPayload = EmailAndIdentityId & Pick<AccessInfo, "resource">;
+export type TokenPayloadProtected = TokenPayload & { jti: string; kid: string };
 
 export type AccessToken = string;
 export type RefreshToken = string;
+export type TokenQueryArgs = Partial<Pick<Token, "jti" | "identityId" | "value">>;
 
 export type AuthToken = {
     access_token: AccessToken;
@@ -23,6 +25,8 @@ export interface JwtToken extends KeyPair {
 export type GenerateTokenArgs = {
     identity: TokenPayload;
     type: TokenTypes;
+    ip_address: string;
+    device_id: string;
     readonly algorithm: TokenAlgorithm | string;
     readonly expiresIn: number;
 };
@@ -45,7 +49,11 @@ export type KeyPair = {
     publicKey: string;
 };
 
-export type TokenPayloadIdentity = EmailAndIdentityId & Pick<AccessInfo, "resource">;
+export type TokenPayloadIdentity = EmailAndIdentityId &
+    Pick<AccessInfo, "resource"> & {
+        ip_address?: string | null;
+        device_id?: string | null;
+    };
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;
 export interface JWTHeader {
     alg: string;

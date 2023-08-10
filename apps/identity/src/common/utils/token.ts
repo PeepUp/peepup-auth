@@ -1,22 +1,20 @@
 /* eslint-disable class-methods-use-this */
 
 import { join } from "path";
-import { mkdirSync, writeFileSync } from "fs";
 import { createPublicKey } from "crypto";
-import { JWK } from "jose";
+import { mkdirSync, writeFileSync } from "fs";
 import * as jose from "jose";
-
 import type {
     JWTHeaderParameters,
     JWTPayload,
     JWTVerifyOptions,
     JoseHeaderParameters,
+    JWK,
 } from "jose";
-import type { CreateTokenArgs, JWTHeader, TokenPayload } from "@/types/token";
-
-import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
+import type { CreateTokenArgs, JWTHeader, TokenPayloadProtected } from "@/types/token";
 import { fileUtils } from "./utils";
 import UnauthorizedException from "../../adapter/middleware/error/unauthorized";
+import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 
 class JwtToken {
     constructor(
@@ -33,13 +31,12 @@ class JwtToken {
         this.payload = payload;
     }
 
-    public async createToken({
-        privateKey,
-        header,
-        payload,
-    }: CreateTokenArgs): Promise<Readonly<string> | null> {
+    public async createToken(data: CreateTokenArgs): Promise<Readonly<string> | null> {
+        const { payload, header, privateKey } = data;
+
         try {
             const privateKeyImport = await jose.importPKCS8(privateKey, header.alg);
+
             const signature = await new jose.SignJWT(payload)
                 .setAudience(payload.aud as string)
                 .setExpirationTime(payload.exp as number)
@@ -50,17 +47,21 @@ class JwtToken {
                 .setProtectedHeader(header)
                 .sign(privateKeyImport);
 
-            return signature;
-        } catch (error: unknown) {
-            if (error) {
-                console.log({ error });
+            if (!signature) {
+                throw new Error("ErrorJwt: Cannot Create new Token Signature!");
             }
 
-            return "";
+            return signature;
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+
+            return null;
         }
     }
 
-    async buildJWKSPublicKey(rsaKeyId: string, ecsdaKeyId: string): Promise<void> {
+    async buildJWKSPublicKey(kid: string, ecsdaKeyId: string): Promise<void> {
         try {
             const keysDirPath = join(process.cwd(), `/keys`);
             const rsakeysCounter = fileUtils.getFolderNames(`${keysDirPath}/RSA`);
@@ -77,7 +78,7 @@ class JwtToken {
                         `/keys/RSA/${keyId}/public.pem.key`
                     );
                     const publicKey = fileUtils.readFile(publicKeyPath, "utf-8");
-                    const jwk = await this.JWKFromPEM(publicKey, rsaKeyId, "RS256");
+                    const jwk = await this.JWKFromPEM(publicKey, kid, "RS256");
                     keysList.push(jwk);
                 })
             );
@@ -130,15 +131,10 @@ class JwtToken {
         publicKey: string,
         algorithm: string,
         options: JWTVerifyOptions,
-        identity: TokenPayload & { jti: string; kid: string }
+        identity: TokenPayloadProtected
     ): Promise<boolean> {
         try {
             const publicKeyImport = await jose.importSPKI(publicKey, algorithm);
-
-            if (!publicKeyImport) {
-                throw new Error("Internal server error: Invalid public key!");
-            }
-
             const { payload, protectedHeader } = await jose.jwtVerify(
                 token,
                 publicKeyImport,
@@ -146,9 +142,8 @@ class JwtToken {
             );
 
             if (!payload || !protectedHeader) {
-                console.log("Payload or protected header is missing");
                 throw new ForbiddenException(
-                    "Invalid token: or Payload or protected header is missing"
+                    "Invalid token: Payload or protected header is missing"
                 );
             }
 
@@ -175,6 +170,7 @@ class JwtToken {
             return true;
         } catch (error) {
             console.dir({ error }, { depth: Infinity });
+
             if (error instanceof jose.errors.JWSInvalid) {
                 throw new ForbiddenException("Invalid token: Invalid signature");
             }
@@ -196,7 +192,7 @@ class JwtToken {
         token: string,
         algorithm: string,
         options: JWTVerifyOptions,
-        identity: TokenPayload & { jti: string; kid: string }
+        identity: TokenPayloadProtected
     ): Promise<boolean> {
         try {
             const jwks = jose.createRemoteJWKSet(
@@ -210,9 +206,8 @@ class JwtToken {
             );
 
             if (!payload || !protectedHeader) {
-                console.log("Payload or protected header is missing");
                 throw new ForbiddenException(
-                    "Invalid token: or Payload or protected header is missing"
+                    "Invalid token: Payload or protected header is missing"
                 );
             }
 
@@ -271,7 +266,7 @@ class JwtToken {
         payload: JWTPayload;
         options: JWTVerifyOptions;
         algorithm: string;
-        identity: TokenPayload & { jti: string; kid: string };
+        identity: TokenPayloadProtected;
         protectedHeader: JWTHeaderParameters;
     }): boolean {
         const { payload, options, identity, protectedHeader } = data;
