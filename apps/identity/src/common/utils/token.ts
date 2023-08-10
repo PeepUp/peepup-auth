@@ -16,7 +16,6 @@ import { fileUtils } from "./utils";
 import UnauthorizedException from "../../adapter/middleware/error/unauthorized";
 import ForbiddenException from "../../adapter/middleware/error/forbidden-exception";
 
-
 class JwtToken {
     constructor(
         public keyId: string,
