@@ -18,16 +18,6 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
     return {
         routes: [
             {
-                method: "POST",
-                url: "/token",
-                handler: handler.roteteToken,
-                schema: {
-                    request: {
-                        querystring: $ref("POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"),
-                    },
-                },
-            },
-            {
                 method: "GET",
                 url: "/token/sessions",
                 handler: handler.getSessions,
@@ -36,6 +26,16 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 method: "GET",
                 url: "/token/sessions/histories",
                 handler: handler.getSessionsHistories,
+            },
+            {
+                method: "POST",
+                url: "/token",
+                handler: handler.roteteToken,
+                schema: {
+                    request: {
+                        querystring: $ref("POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"),
+                    },
+                },
             },
         ],
     };

@@ -25,6 +25,8 @@ export const POST_INACTIVATED_IDENTITY_BODY_SCHEMA = localStrategy
     .omit({ password_identifier: true })
     .merge(z.object({ password }));
 
+export const ip_schema = z.string().ip();
+
 export const POST_LOGIN_IDENTITY_BODY_SCHEMA = localStrategy.merge(
     z.object({ password })
 );

@@ -22,6 +22,8 @@ class TokenFactory {
     static createAccessToken(identity: TokenPayloadIdentity): GenerateTokenArgs {
         return <GenerateTokenArgs>{
             identity,
+            ip_address: identity.ip_address,
+            device_id: identity.device_id,
             type: TokenTypeEnum.access,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 60 * 60),
             algorithm: TokenAlgorithm.RS256,
@@ -31,6 +33,8 @@ class TokenFactory {
     static createRefreshToken(identity: TokenPayloadIdentity): GenerateTokenArgs {
         return <GenerateTokenArgs>{
             identity,
+            ip_address: identity.ip_address,
+            device_id: identity.device_id,
             type: TokenTypeEnum.refresh,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 4 * 60 * 60),
             algorithm: TokenAlgorithm.ES256,
@@ -71,7 +75,9 @@ class TokenFactory {
         payload: JWTPayload,
         header: JWTHeaderParameters | JWTHeader,
         type: string,
-        expirationTime: number
+        expirationTime: number,
+        device_id?: string,
+        ip_address?: string
     ): Token {
         return <Token>{
             kid: header.kid,
@@ -85,6 +91,8 @@ class TokenFactory {
             header: JSON.stringify(header),
             payload: JSON.stringify(payload),
             identityId: payload.id,
+            device_id,
+            ip_address,
             expirationTime: new Date(expirationTime * 1000),
         };
     }

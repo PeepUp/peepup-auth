@@ -14,12 +14,10 @@ import dependencies from "../../infrastructure/diConfig";
 import AuthenticationMiddleware from "../middleware/authentication";
 
 /**
- *
  * @todo
  *  ☑️ clean up this mess (code smells & clean code)
  *  ☑️ destructuring routes
- *  ☐ [SOON] may be i need to add some prefix to routes
- *
+ *  ☑️ [SOON] may be i need to add some prefix to routes
  */
 export function routes(
     server: FastifyInstance<Server, IncomingMessage, ServerResponse>
@@ -27,10 +25,12 @@ export function routes(
     const { identityService, authenticationService, tokenManagementService } =
         dependencies;
 
+    // Routes Hooks
     server.addHook("onRequest", (request, reply) =>
         AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
     );
 
+    // Routes List
     const token = tokenRoutes(tokenManagementService).routes;
     const localStrategy = localIdentityRoutes(authenticationService).routes;
     const identity = identityRoutes(identityService).routes;
