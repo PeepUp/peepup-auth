@@ -11,7 +11,7 @@ import { cryptoUtils } from "../../common/utils/crypto";
 import {
     TokenAlgorithm,
     TokenSID,
-    TokenTypeEnum,
+    TokenType,
     audience,
     clientId,
     issuer,
@@ -24,7 +24,7 @@ class TokenFactory {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
-            type: TokenTypeEnum.access,
+            type: TokenType.access,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 60 * 60),
             algorithm: TokenAlgorithm.RS256,
         };
@@ -35,7 +35,7 @@ class TokenFactory {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
-            type: TokenTypeEnum.refresh,
+            type: TokenType.refresh,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 4 * 60 * 60),
             algorithm: TokenAlgorithm.ES256,
         };

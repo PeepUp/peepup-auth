@@ -130,4 +130,12 @@ server.after(() => {
     server.setErrorHandler(errorHandler);
 });
 
+server.ready(() => {
+    console.log({
+        listPlugin: {
+            cors: server.hasPlugin("@fastify/cors"),
+        },
+    });
+});
+
 export default server;

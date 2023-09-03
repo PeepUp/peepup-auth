@@ -35,7 +35,6 @@ export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
                     },
                 },
             },
-
             {
                 method: "DELETE",
                 url: "/local/logout/api",

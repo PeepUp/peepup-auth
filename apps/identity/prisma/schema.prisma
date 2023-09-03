@@ -8,24 +8,24 @@ datasource db {
 }
 
 model Identity {
-  id            String    @id @default(uuid())
-  avatar        String    @default("")
-  email         String    @unique
+  id            String     @id @default(uuid())
+  avatar        String     @default("")
+  email         String     @unique
   emailVerified DateTime?
-  firstName     String    @default("")
-  lastName      String    @default("")
+  firstName     String     @default("")
+  lastName      String     @default("")
   password      String
-  phoneNumber   String?   @unique
-  state         String    @default("active")
-  username      String?   @unique
-  isAdmin       Boolean   @default(false)
+  phoneNumber   String?    @unique
+  state         String     @default("active")
+  username      String?    @unique
+  role          SystemRole @default(member)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relation fields
   whitelistedTokens WhitelistedToken[]
-  roles             Role[]
+  // roles             Role[]
 
   providerId Int?
   provider   Provider? @relation(fields: [providerId], references: [id])
@@ -35,41 +35,54 @@ model Identity {
   @@map(name: "identities")
 }
 
-model Role {
-  id   Int           @id @default(autoincrement())
-  type UserRoleTypes @default(volunteer)
+enum SystemRole {
+  // Super-admin. Can do everything in the platform.
+  admin
 
-  // relation fields
-  identityId  String?      @unique
-  identity    Identity?    @relation(fields: [identityId], references: [id])
-  permissions Permission[]
+  // Member. Only has access to their own workspaces.
+  member
+
+  // volunteer. Only has access to their own workspaces.
+  volunteer
+
+  // organization. Only has access to their own workspaces.
+  organization
 }
 
-model Permission {
-  id         String   @id @default(cuid())
-  action     Action
-  subject    String
-  fields     String[]
-  conditions Json?
-  inverted   Boolean? @default(false)
-  reason     String?
+// model Role {
+//   id   Int           @id @default(autoincrement())
+//   type UserRoleTypes @default(volunteer)
+//
+//   identityId  String?      @unique
+//   identity    Identity?    @relation(fields: [identityId], references: [id])
+//   permissions Permission[]
+// }
 
-  // relation fields
-  roleId Int?
-  role   Role? @relation(fields: [roleId], references: [id])
+// model Permission {
+//   id         String   @id @default(cuid())
+//   action     Action
+//   subject    String
+//   fields     String[]
+//   conditions Json?
+//   inverted   Boolean? @default(false)
+//   reason     String?
+//
+//   // relation fields
+//   roleId Int?
+//   role   Role? @relation(fields: [roleId], references: [id])
+//
+//   @@map(name: "permissions")
+// }
 
-  @@map(name: "permissions")
-}
-
-model Attribute {
-  id        Int      @id @default(autoincrement())
-  name      String
-  value     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("attributes")
-}
+// model Attribute {
+//   id        Int      @id @default(autoincrement())
+//   name      String
+//   value     String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//
+//   @@map("attributes")
+// }
 
 model Provider {
   id                  Int       @id @default(autoincrement())
@@ -142,12 +155,6 @@ model WhitelistedToken {
   @@unique([tokenId, identityId])
   @@index([identityId], name: "whitelistedTokenIdentityIdIndex")
   @@map(name: "tokens_whitelisted")
-}
-
-enum UserRoleTypes {
-  admin
-  volunteer
-  organization
 }
 
 enum TokenTypes {

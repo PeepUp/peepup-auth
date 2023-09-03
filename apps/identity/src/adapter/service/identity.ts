@@ -7,6 +7,7 @@ import TokenManagementService from "./token";
 
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
 import type { PutIdentityBody } from "../schema/identity";
+import { RoleType } from "../../common/constant";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
@@ -54,9 +55,8 @@ class IdentityService {
     async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password } = body;
 
-        const existingIdentity = await this.identityRepository.getIdentity<Identity>(
-            traits
-        );
+        const existingIdentity =
+            await this.identityRepository.getIdentity<Identity>(traits);
 
         if (existingIdentity !== null) {
             throw new ResourceAlreadyExistException("identity already exists");
@@ -74,7 +74,7 @@ class IdentityService {
             state: "active",
             providerId: null,
             emailVerified: null,
-            isAdmin: false,
+            role: RoleType.member,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

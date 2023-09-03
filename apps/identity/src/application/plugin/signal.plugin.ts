@@ -49,4 +49,6 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
             gracefullyClose(sig);
         });
     }
+
+    fastify.decorate("signal", gracefullyClose);
 };

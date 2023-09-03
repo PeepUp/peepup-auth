@@ -30,6 +30,14 @@ export async function errorHandler(
         });
     }
 
+    if (error.statusCode === 400 && error.name === "BadRequestException") {
+        return reply.code(error.statusCode).send({
+            code: error.statusCode,
+            codeStatus: "Bad Request",
+            message: error.message,
+        });
+    }
+
     if (error.validation) {
         return reply.code(400).send({
             ok: false,

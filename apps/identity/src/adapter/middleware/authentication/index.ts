@@ -1,9 +1,10 @@
 /* eslint-disable consistent-return */
 import { FastifyReply, FastifyRequest } from "fastify";
+import type TokenManagementService from "../../service/token";
+
 import JwtToken from "../../../common/utils/token";
 import { protectedResource } from "../../../common/constant";
-
-import type TokenManagementService from "../../service/token";
+import { httpUtils } from "../../../common/utils/utils";
 
 class AuthenticationMiddleware {
     static async jwt(
@@ -24,18 +25,22 @@ class AuthenticationMiddleware {
                 });
             }
 
-            const token: string[] = authorization.split(" ");
+            const token: string = httpUtils.getAuthorizationToken({
+                value: authorization,
+                authType: "Bearer",
+                checkType: true,
+            });
 
-            if (token[0] !== "Bearer" && token[1] === undefined) {
+            if (!token) {
                 return reply.code(401).send({
                     ok: false,
                     code: 401,
                     codeStatus: "Unauthorized",
-                    message: "Token Authorization is missing or invalid",
+                    message: "Token Authorization header is missing or invalid",
                 });
             }
 
-            const decode = JwtToken.decodeJwt(token[1] as string);
+            const decode = JwtToken.decodeJwt(token as string);
 
             if (!decode) {
                 return reply.code(401).send({
@@ -46,10 +51,10 @@ class AuthenticationMiddleware {
                 });
             }
 
-            const data = await tokenManagementService.verifyToken(<string>token[1], {
+            const data = await tokenManagementService.verifyToken(token, {
                 tokenId_identityId: {
-                    tokenId: <string>decode.jti,
-                    identityId: <string>decode.id,
+                    tokenId: decode.jti as string,
+                    identityId: decode.id as string,
                 },
             });
 

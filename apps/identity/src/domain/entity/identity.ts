@@ -9,8 +9,8 @@ export interface Identity extends Entity {
     readonly password: string;
     phoneNumber: string | null;
     state: string;
+    role: string;
     readonly username?: string | null;
-    isAdmin: boolean;
     readonly createdAt?: Date;
     readonly updatedAt?: Date;
     readonly providerId: number | null;

@@ -5,12 +5,16 @@ import type {
 } from "@/infrastructure/data-source/token.data-source";
 import type { ID, Token, TokenAccessor, WhiteListedToken } from "@/types/types";
 import type TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";
+import { Prisma } from "@prisma/client";
 
 export class TokenRepository implements TokenAccessor {
     constructor(private readonly tokenDataSource: TokenStoreAdapter) {}
 
+    async getToken(query: QueryTokenArgs): Promise<Readonly<Token> | null> {
+        return await this.tokenDataSource.findUnique(query);
+    }
     async getTokens(identityId: ID, value?: string): Promise<Readonly<Token>[] | null> {
-        return this.tokenDataSource.findMany(identityId, value ?? "");
+        return await this.tokenDataSource.findMany(identityId, value ?? "");
     }
 
     async revokeToken(jti: ID): Promise<Readonly<Token> | null> {
@@ -18,15 +22,11 @@ export class TokenRepository implements TokenAccessor {
     }
 
     async saveToken(token: Token, identityId: ID): Promise<Token> {
-        return this.tokenDataSource.create<ID>(token, identityId);
+        return await this.tokenDataSource.create<ID>(token, identityId);
     }
 
     async saveTokens(token: Token[], identityId: ID): Promise<readonly Token[] | null> {
         throw new Error("Method not implemented.");
-    }
-
-    async findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null> {
-        return this.tokenDataSource.findUnique(query);
     }
 
     async WhitelistedToken(

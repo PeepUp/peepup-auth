@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Action } from "@prisma/client";
+import { Prisma, PrismaClient, SystemRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -13,24 +13,7 @@ const identity: Prisma.IdentityCreateInput = {
     firstName: "John",
     lastName: "Doe",
     email: "john@gmail.com",
-    roles: {
-        create: {
-            permissions: {
-                create: [
-                    {
-                        action: Action.read,
-                        subject: "identity",
-                        fields: ["id"],
-                    },
-                    {
-                        action: Action.update,
-                        subject: "identity",
-                        fields: ["id"],
-                    },
-                ],
-            },
-        },
-    },
+    role: SystemRole.admin,
 };
 
 async function main() {

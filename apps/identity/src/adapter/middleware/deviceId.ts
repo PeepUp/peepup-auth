@@ -1,11 +1,33 @@
-import * as crypto from "crypto";
-import { FastifyReply, FastifyRequest } from "fastify";
+import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
+import { httpUtils } from "../../common/utils/utils";
+import { cookieConfig } from "../../application/config/cookie.config";
+import { cryptoUtils } from "../../common/utils/crypto";
 
 export function deviceIdHook(
     request: FastifyRequest,
     reply: FastifyReply,
-    done: () => void
+    done: DoneFuncWithErrOrRes
 ) {
-    request.headers["x-device-id"] = crypto.randomBytes(16).toString("hex");
-    done();
+    const cookies = httpUtils.parseCookies(request.headers.cookie as string);
+    console.log("cookies ", request.headers.cookie as string);
+
+    if (!cookies) {
+        reply.header(
+            "set-cookie",
+            `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(
+                cryptoUtils.generateRandomSHA256(32)
+            )}; Path=/; HttpOnly; SameSite=Strict;`
+        );
+
+        reply.header(
+            "set-cookie",
+            `${cookieConfig.cookies.user_session}=${cryptoUtils.hashString(
+                cryptoUtils.generateRandomSHA256(64)
+            )}; Path=/; HttpOnly; SameSite=Strict;`
+        );
+
+        return done();
+    }
+
+    return done();
 }

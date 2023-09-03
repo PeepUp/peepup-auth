@@ -55,6 +55,7 @@ export type TokenPayloadIdentity = EmailAndIdentityId &
         device_id?: string | null;
     };
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;
+
 export interface JWTHeader {
     alg: string;
     typ: string;

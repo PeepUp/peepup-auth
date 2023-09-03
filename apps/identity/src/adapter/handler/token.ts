@@ -2,11 +2,66 @@ import type { RequestHandler } from "@/types/types";
 import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "../schema/token";
 import TokenManagementService from "../service/token";
 
-import type { PostRefreshTokenParams } from "../schema/token";
+import type {
+    PostRefreshTokenParams,
+    TokenQueryString,
+    idTokenParams,
+} from "../schema/token";
 import { ip_schema } from "../schema/auth";
 
 class TokenHandler {
     constructor(private tokenManagementService: TokenManagementService) {}
+
+    getTokenSessionById: RequestHandler<unknown, unknown, unknown, idTokenParams> =
+        async (request, reply) => {
+            const { params } = request;
+            console.log(params);
+
+            const data = await this.tokenManagementService.getTokenById(params.id);
+
+            reply.code(200).send({
+                data,
+            });
+        };
+
+    getWhoAmI: RequestHandler = async (request, reply) => {
+        const { headers } = request;
+        const token = this.tokenManagementService.splitAuthzHeader(
+            headers.authorization as string
+        );
+
+        const data = await this.tokenManagementService.decodeToken(token);
+        if (!data) {
+            return reply.code(400).send({
+                code: 400,
+                message: "Bad Request",
+            });
+        }
+
+        return reply.code(200).send({ data });
+    };
+
+    getDecodedToken: RequestHandler<
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        TokenQueryString
+    > = async (request, reply) => {
+        const { query } = request;
+        const data = await this.tokenManagementService.decodeToken(query.token);
+
+        if (!data) {
+            return reply.code(400).send({
+                code: 400,
+                message: "Bad Request",
+            });
+        }
+
+        return reply.code(200).send({
+            data,
+        });
+    };
 
     roteteToken: RequestHandler<
         unknown,

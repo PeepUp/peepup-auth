@@ -1,4 +1,5 @@
-import type { AccessInfo, ID, RoleContract, RoleType } from "@/types/types";
+import { RoleType } from "@/common/constant";
+import type { AccessInfo, ID, RoleContract } from "@/types/types";
 
 class Role implements RoleContract {
     constructor(
