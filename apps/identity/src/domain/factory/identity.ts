@@ -1,8 +1,8 @@
 import type { RegisterIdentityBody } from "@/types/types";
 import type { Identity } from "../entity/identity";
+import { IdentityStateTypes, RoleType } from "../../common/constant";
 
 class IdentityFactory {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static createIdentity(identity: RegisterIdentityBody): Identity {
         return <Identity>{
             email: <string>identity.email,
@@ -12,10 +12,10 @@ class IdentityFactory {
             lastName: "",
             firstName: "",
             phoneNumber: null,
-            state: "active",
+            state: IdentityStateTypes.unverified,
             providerId: null,
             emailVerified: null,
-            isAdmin: false,
+            role: RoleType.member,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

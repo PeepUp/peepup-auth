@@ -274,11 +274,11 @@ export interface TokenAccessor {
     rotateToken(token: Token, identityId: ID): Promise<Token>;
     verifyToken(token: Token, identityId: ID): Promise<Token>;
     saveToken(token: Token, identityId: ID): Promise<Readonly<Token>>;
-    findToken(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     validateTokenScope(token: Token, scope: string): Promise<boolean>;
     deleteWhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<void>;
     getWhitelistedTokens(identityId: ID): Promise<Readonly<Token>[] | null>;
     getTokens(identityId: ID, value?: string): Promise<Readonly<Token>[] | null>;
+    getToken(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
     saveTokens(token: Token[], identityId: ID): Promise<Readonly<Token[]> | null>;
     WhitelistedToken(token: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     updateWhiteListedToken(data: Token, newData: Token): Promise<Readonly<Token> | null>;
@@ -361,40 +361,3 @@ export type FastifyGracefulExitOptions = {
     timeout?: number;
     message?: string;
 };
-
-export enum RoleType {
-    admin = "admin",
-    volunteer = "volunteer",
-    organization = "organization",
-}
-
-export enum Action {
-    create = "create",
-    read = "read",
-    update = "update",
-    delete = "delete",
-    manage = "manage",
-}
-
-export enum Possession {
-    ANY = "any",
-    OWN = "own",
-}
-
-export enum TokenStatusTypes {
-    revoked = "revoked",
-    signed = "signed",
-    expired = "expired",
-    revokedAndExpired = "revokedAndExpired",
-    error = "error",
-    active = "active",
-    queued = "queued",
-    unknown = "unknown",
-    rotated = "rotated",
-}
-
-export enum Scope {
-    ANY = "any",
-    OWN = "own",
-    OWN_OR_ANY = "ownOrAny",
-}

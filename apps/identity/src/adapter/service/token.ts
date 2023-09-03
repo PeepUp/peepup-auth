@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-
 import { join } from "path";
 import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
-import { TokenStatusTypes, TokenTypes } from "@prisma/client";
 import type {
     GenerateTokenArgs,
     JWTHeader,
@@ -18,6 +16,8 @@ import {
     CertAlgorithm,
     ExipirationTime,
     TokenAlgorithm,
+    TokenStatusType,
+    TokenType,
     audience,
     clientId,
     issuer,
@@ -41,6 +41,12 @@ export default class TokenManagementService {
     constructor(private readonly tokenRepository: TokenAccessor) {
         this.setupKID();
         this.setupVerifyOptions();
+    }
+
+    async getTokenById(jti: ID): Promise<Readonly<Token> | null> {
+        return this.tokenRepository.getToken({
+            jti: jti as string,
+        });
     }
 
     async generate(data: GenerateTokenArgs): Promise<Readonly<Token>> {
@@ -126,7 +132,7 @@ export default class TokenManagementService {
         if (!data) return [];
 
         const result: Readonly<Token>[] = data.filter(
-            (t: Token) => t.tokenStatus === TokenStatusTypes.revoked
+            (t: Token) => t.tokenStatus === TokenStatusType.revoked
         );
 
         return result;
@@ -163,6 +169,7 @@ export default class TokenManagementService {
 
         return <TokenPayloadWithIdentity>{
             id: decode.id,
+            sid: decode.sid,
             jti: decode.jti,
             exp: decode.exp,
             iat: decode.iat,
@@ -206,8 +213,8 @@ export default class TokenManagementService {
 
         const token = tokens.filter(
             (t: Token) =>
-                t.type === TokenTypes.access &&
-                t.tokenStatus === TokenStatusTypes.active &&
+                t.type === TokenType.access &&
+                t.tokenStatus === TokenStatusType.active &&
                 t.jti === decode.jti &&
                 t.id === decode.id
         )[0];
@@ -235,20 +242,20 @@ export default class TokenManagementService {
             resource: parsedPayload.resource,
         };
 
-        const accessToken = await this.generate({
+        const { value } = await this.generate({
             identity,
-            type: TokenTypes.access,
+            type: TokenType.access,
             algorithm: parsedHeader.alg,
             expiresIn: ExipirationTime.access,
             device_id,
             ip_address,
         });
 
-        if (!accessToken) {
+        if (!value) {
             throw new Error("Error: cannot generate access token!");
         }
 
-        return { access_token: accessToken.value };
+        return { access_token: value };
     }
 
     async deleteWhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<void> {

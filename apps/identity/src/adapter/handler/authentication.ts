@@ -1,7 +1,9 @@
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
-import { POST_LOGIN_IDENTITY_BODY_SCHEMA, ip_schema } from "../schema/auth";
+import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
+import { httpUtils } from "../../common/utils/utils";
+import { cookieConfig } from "../../application/config/cookie.config";
 
 /**
  * @todo:
@@ -15,9 +17,11 @@ class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        const ip_address =
-            ip_schema.safeParse(request.ip).success === true ? request.ip : "";
-        const device_id = request.headers["x-device-id"] as string;
+        const ip_address = httpUtils.getIpAddress(Object.freeze(request));
+        console.log(request.ip);
+        console.log({ ip_address });
+        const cookies = httpUtils.parseCookies(request.headers.cookie as string);
+
         const parsedBody = POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(request.body);
 
         if (!parsedBody.success) {
@@ -29,7 +33,11 @@ class AuthLocalStrategyHandler {
             });
         }
 
-        const result = await this.authService.login(request.body, ip_address, device_id);
+        const result = await this.authService.login(
+            request.body,
+            ip_address,
+            cookies![cookieConfig.cookies.deviceId] as string
+        );
 
         if (!result) {
             return reply.status(401).send({

@@ -11,7 +11,11 @@ import {
     GET_IDENTITY_RESPONSE_SCHEMA,
     PUT_IDENTITY_BODY_SCHEMA,
 } from "./identity";
-import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "./token";
+import {
+    POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA,
+    TOKEN_QUERY_STRING,
+    ID_TOKEN_PARAMS,
+} from "./token";
 
 const { schemas: identitySchema, $ref } = buildJsonSchemas({
     // Auth
@@ -28,6 +32,8 @@ const { schemas: identitySchema, $ref } = buildJsonSchemas({
 
     // Token
     POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA,
+    ID_TOKEN_PARAMS,
+    TOKEN_QUERY_STRING,
 });
 
 export { $ref };

@@ -12,6 +12,7 @@ const cors: FastifyCorsOptions = {
         "origin",
         "Accept",
         "x-requested-with",
+        "x-device-id",
     ],
     exposedHeaders: [
         "Access-Control-Allow-Origin",

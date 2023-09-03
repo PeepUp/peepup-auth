@@ -14,7 +14,23 @@ function generateCUID(): string {
     return `${timestamp}${randomPart}`;
 }
 
+function generateRandomString(length: number = 32) {
+    if (length <= 0) {
+        throw new Error("Length must be greater than 0");
+    }
+
+    const randomBytes = crypto.randomBytes(Math.ceil(length / 2));
+    return randomBytes.toString("hex").slice(0, length);
+}
+
+function hashString(value: string) {
+    const sha256 = crypto.createHash("sha256");
+    return sha256.update(value).digest("hex");
+}
+
 export const cryptoUtils = {
     generateRandomSHA256,
     generateCUID,
+    hashString,
+    generateRandomString,
 };

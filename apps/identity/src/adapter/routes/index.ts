@@ -1,5 +1,5 @@
 import type { IncomingMessage, Server, ServerResponse } from "http";
-import type { FastifyInstance } from "fastify";
+import type { DoneFuncWithErrOrRes, FastifyInstance } from "fastify";
 import type { IdentityRoutes } from "@/types/types";
 
 import jwksRoutes from "./certs/jwks";
@@ -12,6 +12,7 @@ import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
 import AuthenticationMiddleware from "../middleware/authentication";
+import { deviceIdHook } from "../middleware/deviceId";
 
 /**
  * @todo
@@ -28,6 +29,10 @@ export function routes(
     // Routes Hooks
     server.addHook("onRequest", (request, reply) =>
         AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
+    );
+
+    server.addHook("onRequest", (request, reply, done: DoneFuncWithErrOrRes) =>
+        deviceIdHook(request, reply, done)
     );
 
     // Routes List

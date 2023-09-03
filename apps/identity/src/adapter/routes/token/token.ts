@@ -19,6 +19,16 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
         routes: [
             {
                 method: "GET",
+                url: "/token/sessions/:id",
+                handler: handler.getTokenSessionById,
+                schema: {
+                    request: {
+                        params: $ref("ID_TOKEN_PARAMS"),
+                    },
+                },
+            },
+            {
+                method: "GET",
                 url: "/token/sessions",
                 handler: handler.getSessions,
             },
@@ -26,6 +36,21 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 method: "GET",
                 url: "/token/sessions/histories",
                 handler: handler.getSessionsHistories,
+            },
+            {
+                method: "GET",
+                url: "/token/sessions/whoami",
+                handler: handler.getWhoAmI,
+            },
+            {
+                method: "POST",
+                url: "/token/decode",
+                handler: handler.getDecodedToken,
+                schema: {
+                    request: {
+                        querystring: $ref("TOKEN_QUERY_STRING"),
+                    },
+                },
             },
             {
                 method: "POST",

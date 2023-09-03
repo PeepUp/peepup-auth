@@ -3,9 +3,11 @@
 import argon2 from "argon2";
 import { randomBytes } from "crypto";
 import * as fs from "fs";
+import * as fastify from "fastify";
 import { join } from "path";
 
 import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
+import { ip_schema } from "../../adapter/schema/auth";
 
 export const fileUtils = {
     readFile(path: string, encoding: BufferEncoding): string {
@@ -134,6 +136,59 @@ export const passwordUtils = {
                 }
             });
         });
+    },
+};
+
+export const httpUtils = {
+    getIpAddress(request: fastify.FastifyRequest): string {
+        let ipAddress: string = request.ip;
+
+        return ip_schema.safeParse(ipAddress).success === true ? ipAddress : "";
+    },
+    getAuthorizationToken(data: {
+        value: string;
+        authType?: string;
+        checkType?: boolean;
+    }): string {
+        const { value, authType, checkType } = data;
+
+        if (value === "") return "";
+
+        const token = value.split(" ");
+
+        if (token.length !== 2) return "";
+
+        if (!token[1]) return "";
+
+        if (!checkType && !authType) {
+            return token[1];
+        }
+
+        if (!token[0] || token[0] !== authType) return "";
+
+        return token[1];
+    },
+    parseCookies(value: string): { [key: string]: string } | null {
+        if (value == undefined) return null;
+
+        const splited = value.split(";");
+
+        if (!splited || splited.length === 0) {
+            return null;
+        }
+
+        const cookies: Record<string, string> = splited.reduce(
+            (acc: Record<string, string>, item) => {
+                const [key, value] = item.trim().split("=");
+                if (key && value) {
+                    acc[key] = value;
+                }
+                return acc;
+            },
+            {}
+        );
+
+        return cookies;
     },
 };
 

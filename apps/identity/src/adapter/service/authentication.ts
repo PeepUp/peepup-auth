@@ -12,6 +12,7 @@ import UnauthorizedException from "../middleware/error/unauthorized";
 import ResourceAlreadyExistException from "../middleware/error/resource-exists";
 import BadCredentialsException from "../middleware/error/bad-credential-exception";
 import { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
+import BadRequestException from "../middleware/error/bad-request-exception";
 
 export default class AuthenticationService {
     constructor(
@@ -22,9 +23,8 @@ export default class AuthenticationService {
     async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password } = body;
 
-        const existingIdentity = await this.identityRepository.getIdentity<Identity>(
-            traits
-        );
+        const existingIdentity =
+            await this.identityRepository.getIdentity<Identity>(traits);
 
         if (existingIdentity) {
             throw new ResourceAlreadyExistException("identity already exists");
@@ -73,7 +73,7 @@ export default class AuthenticationService {
             email: identity.email,
             resource: "profile",
             ip_address,
-            device_id: "",
+            device_id,
         });
 
         const verify = await passwordUtils.verify({
@@ -105,6 +105,10 @@ export default class AuthenticationService {
     }
 
     async logout(access_token: string): Promise<void> {
+        if (!access_token) {
+            throw new BadRequestException("Untracked credential, you can login again!");
+        }
+
         const authorization: string[] = access_token.split(" ");
 
         if (authorization[0] !== "Bearer" && authorization[1] === undefined) {
@@ -133,9 +137,12 @@ export default class AuthenticationService {
             tokenJtiAndIdentityId
         );
 
-        const userTokens = await this.tokenManagementService.getWhitelistedTokens(
-            access_token
-        );
+        if (!token) {
+            throw new BadCredentialsException("Bad Credentials");
+        }
+
+        const userTokens =
+            await this.tokenManagementService.getWhitelistedTokens(access_token);
 
         const activeTokens = userTokens?.filter((t) => t.tokenStatus === "active");
 

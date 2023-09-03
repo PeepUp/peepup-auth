@@ -18,8 +18,9 @@ export const protectedResource = [
     join(identityPath, "/:id"),
     join(identityPath, "/:id", "/inactivate"),
     join(tokenPath, "/sessions"),
+    join(tokenPath, "/sessions", "/:id"),
     join(tokenPath, "/sessions", "/histories"),
-    join(localAuthPath, "/logout", "/api"),
+    join(tokenPath, "/sessions", "/whoami"),
 ];
 
 export const requiredClaims = [
@@ -49,7 +50,19 @@ export enum ExipirationTime {
     refresh = Math.floor(new Date().getTime() / 1000 + 1 * 24 * 60 * 60),
 }
 
-export enum TokenTypeEnum {
+export enum TokenStatusType {
+    active = "active",
+    inactive = "inactive",
+    expired = "expired",
+    revoked = "revoked",
+    signed = "signed",
+    revokedAndExpired = "revokedAndExpired",
+    error = "error",
+    queued = "queued",
+    rotated = "rotated",
+}
+
+export enum TokenType {
     access = "access",
     refresh = "refresh",
 }
@@ -67,4 +80,53 @@ export enum CertAlgorithm {
 export enum TokenSID {
     active = "active",
     inactive = "inactive",
+}
+
+export enum RoleType {
+    admin = "admin",
+    member = "member",
+    volunteer = "volunteer",
+    organization = "organization",
+}
+
+export enum Action {
+    create = "create",
+    read = "read",
+    update = "update",
+    delete = "delete",
+    manage = "manage",
+}
+
+export enum Possession {
+    ANY = "any",
+    OWN = "own",
+}
+
+export enum TokenStatusTypes {
+    revoked = "revoked",
+    signed = "signed",
+    expired = "expired",
+    revokedAndExpired = "revokedAndExpired",
+    error = "error",
+    active = "active",
+    queued = "queued",
+    unknown = "unknown",
+    rotated = "rotated",
+}
+
+export enum Scope {
+    ANY = "any",
+    OWN = "own",
+    OWN_OR_ANY = "ownOrAny",
+}
+
+export enum IdentityStateTypes {
+    active = "active",
+    deactive = "deactive",
+    pending = "pending",
+    blocked = "blocked",
+    deleted = "deleted",
+    archived = "archived",
+    unknown = "unknown",
+    unverified = "unverified",
 }
