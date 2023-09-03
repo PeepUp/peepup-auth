@@ -7,7 +7,7 @@ import TokenManagementService from "./token";
 
 import type { LoginIdentityBody, RegisterIdentityBody } from "../schema/auth";
 import type { PutIdentityBody } from "../schema/identity";
-import { RoleType } from "../../common/constant";
+import { IdentityStateTypes, RoleType } from "../../common/constant";
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
@@ -71,7 +71,7 @@ class IdentityService {
             lastName: "",
             firstName: "",
             phoneNumber: null,
-            state: "active",
+            state: IdentityStateTypes.unverified,
             providerId: null,
             emailVerified: null,
             role: RoleType.member,

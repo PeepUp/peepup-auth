@@ -1,6 +1,6 @@
 import type { RegisterIdentityBody } from "@/types/types";
 import type { Identity } from "../entity/identity";
-import { RoleType } from "../../common/constant";
+import { IdentityStateTypes, RoleType } from "../../common/constant";
 
 class IdentityFactory {
     public static createIdentity(identity: RegisterIdentityBody): Identity {
@@ -12,7 +12,7 @@ class IdentityFactory {
             lastName: "",
             firstName: "",
             phoneNumber: null,
-            state: "active",
+            state: IdentityStateTypes.unverified,
             providerId: null,
             emailVerified: null,
             role: RoleType.member,

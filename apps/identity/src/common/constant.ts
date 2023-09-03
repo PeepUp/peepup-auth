@@ -119,3 +119,14 @@ export enum Scope {
     OWN = "own",
     OWN_OR_ANY = "ownOrAny",
 }
+
+export enum IdentityStateTypes {
+    active = "active",
+    deactive = "deactive",
+    pending = "pending",
+    blocked = "blocked",
+    deleted = "deleted",
+    archived = "archived",
+    unknown = "unknown",
+    unverified = "unverified",
+}

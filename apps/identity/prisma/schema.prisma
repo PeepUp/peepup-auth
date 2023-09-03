@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Identity {
-  id            String     @id @default(uuid())
-  avatar        String     @default("")
-  email         String     @unique
+  id            String             @id @default(uuid())
+  avatar        String             @default("")
+  email         String             @unique
   emailVerified DateTime?
-  firstName     String     @default("")
-  lastName      String     @default("")
+  firstName     String             @default("")
+  lastName      String             @default("")
   password      String
-  phoneNumber   String?    @unique
-  state         String     @default("active")
-  username      String?    @unique
-  role          SystemRole @default(member)
+  phoneNumber   String?            @unique
+  state         IdentityStateTypes @default(active)
+  username      String?            @unique
+  role          SystemRole         @default(member)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -155,6 +155,17 @@ model WhitelistedToken {
   @@unique([tokenId, identityId])
   @@index([identityId], name: "whitelistedTokenIdentityIdIndex")
   @@map(name: "tokens_whitelisted")
+}
+
+enum IdentityStateTypes {
+  active
+  deactive
+  pending
+  blocked
+  deleted
+  archived
+  unknown
+  unverified
 }
 
 enum TokenTypes {
