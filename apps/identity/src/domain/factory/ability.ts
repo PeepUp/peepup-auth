@@ -2,11 +2,14 @@
 
 import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { PrismaQuery, Subjects, createPrismaAbility } from "@casl/prisma";
+
 import type { Identity } from "@prisma/client";
+import type { Token } from "@/types/types";
 import { Action, RoleType } from "../../common/constant";
 
 export type SubjectsAbility =
     | Subjects<{
+          Token: Token;
           Identity: Identity;
       }>
     | "all";
@@ -15,25 +18,9 @@ export type IdentityAbilityArgs = {
     id: string;
     role: string;
 };
-export const dummy_identity: Identity = {
-    phoneNumber: "1234567890",
-    username: "john123",
-    state: "active",
-    emailVerified: new Date(),
-    password:
-        "$argon2id$v=19$m=65536,t=3,p=4$CUsArk9CbT6eVPTTqyV7Vg$asdklfhjk3l4wjr23iojoiasdjfiodsafjiods75Z2GayCOWUJpd34",
-    avatar: "https://www.google.com",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@gmail.com",
-    role: RoleType.admin,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    providerId: 0,
-    id: "1234567890",
-};
 
 export type AppAbility = PureAbility<[string, SubjectsAbility], PrismaQuery>;
+
 let ANONYMOUS_ABILITY: AppAbility;
 
 export class AbilityFactory {
@@ -68,12 +55,21 @@ export class AbilityFactory {
 
     defineAdminRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
         b.can(Action.manage, "all");
+        b.can(Action.readAll, "Identity");
     }
 
     defineMemberRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
         b.can(Action.manage, "Identity", {
             id: {
                 equals: identity.id,
+            },
+        });
+        b.cannot(Action.readAll, "Identity");
+        b.can(Action.manage, "Token", {
+            identity: {
+                id: {
+                    equals: identity.id,
+                },
             },
         });
     }
@@ -87,9 +83,34 @@ export class AbilityFactory {
                 equals: identity.id,
             },
         });
+        b.can(Action.manage, "Token", {
+            identity: {
+                id: {
+                    equals: identity.id,
+                },
+            },
+        });
     }
 
-    defineAnonymousRules({ can }: AbilityBuilder<AppAbility>) {
-        can(Action.read, "all");
+    defineAnonymousRules(builder: AbilityBuilder<AppAbility>) {
+        return builder;
     }
 }
+
+export const dummy_identity: Identity = {
+    phoneNumber: "1234567890",
+    username: "john123",
+    state: "active",
+    emailVerified: new Date(),
+    password:
+        "$argon2id$v=19$m=65536,t=3,p=4$CUsArk9CbT6eVPTTqyV7Vg$asdklfhjk3l4wjr23iojoiasdjfiodsafjiods75Z2GayCOWUJpd34",
+    avatar: "https://www.google.com",
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@gmail.com",
+    role: RoleType.admin,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    providerId: 0,
+    id: "1234567890",
+};

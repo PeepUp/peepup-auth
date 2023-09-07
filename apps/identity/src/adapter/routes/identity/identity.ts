@@ -16,7 +16,7 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
                 url: "/identities",
                 onRequest: AuthZ.authorize([
                     {
-                        action: Action.read,
+                        action: Action.readAll,
                         subject: "Identity",
                     },
                 ]),

@@ -297,19 +297,23 @@ export default class TokenManagementService {
                 ip_address: data.ip_address as string,
             });
 
-            const rovokedToken = await this.tokenRepository.revokeToken(data.jti);
-            await this.deleteWhitelistedToken({
-                tokenId_identityId: {
-                    tokenId: data.jti,
-                    identityId: "",
-                },
-            });
-
             if (relatedToken) {
-                await this.tokenRepository.revokeToken(relatedToken.jti as string);
+                if (relatedToken.type === TokenType.refresh && relatedToken.jti) {
+                    // refresh_token
+                    await this.tokenRepository.revokeToken(relatedToken.jti as string);
+                    await this.deleteWhitelistedToken({
+                        tokenId_identityId: {
+                            tokenId: relatedToken.jti as string,
+                            identityId: "",
+                        },
+                    });
+                }
+
+                // access token
+                await this.tokenRepository.revokeToken(data.jti);
                 await this.deleteWhitelistedToken({
                     tokenId_identityId: {
-                        tokenId: relatedToken.jti as string,
+                        tokenId: data.jti as string,
                         identityId: "",
                     },
                 });
@@ -339,8 +343,6 @@ export default class TokenManagementService {
         const data = await this.tokenRepository.findRelatedTokens({
             device_id: device_id as string,
             ip_address: ip_address as string,
-            tokenId: jti as string,
-            identityId: identityId as string,
         });
 
         console.log({ whitelistedToken: data });

@@ -77,7 +77,7 @@ class AuthLocalStrategyHandler {
 
     logout: RequestHandler<unknown> = async (request, reply) => {
         const { headers } = request;
-        console.log(headers.authorization);
+
         await this.authService.logout(headers.authorization as string);
 
         return reply.status(204).send();
