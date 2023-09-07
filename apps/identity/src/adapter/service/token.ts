@@ -339,8 +339,6 @@ export default class TokenManagementService {
         const data = await this.tokenRepository.findRelatedTokens({
             device_id: device_id as string,
             ip_address: ip_address as string,
-            tokenId: jti as string,
-            identityId: identityId as string,
         });
 
         console.log({ whitelistedToken: data });
