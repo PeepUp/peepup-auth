@@ -71,7 +71,7 @@ export default class AuthenticationService {
         const identityPayload = Object.freeze({
             id: identity.id,
             email: identity.email,
-            resource: "profile",
+            resource: "member",
             ip_address,
             device_id,
         });
@@ -142,7 +142,7 @@ export default class AuthenticationService {
         }
 
         const userTokens =
-            await this.tokenManagementService.getWhitelistedTokens(access_token);
+            await this.tokenManagementService.getTokenSessions(access_token);
 
         const activeTokens = userTokens?.filter((t) => t.tokenStatus === "active");
 

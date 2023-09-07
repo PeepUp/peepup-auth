@@ -8,9 +8,15 @@ import type {
     TokenPayloadIdentity,
     TokenPayloadWithIdentity,
 } from "@/types/token";
-import type { ID, Token, TokenAccessor, TokenContract } from "@/types/types";
-import type { PostRefreshTokenParams } from "../schema/token";
+import type {
+    ID,
+    Token,
+    TokenAccessor,
+    TokenContract,
+    WhiteListedTokenAccessor,
+} from "@/types/types";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
+import type { PostRefreshTokenParams } from "../schema/token";
 
 import {
     CertAlgorithm,
@@ -38,7 +44,10 @@ export default class TokenManagementService {
 
     private verifyOptions: JWTVerifyOptions = {};
 
-    constructor(private readonly tokenRepository: TokenAccessor) {
+    constructor(
+        private readonly tokenRepository: TokenAccessor,
+        private readonly wlTokenRepository: WhiteListedTokenAccessor
+    ) {
         this.setupKID();
         this.setupVerifyOptions();
     }
@@ -60,6 +69,7 @@ export default class TokenManagementService {
             alg,
             name: privateKeyFile,
         });
+
         const token = await jwt.createToken({
             privateKey,
             payload,
@@ -102,22 +112,6 @@ export default class TokenManagementService {
         throw new Error("Method not implemented.");
     }
 
-    splitAuthzHeader(authorization: string): Readonly<string> {
-        const split = authorization.split(" ");
-
-        if (split[0] !== "Bearer") {
-            throw new UnauthorizedException(
-                "error: invalid header format for authorization"
-            );
-        }
-
-        if (!split[1]) {
-            throw new UnauthorizedException("error: invalid token");
-        }
-
-        return split[1];
-    }
-
     async saveTokenToWhitelist(
         token: Token,
         identityId: ID
@@ -129,6 +123,7 @@ export default class TokenManagementService {
         const token = this.splitAuthzHeader(access_token);
         const decode = JwtToken.decodeJwt(token);
         const data = await this.tokenRepository.getTokens(decode.id as string);
+
         if (!data) return [];
 
         const result: Readonly<Token>[] = data.filter(
@@ -138,20 +133,18 @@ export default class TokenManagementService {
         return result;
     }
 
-    async getWhitelistedTokens(access_token: string): Promise<Readonly<Token[]> | null> {
-        const token = this.splitAuthzHeader(access_token);
-        const decode = JwtToken.decodeJwt(token);
-        const data = await this.tokenRepository.getWhitelistedTokens(decode.id as string);
+    async getTokenSessions(access_token: string): Promise<Readonly<Token[]> | null> {
+        const data = await this.wlTokenRepository.findManyByIdentityId(
+            JwtToken.decodeJwt(this.splitAuthzHeader(access_token)).id as string
+        );
 
         if (!data) return [];
 
-        const result: Readonly<Token>[] = data.map((t: Token) => ({
+        return data.map((t: Token) => ({
             ...t,
             payload: JSON.parse(t.payload as string),
             header: JSON.parse(t.header as string),
         }));
-
-        return result;
     }
 
     async revokeToken(jti: ID): Promise<boolean> {
@@ -204,7 +197,7 @@ export default class TokenManagementService {
 
         const [_verifyToken, tokens] = await Promise.all([
             this.verifyToken(refresh_token, tokenJtiAndIdentityId),
-            this.getWhitelistedTokens(decode.id as string),
+            this.getTokenSessions(decode.id as string),
         ]);
 
         if (!tokens || !tokens.length) {
@@ -267,7 +260,6 @@ export default class TokenManagementService {
         query: QueryWhitelistedTokenArgs
     ): Promise<Readonly<Token> | null> {
         const jwt = new JwtToken(this.rsa256KeyId, {}, <JWTHeaderParameters>{});
-
         const data = await this.tokenRepository.WhitelistedToken(query);
 
         if (!data) {
@@ -298,6 +290,31 @@ export default class TokenManagementService {
         );
 
         if (!result) {
+            const relatedToken = await this.getLinkedToken({
+                jti: data.jti,
+                identityId: data.id,
+                device_id: data.device_id as string,
+                ip_address: data.ip_address as string,
+            });
+
+            const rovokedToken = await this.tokenRepository.revokeToken(data.jti);
+            await this.deleteWhitelistedToken({
+                tokenId_identityId: {
+                    tokenId: data.jti,
+                    identityId: "",
+                },
+            });
+
+            if (relatedToken) {
+                await this.tokenRepository.revokeToken(relatedToken.jti as string);
+                await this.deleteWhitelistedToken({
+                    tokenId_identityId: {
+                        tokenId: relatedToken.jti as string,
+                        identityId: "",
+                    },
+                });
+            }
+
             throw new ForbiddenException("Invalid token: verification failed");
         }
 
@@ -305,6 +322,35 @@ export default class TokenManagementService {
     }
 
     // eslint-disable-next-line class-methods-use-this
+
+    async getLinkedToken({
+        jti,
+        identityId,
+        device_id,
+        ip_address,
+    }: {
+        jti?: string;
+        identityId?: string | ID;
+        device_id?: string;
+        ip_address?: string;
+    }): Promise<Readonly<Token> | null> {
+        console.log({ jti, identityId, device_id, ip_address });
+
+        const data = await this.tokenRepository.findRelatedTokens({
+            device_id: device_id as string,
+            ip_address: ip_address as string,
+            tokenId: jti as string,
+            identityId: identityId as string,
+        });
+
+        console.log({ whitelistedToken: data });
+
+        if (!data) {
+            return null;
+        }
+
+        return data;
+    }
 
     setupKID(): void {
         const isRSADirectoryExist = fileUtils.checkDirectory(join(keysPath, "RSA"));
@@ -351,5 +397,21 @@ export default class TokenManagementService {
         if (!key) throw new Error(`Error: cannot read key file, with path: ${path}`);
 
         return key;
+    }
+
+    splitAuthzHeader(authorization: string): Readonly<string> {
+        const split = authorization.split(" ");
+
+        if (split[0] !== "Bearer") {
+            throw new UnauthorizedException(
+                "error: invalid header format for authorization"
+            );
+        }
+
+        if (!split[1]) {
+            throw new UnauthorizedException("error: invalid token");
+        }
+
+        return split[1];
     }
 }

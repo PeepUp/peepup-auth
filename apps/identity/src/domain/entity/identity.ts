@@ -1,5 +1,5 @@
-import type { Entity } from "@/types/types";
 import { IdentityStateTypes } from "@prisma/client";
+import type { Entity } from "@/types/types";
 
 export interface Identity extends Entity {
     avatar: string;

@@ -26,6 +26,10 @@ class IdentityHandler {
             const { email, username } = request.query;
             const hasKeys = Object.values(request.query).length > 0;
 
+            console.log({
+                ability: request.ability,
+            });
+
             if (hasKeys) {
                 const parseQuery = GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(
                     request.query
@@ -181,7 +185,7 @@ class IdentityHandler {
     };
 
     // eslint-disable-next-line class-methods-use-this
-    inactivated: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (
+    inactivate: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (
         request,
         reply
     ) => {

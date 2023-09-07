@@ -5,6 +5,7 @@ const method = z.enum(["password", "oidc"] as const);
 // const typeValue = z.enum(["api", "browser"] as const);
 const password_identifier = z.enum(["email", "username"] as const);
 
+// const inactive_method = z.enum(["password", "rephrase_words"] as const);
 const traits = createIdentityForRegistration;
 
 export const localStrategy = z.object({
@@ -17,6 +18,7 @@ export const authHeader = z.object({
     Authorization: z.string().startsWith("Bearer"),
 });
 
+export const POST_INACTIVATE_IDENTITY_BODY_SCHEMA = z.object({});
 export const POST_REGISTER_IDENTITY_BODY_SCHEMA = localStrategy
     .omit({ password_identifier: true })
     .merge(z.object({ password }));

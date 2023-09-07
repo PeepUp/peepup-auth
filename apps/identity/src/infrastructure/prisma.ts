@@ -5,6 +5,15 @@ import { passwordUtils } from "../common/utils/utils";
 
 const prisma = new PrismaClient();
 
+/* const pathDir = path.join(
+        process.cwd(),
+        "src",
+        "application/config/casbin/acl_root_model.conf"
+    );
+    const e = await newEnforcer(pathDir);
+    console.log({ e });
+ */
+
 /**
  * @todo
  *  ☐ encapsulte custom method into prisma model

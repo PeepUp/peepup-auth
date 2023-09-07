@@ -15,14 +15,29 @@ class TokenHandler {
     getTokenSessionById: RequestHandler<unknown, unknown, unknown, idTokenParams> =
         async (request, reply) => {
             const { params } = request;
-            console.log(params);
-
             const data = await this.tokenManagementService.getTokenById(params.id);
 
             reply.code(200).send({
                 data,
             });
         };
+
+    deleteSessionById: RequestHandler<unknown, unknown, unknown, idTokenParams> = async (
+        request,
+        reply
+    ) => {
+        const { params } = request;
+        const data = await this.tokenManagementService.revokeToken(params.id);
+
+        if (!data) {
+            return reply.code(400).send({
+                code: 400,
+                message: "Bad Request",
+            });
+        }
+
+        return reply.code(204).send();
+    };
 
     getWhoAmI: RequestHandler = async (request, reply) => {
         const { headers } = request;
@@ -95,11 +110,12 @@ class TokenHandler {
     getSessions: RequestHandler = async (request, reply) => {
         const { headers } = request;
 
-        const data = await this.tokenManagementService.getWhitelistedTokens(
+        const data = await this.tokenManagementService.getTokenSessions(
             headers.authorization as string
         );
 
         reply.code(200).send({
+            length: data?.length,
             data,
         });
     };
@@ -112,6 +128,7 @@ class TokenHandler {
         );
 
         reply.code(200).send({
+            length: data?.length,
             data,
         });
     };

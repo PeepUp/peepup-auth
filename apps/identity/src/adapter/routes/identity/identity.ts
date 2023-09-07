@@ -3,6 +3,8 @@ import type IdentityService from "@/adapter/service/identity";
 
 import { $ref } from "../../schema";
 import IdentityHandler from "../../handler/identity";
+import AuthZ from "../../middleware/guard/authz";
+import { Action } from "../../../common/constant";
 
 export default (identityService: IdentityService): Routes<IdentityRoutes> => {
     const identityHandler = new IdentityHandler(identityService);
@@ -12,6 +14,12 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             {
                 method: "GET",
                 url: "/identities",
+                onRequest: AuthZ.authorize([
+                    {
+                        action: Action.read,
+                        subject: "Identity",
+                    },
+                ]),
                 handler: identityHandler.identities,
                 schema: {
                     request: {
@@ -22,6 +30,12 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             {
                 method: "GET",
                 url: "/identities/:id",
+                onRequest: AuthZ.authorize([
+                    {
+                        action: Action.read,
+                        subject: "Identity",
+                    },
+                ]),
                 handler: identityHandler.getIdentityById,
                 schema: {
                     request: {
@@ -32,6 +46,12 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             {
                 method: "PUT",
                 url: "/identities/:id",
+                onRequest: AuthZ.authorize([
+                    {
+                        action: Action.update,
+                        subject: "Identity",
+                    },
+                ]),
                 handler: identityHandler.updateIdentityById,
                 schema: {
                     request: {
@@ -43,6 +63,12 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             {
                 method: "DELETE",
                 url: "/identities/:id",
+                onRequest: AuthZ.authorize([
+                    {
+                        action: Action.delete,
+                        subject: "Identity",
+                    },
+                ]),
                 handler: identityHandler.deleteIdentityById,
                 schema: {
                     request: {
@@ -53,7 +79,13 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             {
                 method: "POST",
                 url: "/identities/:id/inactivate",
-                handler: identityHandler.inactivated,
+                onRequest: AuthZ.authorize([
+                    {
+                        action: Action.update,
+                        subject: "Identity",
+                    },
+                ]),
+                handler: identityHandler.inactivate,
                 schema: {
                     request: {
                         body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),

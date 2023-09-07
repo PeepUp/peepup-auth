@@ -11,8 +11,9 @@ import identityRoutes from "./identity/identity";
 import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
-import AuthenticationMiddleware from "../middleware/authentication";
+import AuthenticationMiddleware from "../middleware/guard/jwt";
 import { deviceIdHook } from "../middleware/deviceId";
+import { AbilityGuard } from "../middleware/guard/abilty";
 
 /**
  * @todo
@@ -30,6 +31,10 @@ export function routes(
     server.addHook("onRequest", (request, reply) =>
         AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
     );
+
+    server.addHook("onRequest", (request, reply, done: DoneFuncWithErrOrRes) => {
+        new AbilityGuard().abac(request, reply, done);
+    });
 
     server.addHook("onRequest", (request, reply, done: DoneFuncWithErrOrRes) =>
         deviceIdHook(request, reply, done)

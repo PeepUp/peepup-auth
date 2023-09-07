@@ -2,15 +2,19 @@
 
 import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { PrismaQuery, Subjects, createPrismaAbility } from "@casl/prisma";
-
 import type { Identity } from "@prisma/client";
-
 import { Action, RoleType } from "../../common/constant";
 
-export type SubjectsAbility = Subjects<{
-    Identity: Identity;
-}>;
+export type SubjectsAbility =
+    | Subjects<{
+          Identity: Identity;
+      }>
+    | "all";
 
+export type IdentityAbilityArgs = {
+    id: string;
+    role: string;
+};
 export const dummy_identity: Identity = {
     phoneNumber: "1234567890",
     username: "john123",
@@ -29,24 +33,63 @@ export const dummy_identity: Identity = {
     id: "1234567890",
 };
 
-export type AppAbility = PureAbility<[Action, SubjectsAbility], PrismaQuery>;
+export type AppAbility = PureAbility<[string, SubjectsAbility], PrismaQuery>;
+let ANONYMOUS_ABILITY: AppAbility;
 
 export class AbilityFactory {
-    static defineAbilitiesFor(identity: Identity, role: string) {
-        const { can, cannot, build } = new AbilityBuilder<AppAbility>(
-            createPrismaAbility
-        );
+    defineAbilityFor(identity: IdentityAbilityArgs) {
+        if (identity) return createPrismaAbility(this.defineRulesFor(identity));
 
-        if (role === RoleType.admin) {
-            can(Action.manage, "Identity", { id: { equals: identity.id } });
+        ANONYMOUS_ABILITY =
+            ANONYMOUS_ABILITY || createPrismaAbility(this.defineRulesFor());
+        return ANONYMOUS_ABILITY;
+    }
+
+    defineRulesFor(identity?: IdentityAbilityArgs) {
+        const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
+
+        switch (identity?.role) {
+            case "admin":
+                this.defineAdminRules(identity, builder);
+                break;
+            case "member":
+                this.defineMemberRules(identity, builder);
+                break;
+            case "organization":
+                this.defineMemberRules(identity, builder);
+                break;
+            default:
+                this.defineAnonymousRules(builder);
+                break;
         }
 
-        console.log(cannot, build, can);
-        console.log(
-            "🚀 ~ file: ability.ts:18 ~ AbilityFactory ~ defineAbilitiesFor ~ isAdmin:",
-            role
-        );
+        return builder.rules;
+    }
 
-        return build();
+    defineAdminRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
+        b.can(Action.manage, "all");
+    }
+
+    defineMemberRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
+        b.can(Action.manage, "Identity", {
+            id: {
+                equals: identity.id,
+            },
+        });
+    }
+
+    defineOrganizationRules(
+        identity: IdentityAbilityArgs,
+        b: AbilityBuilder<AppAbility>
+    ) {
+        b.can(Action.manage, "Identity", {
+            id: {
+                equals: identity.id,
+            },
+        });
+    }
+
+    defineAnonymousRules({ can }: AbilityBuilder<AppAbility>) {
+        can(Action.read, "all");
     }
 }

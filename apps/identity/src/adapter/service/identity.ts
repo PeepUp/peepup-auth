@@ -55,10 +55,9 @@ class IdentityService {
     async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password } = body;
 
-        const existingIdentity =
-            await this.identityRepository.getIdentity<Identity>(traits);
+        const alreadyExists = await this.identityRepository.getIdentity<Identity>(traits);
 
-        if (existingIdentity !== null) {
+        if (alreadyExists !== null) {
             throw new ResourceAlreadyExistException("identity already exists");
         }
 
