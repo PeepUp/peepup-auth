@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
+import { join } from "path";
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type {
     GenerateTokenArgs,
     JWTHeader,
@@ -13,8 +15,6 @@ import type {
     TokenContract,
     WhiteListedTokenAccessor,
 } from "@/types/types";
-import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
-import { join } from "path";
 import type { QueryWhitelistedTokenArgs } from "../../infrastructure/data-source/token.data-source";
 import type { PostRefreshTokenParams } from "../schema/token";
 
@@ -39,7 +39,9 @@ import UnauthorizedException from "../middleware/error/unauthorized";
 
 export default class TokenManagementService {
     private rsa256KeyId: string = "";
+
     private ecsdaKeyId: string = "";
+
     private verifyOptions: JWTVerifyOptions = {};
 
     constructor(

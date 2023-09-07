@@ -36,7 +36,7 @@ class TokenHandler {
             });
         }
 
-        reply.code(204).send();
+        return reply.code(204).send();
     };
 
     getWhoAmI: RequestHandler = async (request, reply) => {

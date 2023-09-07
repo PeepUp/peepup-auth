@@ -5,7 +5,7 @@ const method = z.enum(["password", "oidc"] as const);
 // const typeValue = z.enum(["api", "browser"] as const);
 const password_identifier = z.enum(["email", "username"] as const);
 
-const inactive_method = z.enum(["password", "rephrase_words"] as const);
+// const inactive_method = z.enum(["password", "rephrase_words"] as const);
 const traits = createIdentityForRegistration;
 
 export const localStrategy = z.object({

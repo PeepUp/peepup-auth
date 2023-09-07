@@ -118,8 +118,6 @@ class TokenRepository implements TokenAccessor {
 }
 
 export type TokenRelatedArgs = {
-    identityId: string;
-    tokenId: string;
     device_id: string;
     ip_address: string;
 };

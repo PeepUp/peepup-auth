@@ -3,7 +3,7 @@ import type IdentityService from "@/adapter/service/identity";
 
 import { $ref } from "../../schema";
 import IdentityHandler from "../../handler/identity";
-import AuthZ from "../../../adapter/middleware/guard/authz";
+import AuthZ from "../../middleware/guard/authz";
 import { Action } from "../../../common/constant";
 
 export default (identityService: IdentityService): Routes<IdentityRoutes> => {

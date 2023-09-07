@@ -1,10 +1,11 @@
+import { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
 import { protectedResource } from "../../../common/constant";
 import JwtToken from "../../../common/utils/token";
 import { httpUtils } from "../../../common/utils/utils";
 import { AbilityFactory } from "../../../domain/factory/ability";
-import { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
 
 export class AbilityGuard {
+    // eslint-disable-next-line class-methods-use-this
     async abac(request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes) {
         const { headers, routerPath } = request;
         const { authorization } = headers;
@@ -46,6 +47,6 @@ export class AbilityGuard {
 
         request.ability = ability;
 
-        done();
+        return done();
     }
 }

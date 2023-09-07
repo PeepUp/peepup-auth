@@ -1,9 +1,9 @@
 /* eslint-disable class-methods-use-this */
 import { TokenStatusTypes, type Prisma, type PrismaClient } from "@prisma/client";
-import { TokenQueryArgs } from "@/types/token";
+import type { TokenQueryArgs } from "@/types/token";
 
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
-import { TokenRelatedArgs } from "@/application/repository/token";
+import type { TokenRelatedArgs } from "@/application/repository/token";
 
 /**
  * @todo:
@@ -81,8 +81,6 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     }
 
     async findRelatedTokens({
-        identityId,
-        tokenId,
         device_id,
         ip_address,
     }: TokenRelatedArgs): Promise<Readonly<Token | null>> {
@@ -92,7 +90,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             },
             where: {
                 token: {
-                    OR: [{ device_id: device_id }, { ip_address: ip_address }],
+                    OR: [{ device_id }, { ip_address }],
                     AND: [
                         {
                             tokenStatus: {

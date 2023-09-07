@@ -1,10 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
-import { AbilityBuilder, ExtractSubjectType, PureAbility } from "@casl/ability";
+import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { PrismaQuery, Subjects, createPrismaAbility } from "@casl/prisma";
-import { Action, RoleType } from "../../common/constant";
-
 import type { Identity } from "@prisma/client";
+import { Action, RoleType } from "../../common/constant";
 
 export type SubjectsAbility =
     | Subjects<{

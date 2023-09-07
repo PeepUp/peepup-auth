@@ -50,7 +50,7 @@ class WhiteListedTokenStoreAdapter implements WhiteListedTokenDataSourceAdapter 
 
         const tokens: Readonly<Token>[] | null =
             result.length > 0
-                ? (result.map((result) => result.token as Token) as Token[])
+                ? (result.map((item) => item.token as Token) as Token[])
                 : null;
 
         return tokens ?? null;
@@ -68,24 +68,6 @@ class WhiteListedTokenStoreAdapter implements WhiteListedTokenDataSourceAdapter 
                 identityId: identityId as string,
             },
         });
-    }
-
-    find(id: ID): Promise<Readonly<Token | Token[]> | null> {
-        throw new Error("Method not implemented.");
-    }
-
-    findUnique(query: Prisma.TokenWhereUniqueInput): Promise<Readonly<Token> | null> {
-        throw new Error("Method not implemented.");
-    }
-
-    update(id: ID, data: Token | Token[]): Promise<Readonly<Token | Token[]> | null> {
-        throw new Error("Method not implemented.");
-    }
-
-    query(
-        query: Partial<Token | Token[]>
-    ): Promise<Readonly<Token | Token[]> | Readonly<Token | Token[]>[] | null> {
-        throw new Error("Method not implemented.");
     }
 }
 

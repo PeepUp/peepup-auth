@@ -1,10 +1,5 @@
 import type { IncomingMessage, Server, ServerResponse } from "http";
-import type {
-    DoneFuncWithErrOrRes,
-    FastifyInstance,
-    FastifyReply,
-    FastifyRequest,
-} from "fastify";
+import type { DoneFuncWithErrOrRes, FastifyInstance } from "fastify";
 import type { IdentityRoutes } from "@/types/types";
 
 import jwksRoutes from "./certs/jwks";
