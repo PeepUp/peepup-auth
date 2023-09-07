@@ -3,6 +3,7 @@ import { TokenStatusTypes, type Prisma, type PrismaClient } from "@prisma/client
 import { TokenQueryArgs } from "@/types/token";
 
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
+import { TokenRelatedArgs } from "@/application/repository/token";
 
 /**
  * @todo:
@@ -79,6 +80,37 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         return result ?? null;
     }
 
+    async findRelatedTokens({
+        identityId,
+        tokenId,
+        device_id,
+        ip_address,
+    }: TokenRelatedArgs): Promise<Readonly<Token | null>> {
+        const results = await this.dataSource.whitelistedToken.findMany({
+            include: {
+                token: true,
+            },
+            where: {
+                token: {
+                    OR: [{ device_id: device_id }, { ip_address: ip_address }],
+                    AND: [
+                        {
+                            tokenStatus: {
+                                equals: TokenStatusTypes.active,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        if (!results || results.length === 0) {
+            return null;
+        }
+
+        return results[0]?.token ?? null;
+    }
+
     async getWhitelistedTokens(identityId: ID): Promise<Readonly<Token>[] | null> {
         const results = await this.dataSource.whitelistedToken.findMany({
             include: {
@@ -104,6 +136,8 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
             },
             where: query,
         });
+
+        console.log({ result });
 
         if (result === null) return null;
 
@@ -195,6 +229,15 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         tokenValue: string
     ): Promise<Readonly<Token>[] | null> {
         const result: Readonly<Token>[] | null = await this.dataSource.token.findMany({
+            take: 10,
+            orderBy: [
+                {
+                    tokenStatus: "desc",
+                },
+                {
+                    type: "asc",
+                },
+            ],
             where: {
                 OR: [
                     { value: tokenValue },

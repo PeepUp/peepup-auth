@@ -243,19 +243,21 @@ class JwtToken {
 
             return true;
         } catch (error) {
-            console.dir({ error }, { depth: Infinity });
+            console.dir({ verifyjwterror: error }, { depth: Infinity });
 
             if (error instanceof jose.errors.JWSInvalid) {
-                throw new UnauthorizedException("Invalid token: Invalid signature");
+                /* throw new UnauthorizedException("Invalid token: Invalid signature"); */
+                console.log("Invalid token: Invalid signature");
             }
 
             if (error instanceof jose.errors.JOSEError) {
-                throw new UnauthorizedException(`Invalid token: ${error.message}`);
+                // throw new UnauthorizedException(`Invalid token: ${error.message}`);
+                console.log(`Invalid token: ${error.message}`);
             }
 
             if (error instanceof Error) {
+                // throw new Error(error.message);
                 console.error("Error occurred during JWT verification:", error);
-                throw new Error(error.message);
             }
 
             return false;

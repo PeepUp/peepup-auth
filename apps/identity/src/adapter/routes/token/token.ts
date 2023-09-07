@@ -28,8 +28,15 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 },
             },
             {
+                /* IT'LL REVOKED THE CURRENT SESSION,
+                 * NOT DELETED THE TOKEN SESSION */
+                method: "DELETE",
+                url: "/token/sessions/:id",
+                handler: handler.deleteSessionById,
+            },
+            {
                 method: "GET",
-                url: "/token/sessions",
+                url: "/token/sessions/active",
                 handler: handler.getSessions,
             },
             {
@@ -52,6 +59,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                     },
                 },
             },
+
             {
                 method: "POST",
                 url: "/token",

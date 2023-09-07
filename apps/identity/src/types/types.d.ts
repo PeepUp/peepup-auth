@@ -4,7 +4,12 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import type { FastifyBaseLogger } from "fastify/types/logger";
 import type { FastifyReply, FastifyRequest } from "fastify/types/request";
 import type { RouteOptions } from "fastify/types/route";
-import type { QueryTokenArgs } from "../infrastructure/data-source/token.data-source";
+import type {
+    QueryTokenArgs,
+    QueryWhitelistedTokenArgs,
+} from "../infrastructure/data-source/token.data-source";
+import { TokenRelatedArgs } from "@/application/repository/token";
+import { WhiteListedTokenCreateArgs } from "@/infrastructure/data-source/whitelist-token.data-source";
 
 type IdentityId = string;
 
@@ -189,6 +194,14 @@ export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Tok
     find(identityId: ID): Promise<Readonly<Token> | null>;
     findMany(identityId: ID, tokenValue?: string): Promise<Readonly<T>[] | null>;
     getWhitelistedTokens(identityId): Promise<Readonly<Token>[] | null>;
+    findRelatedTokens(args: TokenRelatedArgs): Promise<Readonly<Token> | null>;
+}
+
+export interface WhiteListedTokenDataSourceAdapter {
+    findMany(): Promise<Readonly<Token[]> | null>;
+    findManyByIdentityId(identityId: ID): Promise<Readonly<Token[]> | null>;
+    delete(query: QueryWhitelistedTokenArgs): Promise<void>;
+    deleteMany(identityId: ID): Promise<void>;
 }
 
 export type RoleContract = {
@@ -282,16 +295,14 @@ export interface TokenAccessor {
     saveTokens(token: Token[], identityId: ID): Promise<Readonly<Token[]> | null>;
     WhitelistedToken(token: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     updateWhiteListedToken(data: Token, newData: Token): Promise<Readonly<Token> | null>;
+    findRelatedTokens(args: TokenRelatedArgs): Promise<Readonly<Token> | null>;
 }
 
 export interface WhiteListedTokenAccessor {
-    addToWhiteListedToken(
-        token: Token,
-        identityId: ID
-    ): Promise<Readonly<WhiteListedToken>>;
-    removeFromWhiteList(token: Token): Promise<void>;
-    getWhiteListedTokens(identityId: ID): Promise<Readonly<WhiteListedToken>[]>;
-    whitelistToken(token: Token, identityId: ID): Promise<Readonly<WhiteListedToken>>;
+    findMany(): Promise<Readonly<Token[]> | null>;
+    findManyByIdentityId(identityId: ID): Promise<Readonly<Token[]> | null>;
+    delete(query: QueryWhitelistedTokenArgs): Promise<void>;
+    deleteMany(identityId: ID): Promise<void>;
 }
 
 export type TokenAndWhiteListed = TokenAccessor & WhiteListedTokenAccessor;

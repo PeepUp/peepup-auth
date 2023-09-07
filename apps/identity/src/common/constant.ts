@@ -18,6 +18,7 @@ export const protectedResource = [
     join(identityPath, "/:id"),
     join(identityPath, "/:id", "/inactivate"),
     join(tokenPath, "/sessions"),
+    join(tokenPath, "/sessions", "/active"),
     join(tokenPath, "/sessions", "/:id"),
     join(tokenPath, "/sessions", "/histories"),
     join(tokenPath, "/sessions", "/whoami"),
