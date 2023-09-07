@@ -57,11 +57,6 @@ export default class AuthenticationService {
             data: { password },
         });
 
-        console.log({
-            ip_address,
-            device_id,
-        });
-
         if (!identity) {
             throw new BadCredentialsException(
                 "Please cross check again! username, email or password are incorrect!"
@@ -71,7 +66,7 @@ export default class AuthenticationService {
         const identityPayload = Object.freeze({
             id: identity.id,
             email: identity.email,
-            resource: "member",
+            resource: identity.role,
             ip_address,
             device_id,
         });
@@ -104,7 +99,7 @@ export default class AuthenticationService {
         };
     }
 
-    async logout(access_token: string): Promise<void> {
+    async logout(access_token: string): Promise<void | Error> {
         if (!access_token) {
             throw new BadRequestException("Untracked credential, you can login again!");
         }
@@ -117,6 +112,12 @@ export default class AuthenticationService {
 
         if (authorization[1] === undefined) {
             throw new UnauthorizedException("Error: invalid token!");
+        }
+
+        const validate = await this.tokenManagementService.getTokenSessions(access_token);
+
+        if (validate?.length === 0) {
+            throw new BadRequestException("Untracked credential, you can login again!");
         }
 
         const decoded = await this.tokenManagementService.decodeToken(authorization[1]);
@@ -147,11 +148,6 @@ export default class AuthenticationService {
         const activeTokens = userTokens?.filter((t) => t.tokenStatus === "active");
 
         const refreshTokens = userTokens?.filter((t) => t.type === "refresh").at(0);
-
-        console.log({
-            token,
-            userTokens: activeTokens,
-        });
 
         const revoked = await Promise.all([
             this.tokenManagementService.revokeToken(decoded.jti as string),

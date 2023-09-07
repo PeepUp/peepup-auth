@@ -96,6 +96,7 @@ export enum Action {
     update = "update",
     delete = "delete",
     manage = "manage",
+    readAll = "read-all",
 }
 
 export enum Possession {
