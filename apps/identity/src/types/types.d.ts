@@ -12,17 +12,17 @@ import { TokenRelatedArgs } from "@/application/repository/token";
 import { WhiteListedTokenCreateArgs } from "@/infrastructure/data-source/whitelist-token.data-source";
 
 type IdentityId = string;
-
 export type ID = number | IdentityId;
-
 export type Serializable = {
     readonly id?: ID;
 };
-
 export type WildcardParams = {
     "*": string;
 };
-
+export type IdentityAbilityArgs = {
+    id: string;
+    role: string;
+};
 export type RequestHandler<
     Headers = unknown,
     RawQuery = unknown,
@@ -42,6 +42,10 @@ export type RequestHandler<
     reply: FastifyReply
 ) => Promise<unknown>;
 
+export type AuthorizationHeaderOptions = {
+    authorizationHeader: boolean;
+    authorizationHeaderPrefix: string;
+};
 type Request = http.IncomingMessage;
 type Reply = http.ServerResponse;
 
@@ -49,11 +53,9 @@ export type TokenContract = {
     access_token: string;
     refresh_token: string;
 };
-
 export type Routes<T> = {
     routes: T;
 };
-
 export type IdentityRoutes = Array<
     RouteOptions<
         http.Server,
@@ -66,7 +68,6 @@ export type IdentityRoutes = Array<
         FastifyBaseLogger
     >
 >;
-
 export type UserQuery = {
     id?: ID;
     email?: string;
@@ -96,6 +97,23 @@ export type AccountContract = {
     providerId?: ID;
     user: UserContract;
     tokens?: string[];
+} & Entity;
+
+export type ParsedToken = {
+    value: string;
+    type: TokenTypes;
+    header: TokenPayloadIdentity;
+    payload: JWTHeader;
+    kid: string;
+    jti: string;
+    nbf: number;
+    expires_at: number;
+    tokenStatus: TokenStatus;
+    expirationTime: Date;
+    createdAt: Date;
+    identityId: string | null;
+    device_id: string | null;
+    ip_address: string | null;
 } & Entity;
 
 export type Token = {

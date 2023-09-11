@@ -12,15 +12,15 @@ import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import type { FastifyInstance } from "fastify";
+import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import Certificate from "../../common/utils/certs";
-import { keysPath } from "../../common/constant";
-import { cryptoUtils } from "../../common/utils/crypto";
-import { fileUtils } from "../../common/utils/utils";
-import JwtToken from "../../common/utils/token";
-import { JWTHeaderParameters } from "jose";
 import { mkdirSync } from "fs";
+import JwtToken from "../../common/utils/token";
+import { keysPath } from "../../common/constant";
+import Certificate from "../../common/utils/certs";
+import { fileUtils } from "../../common/utils/utils";
+import { cryptoUtils } from "../../common/utils/crypto";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);

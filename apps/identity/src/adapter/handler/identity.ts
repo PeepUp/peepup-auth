@@ -5,11 +5,9 @@ import type {
 } from "@/adapter/schema/identity";
 import type { RequestHandler } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
-import {
-    GET_IDENTITY_PARAMS_ID_SCHEMA,
-    GET_IDENTITY_PARTIAL_QUERY_SCHEMA,
-} from "../schema/identity";
-import { InactivatedIdentityBody } from "../schema/auth";
+import type { InactivatedIdentityBody } from "../schema/auth";
+
+import * as schema from "../schema/identity";
 
 /**
  * @todo:
@@ -31,7 +29,7 @@ class IdentityHandler {
             });
 
             if (hasKeys) {
-                const parseQuery = GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(
+                const parseQuery = schema.GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(
                     request.query
                 );
 
@@ -86,7 +84,9 @@ class IdentityHandler {
     getIdentityById: RequestHandler<unknown, unknown, unknown, GetIdentityParamsId> =
         async (request, reply) => {
             const { id } = request.params;
-            const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+            const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(
+                request.params
+            );
 
             if (!parseId.success) {
                 if (parseId.error) {
@@ -128,7 +128,7 @@ class IdentityHandler {
     > = async (request, reply) => {
         const { id } = request.params;
         const { lastName, firstName, avatar } = request.body;
-        const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+        const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
         if (!parseId.success) {
             return reply.code(400).send({
@@ -156,33 +156,33 @@ class IdentityHandler {
         });
     };
 
-    deleteIdentityById: RequestHandler<{ Params: GetIdentityParamsId }> = async (
-        request,
-        reply
-    ) => {
-        const { id } = <GetIdentityParamsId>request.params;
-        const parseId = GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+    deleteIdentityById: RequestHandler<unknown, unknown, unknown, GetIdentityParamsId> =
+        async (request, reply) => {
+            const { id } = request.params;
+            const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(
+                request.params
+            );
 
-        if (!parseId.success) {
-            return reply.code(400).send({
-                code: 400,
-                message: "bad request",
-                errorss: parseId.error.message,
-            });
-        }
+            if (!parseId.success) {
+                return reply.code(400).send({
+                    code: 400,
+                    message: "bad request",
+                    errorss: parseId.error.message,
+                });
+            }
 
-        const deleted = await this.identitiesService.deleteIdentityById(id);
+            const deleted = await this.identitiesService.deleteIdentityById(id);
 
-        if (!deleted) {
-            return reply.code(400).send({
-                code: 400,
-                message: "bad request",
-                errorss: `cannot delete identity record with id /${id}/`,
-            });
-        }
+            if (!deleted) {
+                return reply.code(400).send({
+                    code: 400,
+                    message: "bad request",
+                    errorss: `cannot delete identity record with id /${id}/`,
+                });
+            }
 
-        return reply.code(204).send();
-    };
+            return reply.code(204).send();
+        };
 
     // eslint-disable-next-line class-methods-use-this
     inactivate: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (

@@ -1,30 +1,33 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
         "declaration": true,
         "declarationDir": "dist",
         "noUncheckedIndexedAccess": true,
         "outDir": "./dist",
+        "baseUrl": ".",
+        "plugins": [
+            { "transform": "typescript-transform-paths" },
+            // Transform paths in output .d.ts files (Include this line if you output declarations files)
+            { "transform": "typescript-transform-paths", "afterDeclarations": true }
+        ],
         "paths": {
-            "@/*": ["src/*"],
-            "application/*": ["src/application/*"],
-            "common/*": ["src/common/*"],
-            "config/*": ["src/config/*"],
-            "domain/*": ["src/domain/*"],
-            "infrastructure/*": ["src/infrastructure/*"],
-            "interfaces/*": ["src/adapter/*"],
-            "tests/*": ["src/__tests__/*"],
-            "types/*": ["src/types/*"]
+            "@/adapter/*": ["./src/adapter/*"],
+            "@/application/*": ["./src/application/*"],
+            "@/common/*": ["./src/common/*"],
+            "@/config/*": ["./src/config/*"],
+            "@/domain/*": ["./src/domain/*"],
+            "@/infrastructure/*": ["./src/infrastructure/*"],
+            "@/tests/*": ["./src/__tests__/*"],
+            "@/types/*": ["./src/types/*"]
         },
         "typeRoots": ["node_modules/@types", "src/types/*.d.ts"],
         "types": ["node", "jest"]
     },
+    "include": ["src"],
     "exclude": ["node_modules", "**/*.test.ts", "jest.config*", "prisma/seed.ts"],
     "extends": "@dofavour/tsconfig/common.json",
-    "include": ["src/**/*"],
     "ts-node": {
-        "esm": true,
-        "files": true,
-        "transpileOnly": true
+        "transpileOnly": true,
+        "require": ["typescript-transform-paths/register", "tsconfig-paths/register"]
     }
 }

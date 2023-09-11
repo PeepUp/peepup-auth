@@ -5,6 +5,7 @@ import type {
     FastifyRequest,
 } from "fastify";
 import ResourceAlreadyExistException from "./error/resource-exists";
+import JWTException from "./error/jwt-error";
 
 export async function errorHandler(
     this: FastifyInstance,
@@ -38,6 +39,20 @@ export async function errorHandler(
         });
     }
 
+    if (error instanceof Error && error instanceof JWTException) {
+        return reply.code(error.statusCode ?? 400).send({
+            ok: false,
+            codeStatus: error.name,
+            error: {
+                message: error.message,
+                cause: error.data.cause,
+                other: {
+                    ...error.data.rest,
+                },
+            },
+        });
+    }
+
     if (error.validation) {
         return reply.code(400).send({
             ok: false,
@@ -60,6 +75,9 @@ export async function errorHandler(
             },
         });
     }
+
+    console.log("error handler");
+    console.dir(error, { depth: Infinity });
 
     if (error.statusCode === 401 && error.name === "UnauthorizedException") {
         return reply.code(401).send({

@@ -1,23 +1,14 @@
-import { FastifyRequest } from "fastify";
 import { ForbiddenError } from "@casl/ability";
-import { Action } from "../../../common/constant";
-import { SubjectsAbility } from "../../../domain/factory/ability";
+import type { FastifyRequest } from "fastify";
+import type { RequiredAbility } from "@/types/ability";
 import ForbiddenException from "../error/forbidden-exception";
 
-export type RequiredAbility = { action: Action; subject: SubjectsAbility };
-
-class AuthZ {
-    static authorize(rules: RequiredAbility[]) {
+class Authorization {
+    static policy(rules: RequiredAbility[]) {
         return async (request: FastifyRequest) => {
             try {
-                console.log({
-                    rules,
-                });
-
-                const { ability } = request;
-
                 rules.forEach(({ action, subject }) =>
-                    ForbiddenError.from(ability).throwUnlessCan(action, subject)
+                    ForbiddenError.from(request.ability).throwUnlessCan(action, subject)
                 );
             } catch (error) {
                 if (error instanceof ForbiddenError) {
@@ -30,4 +21,4 @@ class AuthZ {
     }
 }
 
-export default AuthZ;
+export default Authorization;

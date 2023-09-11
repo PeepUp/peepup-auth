@@ -1,8 +1,9 @@
 import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
-import { POST_LOGIN_IDENTITY_BODY_SCHEMA } from "../schema/auth";
-import { httpUtils } from "../../common/utils/utils";
+
+import * as schema from "../schema/auth";
+import * as utils from "../../common/utils/utils";
 import { cookieConfig } from "../../application/config/cookie.config";
 
 /**
@@ -11,20 +12,18 @@ import { cookieConfig } from "../../application/config/cookie.config";
  *
  */
 class AuthLocalStrategyHandler {
-    constructor(private readonly authService: AuthenticationService) {}
+    constructor(private readonly authenticationService: AuthenticationService) {}
 
     login: RequestHandler<unknown, unknown, LoginIdentityBody> = async (
         request,
         reply
     ) => {
-        const ip_address = httpUtils.getIpAddress(Object.freeze(request));
-        console.log(request.ip);
-        console.log({ ip_address });
-        const cookies = httpUtils.parseCookies(request.headers.cookie as string);
+        const { body } = request;
+        const ip_address = utils.httpUtils.getIpAddress(Object.freeze(request));
+        const cookies = utils.httpUtils.parseCookies(request.headers.cookie as string);
+        const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
 
-        const parsedBody = POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(request.body);
-
-        if (!parsedBody.success) {
+        if ("success" in parsedBody === false) {
             return reply.status(400).send({
                 status: "failed",
                 code: 400,
@@ -33,8 +32,8 @@ class AuthLocalStrategyHandler {
             });
         }
 
-        const result = await this.authService.login(
-            request.body,
+        const result = await this.authenticationService.login(
+            body,
             ip_address,
             cookies![cookieConfig.cookies.deviceId] as string
         );
@@ -49,10 +48,7 @@ class AuthLocalStrategyHandler {
             });
         }
 
-        return reply.status(200).send({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-        });
+        return reply.status(200).send(result);
     };
 
     registration: RequestHandler<unknown, unknown, RegisterIdentityBody> = async (
@@ -61,7 +57,7 @@ class AuthLocalStrategyHandler {
     ) => {
         const { traits, password, method } = request.body;
 
-        await this.authService.registration({
+        await this.authenticationService.registration({
             password,
             traits,
             method,
@@ -76,10 +72,7 @@ class AuthLocalStrategyHandler {
     };
 
     logout: RequestHandler<unknown> = async (request, reply) => {
-        const { headers } = request;
-
-        await this.authService.logout(headers.authorization as string);
-
+        await this.authenticationService.logout(request.headers.authorization as string);
         return reply.status(204).send();
     };
 }

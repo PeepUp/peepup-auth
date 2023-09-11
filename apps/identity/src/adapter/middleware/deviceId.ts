@@ -9,9 +9,9 @@ export function deviceIdHook(
     done: DoneFuncWithErrOrRes
 ) {
     const cookies = httpUtils.parseCookies(request.headers.cookie as string);
-    console.log("cookies ", request.headers.cookie as string);
 
     if (!cookies) {
+        console.log("cookies not found!");
         reply.header(
             "set-cookie",
             `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(
