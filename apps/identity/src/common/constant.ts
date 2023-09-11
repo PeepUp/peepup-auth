@@ -1,19 +1,27 @@
 import { join } from "path";
 import config from "../application/config/api.config";
 
-export const jwksPath = "/.well-known/jwks.json";
-export const clientUrl = process.env.CLIENT_URL || "http://127.0.0.1:3000";
-export const issuer: string =
-    (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
-    ("urn:server-1:http://127.0.0.1:4334" as const);
-
 const localAuthPath = "/local";
 const identityPath = "/identities";
 const tokenPath = "/token";
+const remoteJWKSPath = "oauth2/v1/jwks/keys";
 
+export const clientURL = process.env.CLIENT_URL || "http://127.0.0.1:3000";
+export const serverURL = process.env.SERVER_URL || "http://127.0.0.1:4334";
+export const cwd = process.cwd();
+
+export const issuer: string =
+    (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
+    (`urn:server-1:${serverURL}` as const);
+
+export const jwksPath = "/.well-known/jwks.json";
+export const publicDirPath = join(cwd, "/public");
+export const rsaKeysDirPath = join(cwd, "keys", "RSA");
+export const ecsdaKeysDirPath = join(cwd, "keys", "RSA");
+export const jwksDirPath = join(publicDirPath, jwksPath);
+export const jwksURL = new URL(join(serverURL, remoteJWKSPath));
 export const protectedResource = [
     identityPath,
-    tokenPath,
     localAuthPath,
     join(identityPath, "/:id"),
     join(identityPath, "/:id", "/inactivate"),

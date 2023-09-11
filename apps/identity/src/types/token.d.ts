@@ -1,8 +1,8 @@
 import type { Identity } from "@domain/entity/identity";
 import type { JWTPayload, JWTHeaderParameters, JWTVerifyOptions } from "jose";
-import type { AccessInfo, EmailAndIdentityId, Token, TokenTypes } from "./types";
+import type { AccessInfo, EmailAndIdentityId, Token, TokenTypes } from "@/types";
 
-import { TokenAlgorithm } from "../common/constant";
+import { TokenAlgorithm } from "@/common/constant";
 
 export type TokenPayload = EmailAndIdentityId & Pick<AccessInfo, "resource">;
 export type TokenPayloadProtected = TokenPayload & { jti: string; kid: string };

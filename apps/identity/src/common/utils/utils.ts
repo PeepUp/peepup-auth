@@ -10,7 +10,7 @@ import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
 import { ip_schema } from "../../adapter/schema/auth";
 
 export const fileUtils = {
-    readFile(path: string, encoding: BufferEncoding): string {
+    readFile(path: string, encoding?: BufferEncoding): string {
         try {
             return fs.readFileSync(path, encoding ?? "utf-8");
         } catch (error) {

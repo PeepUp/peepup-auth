@@ -8,12 +8,12 @@ import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
 import identityRoutes from "./identity/identity";
+import AbilityGuard from "../middleware/guard/abilty";
 import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
-import AuthenticationMiddleware from "../middleware/guard/jwt";
 import { deviceIdHook } from "../middleware/deviceId";
-import { AbilityGuard } from "../middleware/guard/abilty";
+import AuthenticationMiddleware from "../middleware/guard/jwt";
 
 /**
  * @todo

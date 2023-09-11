@@ -13,6 +13,7 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
     if (error) {
+        console.error({ error });
         server.close(() => {
             server.log.error("Server has been shut down");
             process.exit(0);

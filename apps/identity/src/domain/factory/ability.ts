@@ -1,29 +1,15 @@
 /* eslint-disable class-methods-use-this */
 
-import { AbilityBuilder, PureAbility } from "@casl/ability";
-import { PrismaQuery, Subjects, createPrismaAbility } from "@casl/prisma";
+import { AbilityBuilder } from "@casl/ability";
+import { createPrismaAbility } from "@casl/prisma";
 
-import type { Identity } from "@prisma/client";
-import type { Token } from "@/types/types";
-import { Action, RoleType } from "../../common/constant";
-
-export type SubjectsAbility =
-    | Subjects<{
-          Token: Token;
-          Identity: Identity;
-      }>
-    | "all";
-
-export type IdentityAbilityArgs = {
-    id: string;
-    role: string;
-};
-
-export type AppAbility = PureAbility<[string, SubjectsAbility], PrismaQuery>;
+import type { AppAbility } from "@/types/ability";
+import type { IdentityAbilityArgs } from "@/types/types";
+import { Action } from "../../common/constant";
 
 let ANONYMOUS_ABILITY: AppAbility;
 
-export class AbilityFactory {
+class AbilityFactory {
     defineAbilityFor(identity: IdentityAbilityArgs) {
         if (identity) return createPrismaAbility(this.defineRulesFor(identity));
 
@@ -37,7 +23,7 @@ export class AbilityFactory {
 
         switch (identity?.role) {
             case "admin":
-                this.defineAdminRules(identity, builder);
+                this.defineAdminRules(builder);
                 break;
             case "member":
                 this.defineMemberRules(identity, builder);
@@ -53,7 +39,7 @@ export class AbilityFactory {
         return builder.rules;
     }
 
-    defineAdminRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
+    defineAdminRules(b: AbilityBuilder<AppAbility>) {
         b.can(Action.manage, "all");
         b.can(Action.readAll, "Identity");
     }
@@ -97,20 +83,4 @@ export class AbilityFactory {
     }
 }
 
-export const dummy_identity: Identity = {
-    phoneNumber: "1234567890",
-    username: "john123",
-    state: "active",
-    emailVerified: new Date(),
-    password:
-        "$argon2id$v=19$m=65536,t=3,p=4$CUsArk9CbT6eVPTTqyV7Vg$asdklfhjk3l4wjr23iojoiasdjfiodsafjiods75Z2GayCOWUJpd34",
-    avatar: "https://www.google.com",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@gmail.com",
-    role: RoleType.admin,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    providerId: 0,
-    id: "1234567890",
-};
+export default AbilityFactory;

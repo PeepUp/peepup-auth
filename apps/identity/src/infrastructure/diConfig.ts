@@ -4,15 +4,15 @@ import IdentityService from "../adapter/service/identity";
 import TokenManagementService from "../adapter/service/token";
 import AuthenticationService from "../adapter/service/authentication";
 
-import IdentityStoreAdapter from "./data-source/identity.data-source";
 import TokenStoreAdapter from "./data-source/token.data-source";
+import IdentityStoreAdapter from "./data-source/identity.data-source";
 
-import IdentityRepository from "../application/repository/identity";
 import TokenRepository from "../application/repository/token";
+import IdentityRepository from "../application/repository/identity";
 
 import type { DependenciesService } from "./dependencies";
-import { WhiteListedTokenRepository } from "../application/repository/whitelist-token";
 import WhiteListedTokenStoreAdapter from "./data-source/whitelist-token.data-source";
+import { WhiteListedTokenRepository } from "../application/repository/whitelist-token";
 
 const tokenManagementService = new TokenManagementService(
     new TokenRepository(new TokenStoreAdapter(prisma)),

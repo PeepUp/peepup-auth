@@ -1,7 +1,7 @@
 import type { Routes, IdentityRoutes } from "@/types/types";
 import type AuthenticationService from "../../service/authentication";
 
-import { $ref } from "../../schema";
+import * as schema from "../../schema";
 import AuthLocalStrategyHandler from "../../handler/authentication";
 
 /**
@@ -22,7 +22,7 @@ export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
                 url: "/local/registration",
                 handler: handler.registration,
                 schema: {
-                    body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
+                    body: schema.$ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
                 },
             },
             {
@@ -31,7 +31,7 @@ export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
                 handler: handler.login,
                 schema: {
                     request: {
-                        body: $ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),
+                        body: schema.$ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),
                     },
                 },
             },

@@ -10,7 +10,7 @@ import type IdentityStoreAdapter from "@/infrastructure/data-source/identity.dat
 class IdentityRepository implements IdentityAccessor {
     constructor(private readonly dataSource: IdentityStoreAdapter) {}
 
-    async getLoginIdentity<T>(
+    async getLoginIdentity<T = Identity>(
         query: FindLoginIdentityQuery
     ): Promise<Readonly<T> | null> {
         const data = await this.dataSource.findUniqueLogin(query);
