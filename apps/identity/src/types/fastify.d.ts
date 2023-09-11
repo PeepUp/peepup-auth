@@ -1,5 +1,5 @@
 import "fastify";
-import type { Identity } from "./main";
+import type { Identity } from "@/types/main";
 import { AppAbility } from "@/domain/factory/ability";
 
 declare module "fastify" {

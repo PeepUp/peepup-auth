@@ -20,14 +20,14 @@ import type {
 import type { PostRefreshTokenParams } from "@/adapter/schema/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
-import JwtToken from "../../common/utils/token";
-import * as constant from "../../common/constant";
-import * as utils from "../../common/utils/utils";
-import TokenFactory from "../../domain/factory/token";
-import JWTException from "../middleware/error/jwt-error";
-import UnauthorizedException from "../middleware/error/unauthorized";
-import ForbiddenException from "../middleware/error/forbidden-exception";
-import BadRequestException from "../middleware/error/bad-request-exception";
+import JwtToken from "@/common/utils/token";
+import * as constant from "@/common/constant";
+import * as utils from "@/common/utils/utils";
+import TokenFactory from "@/domain/factory/token";
+import JWTException from "@/adapter/middleware/error/jwt-error";
+import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
+import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
+import BadRequestException from "@/adapter/middleware/error/bad-request-exception";
 
 export default class TokenManagementService {
     private rsa256KeyId: string = "";

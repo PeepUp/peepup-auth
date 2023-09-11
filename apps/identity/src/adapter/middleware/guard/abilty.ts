@@ -1,8 +1,8 @@
 import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
-import * as constant from "../../../common/constant";
-import JwtToken from "../../../common/utils/token";
-import * as utils from "../../../common/utils/utils";
-import AbilityFactory from "../../../domain/factory/ability";
+import JwtToken from "@/common/utils/token";
+import * as constant from "@/common/constant";
+import * as utils from "@/common/utils/utils";
+import AbilityFactory from "@/domain/factory/ability";
 
 class AbilityGuard {
     // eslint-disable-next-line class-methods-use-this

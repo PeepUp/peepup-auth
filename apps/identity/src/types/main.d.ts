@@ -1,5 +1,5 @@
 import type { RouteOptions } from "fastify";
-import type { JwtToken } from "./token";
+import type { JwtToken } from "@/types/token";
 
 declare namespace Identity {
     namespace Config {

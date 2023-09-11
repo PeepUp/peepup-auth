@@ -7,16 +7,8 @@ import type {
     TokenPayloadWithIdentity,
 } from "@/types/token";
 
-import { cryptoUtils } from "../../common/utils/crypto";
-import {
-    TokenAlgorithm,
-    TokenSID,
-    TokenType,
-    audience,
-    clientId,
-    issuer,
-    requiredClaims,
-} from "../../common/constant";
+import * as constant from "@/common/constant";
+import { cryptoUtils } from "@/common/utils/crypto";
 
 class TokenFactory {
     static createAccessToken(identity: TokenPayloadIdentity): GenerateTokenArgs {
@@ -24,9 +16,9 @@ class TokenFactory {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
-            type: TokenType.access,
+            type: constant.TokenType.access,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 60 * 60),
-            algorithm: TokenAlgorithm.RS256,
+            algorithm: constant.TokenAlgorithm.RS256,
         };
     }
 
@@ -35,9 +27,9 @@ class TokenFactory {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
-            type: TokenType.refresh,
+            type: constant.TokenType.refresh,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 4 * 60 * 60),
-            algorithm: TokenAlgorithm.ES256,
+            algorithm: constant.TokenAlgorithm.ES256,
         };
     }
 
@@ -51,13 +43,13 @@ class TokenFactory {
             email: identity.email,
             id: identity.id,
             resource: identity.resource,
-            sid: TokenSID.active,
-            aud: audience,
+            sid: constant.TokenSID.active,
+            aud: constant.audience,
             iat: Math.floor(Date.now() / 1000),
             nbf: Date.now() / 1000,
             exp: expirationTime,
-            iss: issuer,
-            sub: clientId,
+            iss: constant.issuer,
+            sub: constant.clientId,
             jti: cryptoUtils.generateCUID(),
         };
     }
@@ -84,7 +76,7 @@ class TokenFactory {
             expires_at: payload.exp,
             value,
             type,
-            tokenStatus: TokenSID.active,
+            tokenStatus: constant.TokenSID.active,
             nbf: Date.now() / 1000,
             createdAt: new Date(),
             jti: payload.jti as string,
@@ -98,6 +90,7 @@ class TokenFactory {
     }
 
     static generateJWTOption(algorithms: string[] | string): JWTVerifyOptions {
+        const { audience, issuer, clientId, requiredClaims } = constant;
         return <JWTVerifyOptions>{
             audience,
             issuer,

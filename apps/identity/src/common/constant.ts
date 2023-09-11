@@ -1,5 +1,5 @@
 import { join } from "path";
-import config from "../application/config/api.config";
+import config from "@/application/config/api.config";
 
 const localAuthPath = "/local";
 const identityPath = "/identities";

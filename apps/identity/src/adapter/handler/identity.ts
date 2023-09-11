@@ -5,9 +5,9 @@ import type {
 } from "@/adapter/schema/identity";
 import type { RequestHandler } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
-import type { InactivatedIdentityBody } from "../schema/auth";
+import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 
-import * as schema from "../schema/identity";
+import * as schema from "@/adapter/schema/identity";
 
 /**
  * @todo:

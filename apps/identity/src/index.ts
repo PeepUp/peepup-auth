@@ -1,4 +1,4 @@
-import server from "./infrastructure/http/app";
+import server from "@/infrastructure/http/app";
 
 async function main(): Promise<void> {
     await server.ready();

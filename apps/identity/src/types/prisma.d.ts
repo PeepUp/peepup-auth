@@ -1,4 +1,4 @@
-import { prismaExtendedIdentityModel } from "../infrastructure/prisma";
+import { prismaExtendedIdentityModel } from "@/infrastructure/prisma";
 /**
  * @todo:
  *  - make this to file definition type

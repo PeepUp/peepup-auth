@@ -1,26 +1,26 @@
 /* eslint-disable */
+
+import { mkdirSync } from "fs";
 import http from "http";
 import fastify from "fastify";
 import cors from "@fastify/cors";
-import { routes } from "../../adapter";
-import { schemas } from "../../adapter/schema";
+import { routes } from "@/adapter/routes";
+import { schemas } from "@/adapter/schema";
+import JwtToken from "@/common/utils/token";
+import { keysPath } from "@/common/constant";
+import Certificate from "@/common/utils/certs";
+import { fileUtils } from "@/common/utils/utils";
+import { cryptoUtils } from "@/common/utils/crypto";
 
-import * as fastifyPlugin from "../../application/plugin";
-import fastifyConfig from "../../application/config/fastify.config";
-import { errorHandler } from "../../adapter/middleware/error.handler";
-import { notFoundHandler } from "../../adapter/middleware/not-found.handler";
+import * as fastifyPlugin from "@/application/plugin";
+import fastifyConfig from "@/application/config/fastify.config";
+import { errorHandler } from "@/adapter/middleware/error.handler";
+import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-
-import { mkdirSync } from "fs";
-import JwtToken from "../../common/utils/token";
-import { keysPath } from "../../common/constant";
-import Certificate from "../../common/utils/certs";
-import { fileUtils } from "../../common/utils/utils";
-import { cryptoUtils } from "../../common/utils/crypto";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -38,9 +38,7 @@ async function initRoutes(
 async function initSchema(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
 ) {
-    for (const schema of [...schemas]) {
-        server.addSchema(schema);
-    }
+    for (const schema of [...schemas]) server.addSchema(schema);
 }
 
 async function initSchemaValidatorAndSerializer(
@@ -67,16 +65,13 @@ async function initJWKS() {
         const ecsda: Certificate = new Certificate(keysPath);
         const rsa256: Certificate = new Certificate(keysPath);
         console.log("Generating RSA256 and ECSDA keys...");
-        console.log({
-            rsa256,
-            ecsda,
-        });
 
         rsa256KeyId = cryptoUtils.generateRandomSHA256(32);
         ecsdaKeyId = cryptoUtils.generateRandomSHA256(32);
 
         mkdirSync(keysPath + "/RSA/" + rsa256KeyId, { recursive: true });
         mkdirSync(keysPath + "/ECSDA/" + ecsdaKeyId, { recursive: true });
+
         const rsa256Certs = rsa256.generateKeyPairRSA(4096);
         rsa256.saveKeyPair(rsa256Certs, keysPath + "/RSA/" + rsa256KeyId);
 

@@ -29,7 +29,7 @@ import {
     rsaKeysDirPath,
     TokenAlgorithm,
 } from "@/common/constant";
-import * as utils from "./utils";
+import * as utils from "@/common/utils/utils";
 
 class JwtToken {
     constructor(
