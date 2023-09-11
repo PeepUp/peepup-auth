@@ -1,5 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
+import path from "path";
+import * as fs from "fs";
+import { createPublicKey } from "crypto";
+import * as jose from "jose";
 import type {
     JWTHeaderParameters,
     JWTPayload,
@@ -7,19 +11,13 @@ import type {
     JoseHeaderParameters,
     JWK,
 } from "jose";
+import type { ParsedToken, Token } from "@/types/types";
 import type {
     CreateTokenArgs,
     JWTHeader,
     TokenPayloadIdentity,
     TokenPayloadProtected,
 } from "@/types/token";
-import type { ParsedToken, Token } from "@/types/types";
-
-import path from "path";
-import * as fs from "fs";
-import * as jose from "jose";
-import * as utils from "./utils";
-import { createPublicKey } from "crypto";
 import JWTException from "@/adapter/middleware/error/jwt-error";
 import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
 import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
@@ -31,6 +29,7 @@ import {
     rsaKeysDirPath,
     TokenAlgorithm,
 } from "@/common/constant";
+import * as utils from "./utils";
 
 class JwtToken {
     constructor(

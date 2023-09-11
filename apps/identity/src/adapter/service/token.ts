@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 
+import { join } from "path";
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type {
     GenerateTokenArgs,
     TokenPayloadIdentity,
@@ -15,11 +17,9 @@ import type {
     TokenContract,
     WhiteListedTokenAccessor,
 } from "@/types/types";
-import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { PostRefreshTokenParams } from "@/adapter/schema/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
-import { join } from "path";
 import JwtToken from "../../common/utils/token";
 import * as constant from "../../common/constant";
 import * as utils from "../../common/utils/utils";
