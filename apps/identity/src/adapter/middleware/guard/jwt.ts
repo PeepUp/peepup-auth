@@ -1,10 +1,10 @@
 /* eslint-disable consistent-return */
-import { FastifyReply, FastifyRequest } from "fastify";
-import type TokenManagementService from "../../service/token";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import type TokenManagementService from "@/adapter/service/token";
 
-import JwtToken from "../../../common/utils/token";
-import { protectedResource } from "../../../common/constant";
-import { httpUtils } from "../../../common/utils/utils";
+import JwtToken from "@/common/utils/token";
+import { httpUtils } from "@/common/utils/utils";
+import { protectedResource } from "@/common/constant";
 
 class AuthenticationMiddleware {
     static async jwt(

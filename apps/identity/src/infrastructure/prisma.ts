@@ -1,18 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { PrismaClient } from "@prisma/client";
+import { passwordUtils } from "@/common/utils/utils";
+
 import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
-import { passwordUtils } from "../common/utils/utils";
 
 const prisma = new PrismaClient();
-
-/* const pathDir = path.join(
-        process.cwd(),
-        "src",
-        "application/config/casbin/acl_root_model.conf"
-    );
-    const e = await newEnforcer(pathDir);
-    console.log({ e });
- */
 
 /**
  * @todo

@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { TokenStatusTypes, type Prisma, type PrismaClient } from "@prisma/client";
-import type { TokenQueryArgs } from "@/types/token";
 
+import type { TokenQueryArgs } from "@/types/token";
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
 import type { TokenRelatedArgs } from "@/application/repository/token";
 

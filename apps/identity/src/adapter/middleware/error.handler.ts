@@ -4,8 +4,9 @@ import type {
     FastifyReply,
     FastifyRequest,
 } from "fastify";
-import ResourceAlreadyExistException from "./error/resource-exists";
+
 import JWTException from "./error/jwt-error";
+import ResourceAlreadyExistException from "./error/resource-exists";
 
 export async function errorHandler(
     this: FastifyInstance,

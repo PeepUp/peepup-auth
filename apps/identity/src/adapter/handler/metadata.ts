@@ -1,7 +1,7 @@
 import type { RequestHandler } from "@/types/types";
 
-import { clientURL, serverURL } from "../../common/constant";
-import openapi from "../../application/config/openapi.json";
+import { clientURL, serverURL } from "@/common/constant";
+import openapi from "@/application/config/openapi.json";
 
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {

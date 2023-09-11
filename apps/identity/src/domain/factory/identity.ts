@@ -1,6 +1,7 @@
+import { IdentityStateTypes, RoleType } from "@/common/constant";
+
+import type { Identity } from "@/domain/entity/identity";
 import type { RegisterIdentityBody } from "@/types/types";
-import type { Identity } from "../entity/identity";
-import { IdentityStateTypes, RoleType } from "../../common/constant";
 
 class IdentityFactory {
     public static createIdentity(identity: RegisterIdentityBody): Identity {

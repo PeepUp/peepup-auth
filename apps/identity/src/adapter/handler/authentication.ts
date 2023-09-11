@@ -2,9 +2,9 @@ import type { RequestHandler } from "@/types/types";
 import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
 
-import * as schema from "../schema/auth";
-import * as utils from "../../common/utils/utils";
-import { cookieConfig } from "../../application/config/cookie.config";
+import * as schema from "@/adapter/schema/auth";
+import * as utils from "@/common/utils/utils";
+import { cookieConfig } from "@/application/config/cookie.config";
 
 /**
  * @todo:

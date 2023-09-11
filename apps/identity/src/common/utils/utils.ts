@@ -7,7 +7,7 @@ import * as fastify from "fastify";
 import { join } from "path";
 
 import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
-import { ip_schema } from "../../adapter/schema/auth";
+import { ip_schema } from "@/adapter/schema/auth";
 
 export const fileUtils = {
     readFile(path: string, encoding?: BufferEncoding): string {

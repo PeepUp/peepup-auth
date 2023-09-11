@@ -1,13 +1,13 @@
-import type { RequestHandler } from "@/types/types";
-import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "../schema/token";
-import TokenManagementService from "../service/token";
+import { ip_schema } from "@/adapter/schema/auth";
+import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "@/adapter/schema/token";
+import TokenManagementService from "@/adapter/service/token";
 
+import type { RequestHandler } from "@/types/types";
 import type {
     PostRefreshTokenParams,
     TokenQueryString,
     idTokenParams,
 } from "../schema/token";
-import { ip_schema } from "../schema/auth";
 
 class TokenHandler {
     constructor(private tokenManagementService: TokenManagementService) {}

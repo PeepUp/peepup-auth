@@ -2,10 +2,10 @@
 
 import { AbilityBuilder } from "@casl/ability";
 import { createPrismaAbility } from "@casl/prisma";
+import { Action } from "@/common/constant";
 
 import type { AppAbility } from "@/types/ability";
 import type { IdentityAbilityArgs } from "@/types/types";
-import { Action } from "../../common/constant";
 
 let ANONYMOUS_ABILITY: AppAbility;
 

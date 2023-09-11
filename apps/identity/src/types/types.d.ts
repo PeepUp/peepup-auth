@@ -7,7 +7,7 @@ import type { RouteOptions } from "fastify/types/route";
 import type {
     QueryTokenArgs,
     QueryWhitelistedTokenArgs,
-} from "../infrastructure/data-source/token.data-source";
+} from "@/infrastructure/data-source/token.data-source";
 import { TokenRelatedArgs } from "@/application/repository/token";
 import { WhiteListedTokenCreateArgs } from "@/infrastructure/data-source/whitelist-token.data-source";
 

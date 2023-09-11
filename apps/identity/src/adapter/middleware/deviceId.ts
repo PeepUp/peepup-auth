@@ -1,7 +1,7 @@
 import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
-import { httpUtils } from "../../common/utils/utils";
-import { cookieConfig } from "../../application/config/cookie.config";
-import { cryptoUtils } from "../../common/utils/crypto";
+import { httpUtils } from "@/common/utils/utils";
+import { cryptoUtils } from "@/common/utils/crypto";
+import { cookieConfig } from "@/application/config/cookie.config";
 
 export function deviceIdHook(
     request: FastifyRequest,

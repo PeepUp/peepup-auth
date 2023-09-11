@@ -1,7 +1,8 @@
 /* eslint-disable class-methods-use-this */
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ID, Token, WhiteListedTokenDataSourceAdapter } from "@/types/types";
-import { TokenStatusType } from "../../common/constant";
+
+import { TokenStatusType } from "@/common/constant";
 
 /**
  * @todo:
