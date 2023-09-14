@@ -23,6 +23,7 @@ export type IdentityAbilityArgs = {
     id: string;
     role: string;
 };
+
 export type RequestHandler<
     Headers = unknown,
     RawQuery = unknown,

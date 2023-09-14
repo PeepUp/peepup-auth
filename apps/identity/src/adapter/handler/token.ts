@@ -109,6 +109,7 @@ class TokenHandler {
 
     getSessions: RequestHandler = async (request, reply) => {
         const { headers } = request;
+        console.log(headers);
 
         const data = await this.tokenManagementService.getTokenSessions(
             headers.authorization as string

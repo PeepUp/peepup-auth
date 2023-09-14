@@ -40,10 +40,10 @@ export async function errorHandler(
         });
     }
 
-    if (error instanceof Error && error instanceof JWTException) {
+    if (error && error instanceof JWTException) {
         return reply.code(error.statusCode ?? 400).send({
             ok: false,
-            codeStatus: error.name,
+            code: error.statusCode ?? 400,
             error: {
                 message: error.message,
                 cause: error.data.cause,
@@ -77,9 +77,6 @@ export async function errorHandler(
         });
     }
 
-    console.log("error handler");
-    console.dir(error, { depth: Infinity });
-
     if (error.statusCode === 401 && error.name === "UnauthorizedException") {
         return reply.code(401).send({
             ok: false,
@@ -100,7 +97,14 @@ export async function errorHandler(
     }
 
     if (error instanceof Error) {
-        console.dir(error, { depth: Infinity });
+        console.log({
+            code: error.code,
+            statusCode: error.statusCode,
+            error: error.message,
+            name: error.name,
+            stack: error.stack,
+            _SDF: error.constructor.name,
+        });
 
         return reply.code(500).send({
             code: 500,

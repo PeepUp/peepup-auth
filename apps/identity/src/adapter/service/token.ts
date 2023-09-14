@@ -130,13 +130,18 @@ export default class TokenManagementService {
         access_token: string,
         options?: AuthorizationHeaderOptions
     ): Promise<Readonly<Token[]> | null> {
-        let data = null;
+        const token =
+            options && options?.authorizationHeader
+                ? this.splitAuthzHeader(access_token)
+                : access_token;
 
-        if (options && options?.authorizationHeader) {
-            data = await this.wlTokenRepository.findManyByIdentityId(
-                JwtToken.decodeJwt(this.splitAuthzHeader(access_token)).id as string
-            );
-        }
+        const decoded = await JwtToken.parsedToken(JwtToken.decodeJwt(token));
+
+        const data = await this.wlTokenRepository.findManyByIdentityId(
+            decoded.payload.id
+        );
+
+        console.log({ getCurrentActiveSessions: data });
 
         if (!data) return [];
 
@@ -182,11 +187,12 @@ export default class TokenManagementService {
         device_id: string
     ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
         const { refresh_token } = params;
+        console.log({ ...params });
         const decodeRefreshToken = JwtToken.decodeJwt(refresh_token);
-        console.log({ decode: decodeRefreshToken });
+        console.log({ decodeRefreshToken });
 
         if (!decodeRefreshToken) {
-            throw new ForbiddenException("Error: Token invalid!");
+            throw new BadRequestException("Token are invalid!");
         }
 
         const tokenJtiAndIdentityId: QueryWhitelistedTokenArgs = {
@@ -278,7 +284,7 @@ export default class TokenManagementService {
         }
 
         const { payload, header, jti, kid }: ParsedToken =
-            await jwt.parsedToken(whitelistedToken);
+            await JwtToken.parsedToken(whitelistedToken);
 
         if (!payload || !header) {
             throw new UnauthorizedException("Invalid token: token is corrupted!");
