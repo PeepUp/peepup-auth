@@ -1,10 +1,11 @@
 import type { IdentityRoutes, Routes } from "@/types/types";
 
-import * as schema from "../../schema";
-import TokenHandler from "../../handler/token";
-import * as constant from "../../../common/constant";
-import Authorization from "../../middleware/guard/authz";
-import TokenManagementService from "../../service/token";
+import * as schema from "@/adapter/schema";
+import * as constant from "@/common/constant";
+import TokenHandler from "@/adapter/handler/token";
+import config from "@/application/config/api.config";
+import Authorization from "@/adapter/middleware/guard/authz";
+import TokenManagementService from "@/adapter/service/token";
 
 /**
  * @todo
@@ -16,12 +17,14 @@ import TokenManagementService from "../../service/token";
  */
 export default (tokenService: TokenManagementService): Routes<IdentityRoutes> => {
     const handler = new TokenHandler(tokenService);
+    const { paths } = config.api.paths.tokens;
+    console.log(paths);
 
     return {
         routes: [
             {
                 method: "GET",
-                url: "/token/sessions/:id",
+                url: "/tokens/sessions/:id",
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -45,12 +48,12 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                         subject: "Token",
                     },
                 ]),
-                url: "/token/sessions/:id",
+                url: "/tokens/sessions/:id",
                 handler: handler.deleteSessionById,
             },
             {
                 method: "GET",
-                url: "/token/sessions/active",
+                url: "/tokens/sessions/active",
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -61,7 +64,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
             },
             {
                 method: "GET",
-                url: "/token/sessions/histories",
+                url: "/tokens/sessions/histories",
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -72,7 +75,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
             },
             {
                 method: "GET",
-                url: "/token/sessions/whoami",
+                url: "/tokens/sessions/whoami",
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -83,8 +86,8 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 handler: handler.getWhoAmI,
             },
             {
-                method: "POST",
-                url: "/token/decode",
+                method: paths.decode.method,
+                url: paths.decode.path,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -98,10 +101,9 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                     },
                 },
             },
-
             {
-                method: "POST",
-                url: "/token",
+                method: paths.rotate.method,
+                url: paths.rotate.path,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.manage,

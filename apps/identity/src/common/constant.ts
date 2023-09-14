@@ -1,9 +1,8 @@
 import { join } from "path";
-import config from "@/application/config/api.config";
 
 const localAuthPath = "/local";
 const identityPath = "/identities";
-const tokenPath = "/token";
+const tokenPath = "/tokens";
 const remoteJWKSPath = "oauth2/v1/jwks/keys";
 
 export const clientURL = process.env.CLIENT_URL || "http://127.0.0.1:3000";
@@ -11,8 +10,7 @@ export const serverURL = process.env.SERVER_URL || "http://127.0.0.1:4334";
 export const cwd = process.cwd();
 
 export const issuer: string =
-    (`urn:server-identity:${config.environment.host}:${config.environment.port}` as const) ??
-    (`urn:server-1:${serverURL}` as const);
+    `urn:server-identity:${serverURL}` || `urn:server-1:${serverURL}`;
 
 export const jwksPath = "/.well-known/jwks.json";
 export const publicDirPath = join(cwd, "/public");
@@ -23,13 +21,14 @@ export const jwksURL = new URL(join(serverURL, remoteJWKSPath));
 export const protectedResource = [
     identityPath,
     localAuthPath,
-    join(identityPath, "/:id"),
-    join(identityPath, "/:id", "/inactivate"),
-    join(tokenPath, "/sessions"),
-    join(tokenPath, "/sessions", "/active"),
-    join(tokenPath, "/sessions", "/:id"),
-    join(tokenPath, "/sessions", "/histories"),
-    join(tokenPath, "/sessions", "/whoami"),
+    join(identityPath, ":id"),
+    join(identityPath, ":id", "inactivate"),
+    join(tokenPath, "rotate"),
+    join(tokenPath, "sessions"),
+    join(tokenPath, "sessions", "active"),
+    join(tokenPath, "sessions", ":id"),
+    join(tokenPath, "sessions", "histories"),
+    join(tokenPath, "sessions", "whoami"),
 ];
 
 export const requiredClaims = [
@@ -45,7 +44,7 @@ export const requiredClaims = [
     "exp",
 ];
 
-export const keysPath = join(process.cwd(), "/keys");
+export const keysPath = join(cwd, "/keys");
 export const privateKeyFile = "private.pem.key" as const;
 export const publicKeyFile = "public.pem.key" as const;
 export const jwtType = "JWT" as const;
@@ -140,3 +139,5 @@ export enum IdentityStateTypes {
     unknown = "unknown",
     unverified = "unverified",
 }
+
+export type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";

@@ -1,3 +1,4 @@
+import { join } from "path";
 import dotenv from "dotenv";
 
 import type { Identity } from "@/types/main";
@@ -6,6 +7,7 @@ dotenv.config({
     path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
 });
 
+const TOKEN_PATH = "/tokens";
 const config: Identity.Config.Api = {
     environment: {
         env: process.env.NODE_ENV,
@@ -23,6 +25,27 @@ const config: Identity.Config.Api = {
     },
     api: {
         prefix: "/v1",
+        root: "/",
+        paths: {
+            tokens: {
+                root: TOKEN_PATH,
+                paths: {
+                    rotate: {
+                        path: join(TOKEN_PATH, "rotate"),
+                        method: "POST",
+                    },
+                    decode: {
+                        path: join(TOKEN_PATH, "decode"),
+                        method: "POST",
+                    },
+                    sessions: {
+                        root: join(TOKEN_PATH, "sessions"),
+                        method: "GET",
+                        paths: {},
+                    },
+                },
+            },
+        },
     },
 };
 

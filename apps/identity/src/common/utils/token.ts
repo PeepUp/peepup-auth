@@ -140,7 +140,21 @@ class JwtToken {
     }
 
     public static decodeJwt(token: string): JWTPayload {
-        return jose.decodeJwt(token);
+        try {
+            return jose.decodeJwt(token);
+        } catch (error) {
+            if (error) {
+                throw new JWTException({
+                    message: "JWTException: Invalid token!",
+                    statusCode: 400,
+                    cause: "Invalid token signature",
+                    stack: "JWTException: Invalid token signature",
+                    rest: {},
+                });
+            }
+
+            return {} as JWTPayload;
+        }
     }
 
     public async verifyJWT(
@@ -157,6 +171,11 @@ class JwtToken {
                 publicKeyImport,
                 options
             );
+
+            console.log({
+                payload,
+                protectedHeader,
+            });
 
             if (!payload || !protectedHeader) {
                 throw new UnauthorizedException(
@@ -240,7 +259,9 @@ class JwtToken {
         }
     }
 
-    public async parsedToken(token: Token): Promise<Token | ParsedToken> {
+    public static async parsedToken(
+        token: Token | ParsedToken
+    ): Promise<Token | ParsedToken> {
         return {
             ...token,
             payload: (await JSON.parse(token.header as string)) as TokenPayloadIdentity,
@@ -293,8 +314,15 @@ class JwtToken {
 
             return true;
         } catch (error) {
-            console.dir({ JWT_VERIFY_ERROR: error }, { depth: Infinity });
-
+            if (error instanceof Error) {
+                console.log({
+                    _SDF: error.constructor.name,
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack,
+                    cause: error.cause ?? "",
+                });
+            }
             if (error instanceof jose.errors.JWTExpired) {
                 return new JWTException({
                     message: "Token is expired",
@@ -308,6 +336,39 @@ class JwtToken {
             if (error instanceof jose.errors.JWSInvalid) {
                 /* throw new UnauthorizedException("Invalid token: Invalid signature"); */
                 console.log("JWTException: Invalid signature");
+            }
+
+            if (error && error.constructor.name === "JWTInvalid") {
+                throw new JWTException({
+                    name: "JWTInvalid",
+                    message: "___Token JWT invalid",
+                    statusCode: 401,
+                    cause: "alg",
+                    stack: "",
+                    rest: { ...error },
+                });
+            }
+
+            if (error instanceof Error && error.name === "JOSEAlgNotAllowed") {
+                console.log("JWTException: JOSEAlgNotAllowed");
+                throw new JWTException({
+                    name: error.name,
+                    message: "Token JWT invalid",
+                    statusCode: 401,
+                    cause: "alg",
+                    stack: error.stack ?? "",
+                    rest: { ...error },
+                });
+            }
+
+            if (error instanceof jose.errors.JOSEAlgNotAllowed) {
+                throw new JWTException({
+                    message: "Token signature invalid",
+                    statusCode: 401,
+                    cause: "alg",
+                    stack: error.stack ?? "",
+                    rest: { ...error },
+                });
             }
 
             if (error instanceof jose.errors.JOSEError) {
@@ -335,7 +396,6 @@ class JwtToken {
     ): boolean | Error {
         const { payload, options, identity, protectedHeader } = data;
 
-        // soon change here
         if (payload.jti && payload.jti !== identity.jti) {
             return new UnauthorizedException("Invalid token: Invalid jti token");
         }

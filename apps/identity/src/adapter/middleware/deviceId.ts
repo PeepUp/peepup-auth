@@ -10,24 +10,22 @@ export function deviceIdHook(
 ) {
     const cookies = httpUtils.parseCookies(request.headers.cookie as string);
 
-    if (!cookies) {
-        console.log("cookies not found!");
-        reply.header(
-            "set-cookie",
-            `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(
-                cryptoUtils.generateRandomSHA256(32)
-            )}; Path=/; HttpOnly; SameSite=Strict;`
-        );
-
-        reply.header(
-            "set-cookie",
-            `${cookieConfig.cookies.user_session}=${cryptoUtils.hashString(
-                cryptoUtils.generateRandomSHA256(64)
-            )}; Path=/; HttpOnly; SameSite=Strict;`
-        );
-
+    if (cookies) {
         return done();
     }
+    reply.header(
+        "set-cookie",
+        `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(
+            cryptoUtils.generateRandomSHA256(32)
+        )}; Path=/; HttpOnly; SameSite=Strict;`
+    );
+
+    reply.header(
+        "set-cookie",
+        `${cookieConfig.cookies.user_session}=${cryptoUtils.hashString(
+            cryptoUtils.generateRandomString(64)
+        )}; Path=/; HttpOnly; SameSite=Strict;`
+    );
 
     return done();
 }

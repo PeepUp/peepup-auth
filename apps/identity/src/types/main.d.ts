@@ -1,5 +1,6 @@
 import type { RouteOptions } from "fastify";
 import type { JwtToken } from "@/types/token";
+import { HTTPMethod } from "@/common/constant";
 
 declare namespace Identity {
     namespace Config {
@@ -20,7 +21,31 @@ declare namespace Identity {
             };
             api: {
                 prefix: string;
+                root: string;
+                paths: {
+                    tokens: {
+                        root: string;
+                        paths: {
+                            rotate: BasicRoutesPath | ComplexRoutesPath;
+                            decode: BasicRoutesPath;
+                            sessions: {
+                                root: string;
+                                method: HTTPMethod;
+                                paths: {};
+                            };
+                        };
+                    };
+                };
             };
+        }
+
+        interface BasicRoutesPath {
+            path: string;
+            method: HTTPMethod;
+        }
+
+        interface ComplexRoutesPath extends BasicRoutesPath {
+            root: string;
         }
 
         interface Certs {
