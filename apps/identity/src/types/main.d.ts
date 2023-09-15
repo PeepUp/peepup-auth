@@ -31,7 +31,11 @@ declare namespace Identity {
                             sessions: {
                                 root: string;
                                 method: HTTPMethod;
-                                paths: {};
+                                paths: {
+                                    active: BasicRoutesPath;
+                                    whoami: BasicRoutesPath;
+                                    histories: BasicRoutesPath;
+                                };
                             };
                         };
                     };

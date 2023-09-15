@@ -5,18 +5,19 @@ import { join } from "path";
 import { fileUtils } from "@/common/utils/utils";
 
 import type { RequestHandler } from "@/types/types";
+import * as constant from "@/common/constant";
 
 class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
-        const jwksPath = join(process.cwd(), "public/.well-known/jwks.json");
+        const jwksPath = join(constant.publicDirPath, constant.jwksPath);
 
-        if (!existsSync(jwksPath)) {
+        if (!existsSync(jwksPath))
             return reply.code(404).send({
                 status: "not found",
             });
-        }
 
         const jwksContent = fileUtils.readFile(jwksPath, "utf-8");
+
         if (jwksContent === null) {
             return reply.code(404).send({
                 status: "not found",

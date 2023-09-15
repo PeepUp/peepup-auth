@@ -14,7 +14,7 @@ class Authorization {
             } catch (error) {
                 if (error instanceof ForbiddenError) {
                     throw new ForbiddenException(
-                        "Forbidden: You don't have enough permission!"
+                        "Sorry! looks like You don't have permission or access to the resource!"
                     );
                 }
             }

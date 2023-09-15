@@ -130,6 +130,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
     ): Promise<Readonly<Token> | null> {
         const result = await this.dataSource.whitelistedToken.findUnique({
             include: {
+                identity: true,
                 token: true,
             },
             where: query,

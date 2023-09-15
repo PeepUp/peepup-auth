@@ -41,7 +41,20 @@ const config: Identity.Config.Api = {
                     sessions: {
                         root: join(TOKEN_PATH, "sessions"),
                         method: "GET",
-                        paths: {},
+                        paths: {
+                            active: {
+                                path: join(TOKEN_PATH, "sessions", "active"),
+                                method: "GET",
+                            },
+                            whoami: {
+                                path: join(TOKEN_PATH, "sessions", "whoami"),
+                                method: "GET",
+                            },
+                            histories: {
+                                path: join(TOKEN_PATH, "sessions", "histories"),
+                                method: "GET",
+                            },
+                        },
                     },
                 },
             },

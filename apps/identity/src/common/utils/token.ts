@@ -14,6 +14,7 @@ import type {
 import type { ParsedToken, Token } from "@/types/types";
 import type {
     CreateTokenArgs,
+    DecodedToken,
     JWTHeader,
     TokenPayloadIdentity,
     TokenPayloadProtected,
@@ -33,7 +34,7 @@ import * as utils from "@/common/utils/utils";
 
 class JwtToken {
     constructor(
-        public keyId: string,
+        public keyId: string | null,
         public payload: JWTPayload,
         public header: JWTHeaderParameters | JoseHeaderParameters | JWTHeader
     ) {}
@@ -46,7 +47,7 @@ class JwtToken {
         this.payload = payload;
     }
 
-    public async createToken(data: CreateTokenArgs): Promise<Readonly<string> | null> {
+    public async createToken(data: CreateTokenArgs): Promise<Readonly<string>> {
         const { payload, header, privateKey } = data;
 
         try {
@@ -74,10 +75,11 @@ class JwtToken {
             return signature;
         } catch (error: unknown) {
             if (error instanceof Error) {
-                throw new Error(error.message);
+                console.error(error.message);
+                throw new Error("JWTException: Cannot generate new token!");
             }
 
-            return null;
+            throw new Error("JWTException: unhandled error while generate token!");
         }
     }
 
@@ -139,21 +141,21 @@ class JwtToken {
         };
     }
 
-    public static decodeJwt(token: string): JWTPayload {
+    public static decodeJwt(token: string): DecodedToken {
         try {
-            return jose.decodeJwt(token);
+            return jose.decodeJwt(token) as DecodedToken;
         } catch (error) {
-            if (error) {
+            if (error instanceof Error) {
                 throw new JWTException({
                     message: "JWTException: Invalid token!",
                     statusCode: 400,
                     cause: "Invalid token signature",
-                    stack: "JWTException: Invalid token signature",
+                    stack: "",
                     rest: {},
                 });
             }
 
-            return {} as JWTPayload;
+            return {} as DecodedToken;
         }
     }
 
@@ -171,11 +173,6 @@ class JwtToken {
                 publicKeyImport,
                 options
             );
-
-            console.log({
-                payload,
-                protectedHeader,
-            });
 
             if (!payload || !protectedHeader) {
                 throw new UnauthorizedException(
@@ -298,6 +295,8 @@ class JwtToken {
             });
 
             if (validate instanceof Error) {
+                console.log("error while validate the payload!");
+                console.log({ validate });
                 throw new UnauthorizedException("JWTException: Invalid token signature");
             }
 
@@ -316,13 +315,15 @@ class JwtToken {
         } catch (error) {
             if (error instanceof Error) {
                 console.log({
-                    _SDF: error.constructor.name,
+                    from: error.constructor.name,
                     name: error.name,
                     message: error.message,
                     stack: error.stack,
                     cause: error.cause ?? "",
+                    here: "here!!",
                 });
             }
+
             if (error instanceof jose.errors.JWTExpired) {
                 return new JWTException({
                     message: "Token is expired",
@@ -331,11 +332,6 @@ class JwtToken {
                     stack: error.stack ?? "",
                     rest: {},
                 });
-            }
-
-            if (error instanceof jose.errors.JWSInvalid) {
-                /* throw new UnauthorizedException("Invalid token: Invalid signature"); */
-                console.log("JWTException: Invalid signature");
             }
 
             if (error && error.constructor.name === "JWTInvalid") {

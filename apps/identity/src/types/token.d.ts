@@ -3,6 +3,7 @@ import type { JWTPayload, JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { AccessInfo, EmailAndIdentityId, Token, TokenTypes } from "@/types";
 
 import { TokenAlgorithm } from "@/common/constant";
+import { ID } from "./types";
 
 export type TokenPayload = EmailAndIdentityId & Pick<AccessInfo, "resource">;
 export type TokenPayloadProtected = TokenPayload & { jti: string; kid: string };
@@ -16,11 +17,31 @@ export type AuthToken = {
     refresh_token: RefreshToken;
 };
 
+export type SupportedKeyAlgorithm = {
+    [key in TokenAlgorithm]: string;
+};
+
 export interface JwtToken extends KeyPair {
     keyId: string;
     payload?: JWTPayload;
     header?: JWTHeaderParameters;
 }
+
+export type DecodedToken = {
+    id: string;
+    type: string;
+    email: string;
+    id: string;
+    resource: string;
+    sid: string;
+    aud: string;
+    iat: number;
+    nbf: number;
+    exp: number;
+    iss: string;
+    sub: string;
+    jti: string;
+};
 
 export type GenerateTokenArgs = {
     identity: TokenPayload;

@@ -1,11 +1,12 @@
 import type { IdentityRoutes, Routes } from "@/types/types";
 
+import { join } from "path";
 import * as schema from "@/adapter/schema";
 import * as constant from "@/common/constant";
 import TokenHandler from "@/adapter/handler/token";
 import config from "@/application/config/api.config";
 import Authorization from "@/adapter/middleware/guard/authz";
-import TokenManagementService from "@/adapter/service/token";
+import TokenManagementService from "@/adapter/service/tokens/token";
 
 /**
  * @todo
@@ -18,17 +19,16 @@ import TokenManagementService from "@/adapter/service/token";
 export default (tokenService: TokenManagementService): Routes<IdentityRoutes> => {
     const handler = new TokenHandler(tokenService);
     const { paths } = config.api.paths.tokens;
-    console.log(paths);
 
     return {
         routes: [
             {
                 method: "GET",
-                url: "/tokens/sessions/:id",
+                url: join(paths.sessions.root, "/:id"),
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
                 handler: handler.getTokenSessionById,
@@ -42,44 +42,50 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 /* IT'LL REVOKED THE CURRENT SESSION,
                  * NOT DELETED THE TOKEN SESSION */
                 method: "DELETE",
+                url: join(paths.sessions.root, ":id"),
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.delete,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
-                url: "/tokens/sessions/:id",
                 handler: handler.deleteSessionById,
+                schema: {
+                    request: {
+                        params: schema.$ref("ID_TOKEN_PARAMS"),
+                    },
+                },
             },
+
             {
-                method: "GET",
-                url: "/tokens/sessions/active",
+                method: paths.sessions.method,
+                url: paths.sessions.root,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
                 handler: handler.getSessions,
             },
             {
-                method: "GET",
-                url: "/tokens/sessions/histories",
+                method: paths.sessions.paths.histories.method,
+                url: paths.sessions.paths.histories.path,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
                 handler: handler.getSessionsHistories,
             },
             {
-                method: "GET",
-                url: "/tokens/sessions/whoami",
+                method: paths.sessions.paths.whoami.method,
+                url: paths.sessions.paths.whoami.path,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
 
@@ -91,7 +97,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
                 handler: handler.getDecodedToken,
@@ -107,7 +113,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.manage,
-                        subject: "Token",
+                        subject: constant.ResourceList.token,
                     },
                 ]),
                 handler: handler.roteteToken,

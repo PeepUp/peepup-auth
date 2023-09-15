@@ -9,7 +9,7 @@ class AbilityGuard {
     async abac(request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes) {
         const { authorization } = request.headers;
 
-        if (!constant.protectedResource.includes(request.routerPath)) return done();
+        if (!constant.protectedResource.includes(request.routeOptions.url)) return done();
 
         if (!authorization) {
             return reply.code(401).send({
