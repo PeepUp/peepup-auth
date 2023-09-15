@@ -141,3 +141,8 @@ export enum IdentityStateTypes {
 }
 
 export type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
+
+export enum ResourceList {
+    identity = "Identity",
+    token = "Token",
+}

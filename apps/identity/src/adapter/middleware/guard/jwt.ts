@@ -1,10 +1,10 @@
 /* eslint-disable consistent-return */
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type TokenManagementService from "@/adapter/service/token";
 
 import JwtToken from "@/common/utils/token";
 import { httpUtils } from "@/common/utils/utils";
 import { protectedResource } from "@/common/constant";
+import type TokenManagementService from "@/adapter/service/token";
 
 class AuthenticationMiddleware {
     static async jwt(
@@ -12,10 +12,10 @@ class AuthenticationMiddleware {
         reply: FastifyReply,
         tokenManagementService: TokenManagementService
     ) {
-        const { headers, routerPath } = request;
+        const { headers, routeOptions } = request;
         const { authorization } = headers;
 
-        if (protectedResource.includes(routerPath)) {
+        if (protectedResource.includes(routeOptions.url)) {
             if (!authorization) {
                 return reply.code(401).send({
                     ok: false,

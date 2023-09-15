@@ -10,9 +10,13 @@ export function deviceIdHook(
 ) {
     const cookies = httpUtils.parseCookies(request.headers.cookie as string);
 
-    if (cookies) {
+    if (
+        cookies?.[cookieConfig.cookies.deviceId] &&
+        cookies?.[cookieConfig.cookies.user_session]
+    ) {
         return done();
     }
+
     reply.header(
         "set-cookie",
         `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(

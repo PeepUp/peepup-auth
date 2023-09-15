@@ -1,6 +1,6 @@
 import IdentityService from "@/adapter/service/identity";
 import TokenRepository from "@/application/repository/token";
-import TokenManagementService from "@/adapter/service/token";
+import TokenManagementService from "@/adapter/service/tokens/token";
 import IdentityRepository from "@/application/repository/identity";
 import AuthenticationService from "@/adapter/service/authentication";
 import TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";

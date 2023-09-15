@@ -13,9 +13,7 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
     let closePromise: Promise<undefined> | null = null;
 
     const gracefullyClose = async (sign: string): Promise<unknown> => {
-        if (closePromise) {
-            return closePromise;
-        }
+        if (closePromise) return closePromise;
 
         console.warn(
             `🌿 Server has been interrupt on ${sign} gracefully and will be shut down ...`

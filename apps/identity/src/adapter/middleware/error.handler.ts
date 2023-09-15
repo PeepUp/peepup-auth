@@ -97,15 +97,6 @@ export async function errorHandler(
     }
 
     if (error instanceof Error) {
-        console.log({
-            code: error.code,
-            statusCode: error.statusCode,
-            error: error.message,
-            name: error.name,
-            stack: error.stack,
-            _SDF: error.constructor.name,
-        });
-
         return reply.code(500).send({
             code: 500,
             error: {

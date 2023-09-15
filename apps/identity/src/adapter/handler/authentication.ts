@@ -20,8 +20,8 @@ class AuthLocalStrategyHandler {
     ) => {
         const { body } = request;
         const ip_address = utils.httpUtils.getIpAddress(Object.freeze(request));
-        const cookies = utils.httpUtils.parseCookies(request.headers.cookie as string);
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
+        const cookies = utils.httpUtils.parseCookies(request.headers.cookie as string);
 
         if ("success" in parsedBody === false) {
             return reply.status(400).send({
@@ -55,12 +55,8 @@ class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        const { traits, password, method } = request.body;
-
         await this.authenticationService.registration({
-            password,
-            traits,
-            method,
+            ...request.body,
         });
 
         return reply.status(201).send({
