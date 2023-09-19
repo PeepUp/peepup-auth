@@ -356,7 +356,6 @@ export default class TokenManagementService {
             algorithms: ["RS256", "ES256"],
             currentDate: new Date(),
             subject: clientId,
-            maxTokenAge: "1 hours",
             clockTolerance: "1 minutes",
             typ: "jwt",
             requiredClaims,

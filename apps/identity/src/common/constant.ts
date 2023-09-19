@@ -12,10 +12,11 @@ export const cwd = process.cwd();
 export const issuer: string =
     `urn:server-identity:${serverURL}` || `urn:server-1:${serverURL}`;
 
+export const keysPath = join(cwd, "/keys");
 export const jwksPath = "/.well-known/jwks.json";
 export const publicDirPath = join(cwd, "/public");
-export const rsaKeysDirPath = join(cwd, "keys", "RSA");
-export const ecsdaKeysDirPath = join(cwd, "keys", "RSA");
+export const rsaKeysDirPath = join(keysPath, "RSA");
+export const ecsdaKeysDirPath = join(keysPath, "ECSDA");
 export const jwksDirPath = join(publicDirPath, jwksPath);
 export const jwksURL = new URL(join(serverURL, remoteJWKSPath));
 export const protectedResource = [
@@ -44,7 +45,6 @@ export const requiredClaims = [
     "exp",
 ];
 
-export const keysPath = join(cwd, "/keys");
 export const privateKeyFile = "private.pem.key" as const;
 export const publicKeyFile = "public.pem.key" as const;
 export const jwtType = "JWT" as const;
