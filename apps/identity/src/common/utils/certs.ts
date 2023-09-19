@@ -6,11 +6,11 @@ import { join } from "path";
 import type { KeyPair } from "@/types/token";
 
 class Certificate {
-    private privateKey = "";
-
-    private publicKey = "";
-
-    constructor(public path: string) {}
+    constructor(
+        public path: string,
+        private readonly privateKey?: string,
+        private readonly publicKey?: string
+    ) {}
 
     public generateKeyPairRSA(length = 4096): KeyPair {
         const { privateKey, publicKey } = generateKeyPairSync("rsa", {
@@ -24,9 +24,6 @@ class Certificate {
                 format: "pem",
             },
         });
-
-        this.privateKey = privateKey;
-        this.publicKey = publicKey;
 
         return { privateKey, publicKey };
     }

@@ -7,7 +7,7 @@ import cors from "@fastify/cors";
 import { routes } from "@/adapter/routes";
 import { schemas } from "@/adapter/schema";
 import JwtToken from "@/common/utils/token";
-import { keysPath } from "@/common/constant";
+import { ecsdaKeysDirPath, keysPath, rsaKeysDirPath } from "@/common/constant";
 import Certificate from "@/common/utils/certs";
 import { fileUtils } from "@/common/utils/utils";
 import { cryptoUtils } from "@/common/utils/crypto";
@@ -21,6 +21,7 @@ import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { join } from "path";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -69,8 +70,8 @@ async function initJWKS() {
         rsa256KeyId = cryptoUtils.generateRandomSHA256(32);
         ecsdaKeyId = cryptoUtils.generateRandomSHA256(32);
 
-        mkdirSync(keysPath + "/RSA/" + rsa256KeyId, { recursive: true });
-        mkdirSync(keysPath + "/ECSDA/" + ecsdaKeyId, { recursive: true });
+        mkdirSync(join(rsaKeysDirPath, rsa256KeyId), { recursive: true });
+        mkdirSync(join(ecsdaKeysDirPath, ecsdaKeyId), { recursive: true });
 
         const rsa256Certs = rsa256.generateKeyPairRSA(4096);
         rsa256.saveKeyPair(rsa256Certs, keysPath + "/RSA/" + rsa256KeyId);
@@ -88,11 +89,7 @@ async function initJWKS() {
     if (!checkWellKnownDirectory) {
         if (rsa256KeyId[0] && ecsdaKeyId[0]) {
             console.log("Generating JWKS...");
-
-            console.log({
-                rsa256KeyId,
-                ecsdaKeyId,
-            });
+            console.log({ rsa256KeyId, ecsdaKeyId });
 
             new JwtToken(rsa256KeyId[0], {}, <JWTHeaderParameters>{}).buildJWKSPublicKey(
                 rsa256KeyId[0],
