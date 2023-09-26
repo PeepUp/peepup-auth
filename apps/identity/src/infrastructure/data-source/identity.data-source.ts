@@ -49,8 +49,9 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         const result: Readonly<Identity>[] = await this.db.identity.findMany({
             where: {
                 email: { contains: query.email },
-                id: { contains: <string>query.id },
-                username: { contains: <string>query.username },
+                id: { contains: query.id as string },
+                username: { contains: query.username as string },
+                password: { contains: query.password as string },
             },
         });
 

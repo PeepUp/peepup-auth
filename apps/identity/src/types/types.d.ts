@@ -86,7 +86,9 @@ export type UserQuery = {
     };
 };
 
-export type RegisterIdentityBody = Pick<Identity, "email" | "password" | "username">;
+export type RegisterIdentityBody = Readonly<
+    Partial<Pick<Identity, "email" | "password" | "username">>
+>;
 export type Entity = Serializable;
 
 export interface UseCase<T> {

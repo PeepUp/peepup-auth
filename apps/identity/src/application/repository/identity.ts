@@ -17,7 +17,9 @@ class IdentityRepository implements IdentityAccessor {
         return <T>data ?? null;
     }
 
-    async getIdentity<T>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null> {
+    async getIdentity<T = Identity>(
+        query: FindUniqeIdentityQuery
+    ): Promise<Readonly<T> | null> {
         const data = await this.dataSource.findUnique(query);
         return <T>data ?? null;
     }
@@ -33,7 +35,7 @@ class IdentityRepository implements IdentityAccessor {
         return <T>data ?? null;
     }
 
-    async create<T>(identity: Identity): Promise<T | void> {
+    async create<T = Identity>(identity: Identity): Promise<T | void> {
         const result = await this.dataSource.create(identity);
         return <T>result;
     }

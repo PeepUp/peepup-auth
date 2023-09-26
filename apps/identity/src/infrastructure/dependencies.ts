@@ -1,6 +1,6 @@
 import type AuthenticationService from "@/adapter/service/authentication";
 import type IdentityService from "@/adapter/service/identity";
-import type TokenManagementService from "@/adapter/service/token";
+import type TokenManagementService from "@/adapter/service/tokens/token";
 
 export interface DependenciesService {
     identityService: IdentityService;

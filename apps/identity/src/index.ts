@@ -1,6 +1,6 @@
 import server from "@/infrastructure/http/app";
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
     await server.ready();
 
     const app = await server.listen({
