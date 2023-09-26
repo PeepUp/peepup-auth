@@ -4,22 +4,22 @@ import type { Identity } from "@/domain/entity/identity";
 import type { RegisterIdentityBody } from "@/types/types";
 
 class IdentityFactory {
-    public static createIdentity(identity: RegisterIdentityBody): Identity {
-        return <Identity>{
-            email: <string>identity.email,
-            password: identity.password,
+    public static defaultIdentity(data: RegisterIdentityBody): Readonly<Identity> {
+        return {
             avatar: "",
-            username: <string>identity.username ?? <string>identity.email?.split("@")[0],
             lastName: "",
             firstName: "",
-            phoneNumber: null,
-            state: IdentityStateTypes.unverified,
             providerId: null,
+            email: data.email,
+            phoneNumber: null,
             emailVerified: null,
             role: RoleType.member,
             createdAt: new Date(),
             updatedAt: new Date(),
-        };
+            password: data.password,
+            state: IdentityStateTypes.unverified,
+            username: data.username ?? data.email?.split("@")[0],
+        } as Identity;
     }
 }
 

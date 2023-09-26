@@ -1,5 +1,4 @@
 import type { RequestHandler } from "@/types/types";
-import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
 import type AuthenticationService from "@/adapter/service/authentication";
 
 import * as schema from "@/adapter/schema/auth";
@@ -14,7 +13,7 @@ import { cookieConfig } from "@/application/config/cookie.config";
 class AuthLocalStrategyHandler {
     constructor(private readonly authenticationService: AuthenticationService) {}
 
-    login: RequestHandler<unknown, unknown, LoginIdentityBody> = async (
+    login: RequestHandler<unknown, unknown, schema.LoginIdentityBody> = async (
         request,
         reply
     ) => {
@@ -51,7 +50,7 @@ class AuthLocalStrategyHandler {
         return reply.status(200).send(result);
     };
 
-    registration: RequestHandler<unknown, unknown, RegisterIdentityBody> = async (
+    registration: RequestHandler<unknown, unknown, schema.RegisterIdentityBody> = async (
         request,
         reply
     ) => {

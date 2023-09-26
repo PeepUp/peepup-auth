@@ -4,6 +4,7 @@ import type {
     GenerateTokenArgs,
     JWTHeader,
     TokenPayloadIdentity,
+    TokenPayloadIdentityReadonly,
     TokenPayloadWithIdentity,
 } from "@/types/token";
 
@@ -11,7 +12,7 @@ import * as constant from "@/common/constant";
 import { cryptoUtils } from "@/common/utils/crypto";
 
 class TokenFactory {
-    static createAccessToken(identity: TokenPayloadIdentity): GenerateTokenArgs {
+    static accessToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {
         return <GenerateTokenArgs>{
             identity,
             ip_address: identity.ip_address,
@@ -22,7 +23,7 @@ class TokenFactory {
         };
     }
 
-    static createRefreshToken(identity: TokenPayloadIdentity): GenerateTokenArgs {
+    static refreshToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {
         return <GenerateTokenArgs>{
             identity,
             ip_address: identity.ip_address,
@@ -30,6 +31,18 @@ class TokenFactory {
             type: constant.TokenType.refresh,
             expiresIn: Math.floor(new Date().getTime() / 1000 + 1 * 4 * 60 * 60),
             algorithm: constant.TokenAlgorithm.ES256,
+        };
+    }
+
+    static simplePayloadIdentity(
+        data: TokenPayloadIdentityReadonly
+    ): TokenPayloadIdentityReadonly {
+        return {
+            id: data.id,
+            email: data.email,
+            resource: data.role,
+            ip_address: data.ip_address,
+            device_id: data.device_id,
         };
     }
 

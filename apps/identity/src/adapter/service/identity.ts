@@ -1,28 +1,12 @@
-import type { Identity } from "@/domain/entity/identity";
-import type { FindUniqeIdentityQuery } from "@/types/types";
 import IdentityRepository from "@/application/repository/identity";
-import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
-import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
 import TokenManagementService from "@/adapter/service/tokens/token";
+import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
+import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
 
-import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
+import type { Identity } from "@/domain/entity/identity";
+import type { FindUniqeIdentityQuery, RegisterIdentityBody } from "@/types/types";
 import type { PutIdentityBody } from "@/adapter/schema/identity";
-import { IdentityStateTypes, RoleType } from "@/common/constant";
-
-export type IdentityRegistration = Pick<Identity, "email" | "password">;
-export type IdentityResponse = Omit<Identity, "password">;
-export type IdentityDataOmittedValue =
-    | "password"
-    | "providerId"
-    | "phoneNumber"
-    | "updatedAt";
-export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
-
-export interface IdentityManagementService {
-    getIdentityByQuery: (query: FindUniqeIdentityQuery) => Promise<Identity | null>;
-    getIdentityById: (id: string) => Promise<Identity | null>;
-    getIdentities: () => Promise<Identity[] | null>;
-}
+import IdentityFactory from "@/domain/factory/identity";
 
 /*
  * @todo:
@@ -34,11 +18,12 @@ export interface IdentityManagementService {
  *  ☐ implement type for IdentityManagementServiceType
  *
  * */
+
 class IdentityService {
     constructor(
         private readonly identityRepository: IdentityRepository,
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        private tokenManagementService: TokenManagementService
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        private readonly tokenManagementService: TokenManagementService
     ) {}
 
     /**
@@ -52,48 +37,21 @@ class IdentityService {
      *   🤔
      *
      * */
-    async registration(body: RegisterIdentityBody): Promise<void> {
-        const { traits, password } = body;
+    async create(payload: RegisterIdentityBody): Promise<void | Identity> {
+        const { email } = payload;
 
-        const alreadyExists = await this.identityRepository.getIdentity<Identity>(traits);
-
-        if (alreadyExists !== null) {
-            throw new ResourceAlreadyExistException("identity already exists");
+        if (await this.identityRepository.getIdentity({ email })) {
+            throw new ResourceAlreadyExistException("Error: Identity Already Exists!");
         }
 
-        const identity: Identity = {
-            id: "",
-            email: <string>traits.email,
-            password,
-            avatar: "",
-            username: <string>traits.username ?? <string>traits.email?.split("@")[0],
-            lastName: "",
-            firstName: "",
-            phoneNumber: null,
-            state: IdentityStateTypes.unverified,
-            providerId: null,
-            emailVerified: null,
-            role: RoleType.member,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+        const identity = await this.identityRepository.create(
+            IdentityFactory.defaultIdentity(payload)
+        );
 
-        const data = await this.identityRepository.create<Identity>(identity);
-
-        if (!data) {
-            throw new Error("Error: cannot creating identity");
+        if (!identity) {
+            console.error("UnhandledError: failed creating new identity!");
+            throw new Error("UnhandledError: failed creating new identity!");
         }
-    }
-
-    async login(body: LoginIdentityBody): Promise<Readonly<IdentityOmitted> | null> {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { traits, password, method, password_identifier } = body;
-        const identity = await this.identityRepository.getLoginIdentity<Identity>({
-            where: traits,
-            data: { password },
-        });
-
-        if (identity === null) return null;
 
         return identity;
     }
@@ -132,6 +90,13 @@ class IdentityService {
         const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
             data;
         return result;
+    }
+
+    async getIdentityByTraits(
+        payload: FindUniqeIdentityQuery
+    ): Promise<Readonly<Identity> | null> {
+        const data = await this.identityRepository.getIdentity<Identity>(payload);
+        return data ?? null;
     }
 
     async getIdentityByQuery(
@@ -222,3 +187,18 @@ class IdentityService {
 }
 
 export default IdentityService;
+
+export type IdentityRegistration = Pick<Identity, "email" | "password">;
+export type IdentityResponse = Omit<Identity, "password">;
+export type IdentityDataOmittedValue =
+    | "password"
+    | "providerId"
+    | "phoneNumber"
+    | "updatedAt";
+export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
+export interface IdentityManagementService {
+    getIdentityByQuery: (query: FindUniqeIdentityQuery) => Promise<Identity | null>;
+    getIdentityById: (id: string) => Promise<Identity | null>;
+    getIdentities: () => Promise<Identity[] | null>;
+}
+export type RegisterNewIdentity = Pick<Identity, "email" | "username" | "password">;
