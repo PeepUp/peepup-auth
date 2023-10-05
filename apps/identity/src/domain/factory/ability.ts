@@ -2,7 +2,7 @@
 
 import { AbilityBuilder } from "@casl/ability";
 import { createPrismaAbility } from "@casl/prisma";
-import { Action } from "@/common/constant";
+import { Action, Role } from "@/common/constant";
 
 import type { AppAbility } from "@/types/ability";
 import type { IdentityAbilityArgs } from "@/types/types";
@@ -22,13 +22,13 @@ class AbilityFactory {
         const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
         switch (identity?.role) {
-            case "admin":
+            case Role.admin:
                 this.defineAdminRules(builder);
                 break;
-            case "member":
+            case Role.member:
                 this.defineMemberRules(identity, builder);
                 break;
-            case "organization":
+            case Role.organization:
                 this.defineMemberRules(identity, builder);
                 break;
             default:
@@ -37,6 +37,10 @@ class AbilityFactory {
         }
 
         return builder.rules;
+    }
+
+    defineAnonymousRules(builder: AbilityBuilder<AppAbility>) {
+        return builder;
     }
 
     defineAdminRules(b: AbilityBuilder<AppAbility>) {
@@ -76,10 +80,6 @@ class AbilityFactory {
                 },
             },
         });
-    }
-
-    defineAnonymousRules(builder: AbilityBuilder<AppAbility>) {
-        return builder;
     }
 }
 

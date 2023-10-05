@@ -1,11 +1,5 @@
 /* eslint-disable */
-import type {
-    AccessControl,
-    AccessControlAccessor,
-    AccessInfo,
-    RoleAccessor,
-    RoleContract,
-} from "@/types/types";
+import type { AccessControlAccessor, RoleAccessor } from "@/types/types";
 
 class RBAC {
     constructor(

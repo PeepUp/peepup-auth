@@ -95,6 +95,7 @@ export enum RoleType {
     member = "member",
     volunteer = "volunteer",
     organization = "organization",
+    manager = "manager",
 }
 
 export enum Action {
