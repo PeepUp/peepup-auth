@@ -47,6 +47,9 @@ enum SystemRole {
 
   // organization. Only has access to their own workspaces.
   organization
+
+  // manager. Only has access to their own workspaces.
+  manager
 }
 
 // model Role {
@@ -155,6 +158,19 @@ model WhitelistedToken {
   @@unique([tokenId, identityId])
   @@index([identityId], name: "whitelistedTokenIdentityIdIndex")
   @@map(name: "tokens_whitelisted")
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
 }
 
 enum IdentityStateTypes {

@@ -8,6 +8,15 @@ export async function main(): Promise<void> {
         host: <string>server.config.environment.host,
     });
 
+    /* const emailSender = EmailSender.getInstance();
+    emailSender.activate();
+    emailSender.setEmailApi(new NodeMailerAdapter());
+
+    emailSender.sendEmail({
+        toEmail: "coocoobolo1@gmail.com",
+        verificationToken: "test",
+    }); */
+
     console.log(`🐢 Server listening on ${app}`);
 }
 
