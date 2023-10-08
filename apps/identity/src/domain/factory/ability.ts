@@ -2,7 +2,7 @@
 
 import { AbilityBuilder } from "@casl/ability";
 import { createPrismaAbility } from "@casl/prisma";
-import { Action, Role } from "@/common/constant";
+import { Action, RoleType as Role } from "@/common/constant";
 
 import type { AppAbility } from "@/types/ability";
 import type { IdentityAbilityArgs } from "@/types/types";

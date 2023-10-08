@@ -4,18 +4,9 @@ export async function main(): Promise<void> {
     await server.ready();
 
     const app = await server.listen({
-        port: <number>server.config.environment.port,
-        host: <string>server.config.environment.host,
+        port: server.config.environment.port as number,
+        host: server.config.environment.host as string,
     });
-
-    /* const emailSender = EmailSender.getInstance();
-    emailSender.activate();
-    emailSender.setEmailApi(new NodeMailerAdapter());
-
-    emailSender.sendEmail({
-        toEmail: "coocoobolo1@gmail.com",
-        verificationToken: "test",
-    }); */
 
     console.log(`🐢 Server listening on ${app}`);
 }
