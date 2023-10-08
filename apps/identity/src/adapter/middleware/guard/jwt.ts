@@ -4,7 +4,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import JwtToken from "@/common/utils/token";
 import { httpUtils } from "@/common/utils/utils";
 import { protectedResource } from "@/common/constant";
-import type TokenManagementService from "@/adapter/service/token";
+import type TokenManagementService from "@/adapter/service/tokens/token";
 
 class AuthenticationMiddleware {
     static async jwt(

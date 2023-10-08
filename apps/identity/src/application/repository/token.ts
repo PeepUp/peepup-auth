@@ -71,6 +71,7 @@ class TokenRepository implements TokenAccessor {
      *     - set status of old token to revoked
      *
      */
+
     async generateToken(token: Token, identityId: ID): Promise<Token> {
         return this.tokenDataSource.create<ID>(token, identityId);
     }
@@ -82,11 +83,6 @@ class TokenRepository implements TokenAccessor {
     async rotateToken(token: Token, identityId: ID): Promise<Token> {
         return this.tokenDataSource.create<ID>(token, identityId);
     }
-
-    /*     async revokeToken(token: Token, identityId: ID): Promise<void> {
-        await this.tokenDataSource.update(token, token);
-        throw new Error("Method not implemented.");
-    } */
 
     async cleanUpExpiredToken(): Promise<void> {
         throw new Error("Method not implemented.");

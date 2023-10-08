@@ -8,6 +8,7 @@ class Authorization {
     static policy(rules: RequiredAbility[]) {
         return async (request: FastifyRequest) => {
             try {
+                console.log({ ability: request.ability });
                 rules.forEach(({ action, subject }) =>
                     ForbiddenError.from(request.ability).throwUnlessCan(action, subject)
                 );
