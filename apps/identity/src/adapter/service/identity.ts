@@ -4,9 +4,20 @@ import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
 import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
 
 import type { Identity } from "@/domain/entity/identity";
-import type { FindUniqeIdentityQuery, RegisterIdentityBody } from "@/types/types";
+import type {
+    EmailUserName,
+    FindUniqeIdentityQuery,
+    ID,
+    RegisterIdentityBody,
+    VerifyHashPasswordUtils,
+} from "@/types/types";
 import type { PutIdentityBody } from "@/adapter/schema/identity";
+
+import * as utils from "@/common/utils/utils";
 import IdentityFactory from "@/domain/factory/identity";
+import { InactivatedIdentityBody } from "../schema/auth";
+import BadRequestException from "../middleware/error/bad-request-exception";
+import BadCredentialsException from "../middleware/error/bad-credential-exception";
 
 /*
  * @todo:
@@ -99,6 +110,94 @@ class IdentityService {
         return data ?? null;
     }
 
+    /* eslint-disable-next-line class-methods-use-this */
+    async verifyPassword(data: VerifyHashPasswordUtils): Promise<boolean> {
+        if (!(await utils.passwordUtils.verify(data))) {
+            throw new BadCredentialsException();
+        }
+        return true;
+    }
+
+    async checkAndAutoActivateState(
+        state: string,
+        activate?: boolean,
+        traits?: EmailUserName
+    ): Promise<boolean> {
+        if (!activate && !traits) {
+            if (state === "deactive") return false;
+            return false;
+        }
+
+        await this.activateState({
+            password: "",
+            traits: {
+                ...traits,
+            },
+            method: "password",
+        });
+
+        return true;
+    }
+
+    async deactivateState(payload: InactivatedIdentityBody): Promise<void> {
+        const { password: _, traits, method } = payload;
+        const identity = await this.identityRepository.getIdentity(traits);
+
+        if (!identity) {
+            throw new BadRequestException(
+                "Error: identity doesn't exists, please check your fields!"
+            );
+        }
+
+        if (identity.state === "deactive") return;
+        if (method === "password" && _) {
+            const { password: __ } = identity;
+            await this.verifyPassword({ _, __ });
+        }
+
+        const data = await this.identityRepository.update(identity.id as ID, {
+            ...identity,
+            state: "deactive",
+        });
+
+        if (data) {
+            if (data.state !== "deactive") {
+                throw new BadRequestException("Error: failed to deactivate identity!");
+            }
+        }
+    }
+
+    async activateState(payload: InactivatedIdentityBody): Promise<void> {
+        const { password: _, traits, method } = payload;
+        const identity = await this.identityRepository.getIdentity(traits);
+
+        if (!identity) {
+            throw new BadRequestException(
+                "Error: identity doesn't exists, please check your fields!"
+            );
+        }
+
+        if (identity.state === "active") return;
+
+        if (method === "password" && _) {
+            const { password: __ } = identity;
+            await this.verifyPassword({ _, __ });
+        }
+
+        const data = await this.identityRepository.update(identity.id as ID, {
+            ...identity,
+            state: "active",
+        });
+
+        if (data) {
+            if (data.state !== "active") {
+                throw new BadRequestException(
+                    "Error: your identity is currently in deactivate state!"
+                );
+            }
+        }
+    }
+
     async getIdentityByQuery(
         query: FindUniqeIdentityQuery
     ): Promise<Readonly<IdentityOmitted> | null> {
@@ -139,8 +238,6 @@ class IdentityService {
             firstName: parsedData.data.firstName ?? identity.firstName,
             avatar: parsedData.data.avatar ?? identity.avatar,
         } as const;
-
-        console.log({ toBeUpdatedIdentity });
 
         // @todo [SOON] delete assertion below
         const updatedIdentity: Readonly<Identity> | void =

@@ -42,7 +42,15 @@ export default class AuthenticationService {
         if (!identity) throw new BadCredentialsException();
         if ("id" in identity === undefined) throw new BadCredentialsException();
 
-        const { id, email, role, password: __ } = identity;
+        const { id, email, username, role, state, password: __ } = identity;
+
+        await this.identityService.checkAndAutoActivateState(state, true, {
+            email,
+            username,
+        });
+
+        // verify password
+        await this.identityService.verifyPassword({ _, __ });
 
         const payload = TokenFactory.simplePayloadIdentity({
             id,
@@ -51,10 +59,6 @@ export default class AuthenticationService {
             device_id,
             role,
         });
-
-        const verify = await utils.passwordUtils.verify({ _, __ });
-
-        if (!verify) throw new BadCredentialsException();
 
         const [{ value: access_token }, { value: refresh_token }] = await Promise.all([
             this.tokenManagementService.generate(TokenFactory.accessToken(payload)),

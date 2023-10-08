@@ -8,6 +8,7 @@ import type IdentityService from "@/adapter/service/identity";
 import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 
 import * as schema from "@/adapter/schema/identity";
+import * as schemaAuth from "@/adapter/schema/auth";
 
 /**
  * @todo:
@@ -159,15 +160,15 @@ class IdentityHandler {
     deleteIdentityById: RequestHandler<unknown, unknown, unknown, GetIdentityParamsId> =
         async (request, reply) => {
             const { id } = request.params;
-            const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(
+            const parsedId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(
                 request.params
             );
 
-            if (!parseId.success) {
+            if (!parsedId.success) {
                 return reply.code(400).send({
                     code: 400,
                     message: "bad request",
-                    errorss: parseId.error.message,
+                    errors: parsedId.error.message,
                 });
             }
 
@@ -177,22 +178,31 @@ class IdentityHandler {
                 return reply.code(400).send({
                     code: 400,
                     message: "bad request",
-                    errorss: `cannot delete identity record with id /${id}/`,
+                    errors: `cannot delete identity record with id /${id}/`,
                 });
             }
 
             return reply.code(204).send();
         };
 
-    // eslint-disable-next-line class-methods-use-this
-    inactivate: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (
+    deactivate: RequestHandler<unknown, unknown, InactivatedIdentityBody> = async (
         request,
         reply
     ) => {
-        const { password, method, traits } = request.body;
-        console.log(password, method, traits);
+        const parsedBody = schemaAuth.POST_REGISTER_IDENTITY_BODY_SCHEMA.safeParse(
+            request.body
+        );
 
-        reply.code(200);
+        if (!parsedBody.success) {
+            return reply.code(400).send({
+                code: 400,
+                message: "bad request",
+                error: await JSON.parse(parsedBody.error.message),
+            });
+        }
+
+        await this.identitiesService.deactivateState(request.body);
+        return reply.code(200);
     };
 }
 

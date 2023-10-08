@@ -146,6 +146,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
                 lastName: data.lastName,
                 avatar: data.avatar,
                 updatedAt: new Date(),
+                state: data.state,
             },
         });
 

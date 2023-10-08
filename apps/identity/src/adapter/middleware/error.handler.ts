@@ -105,8 +105,6 @@ export async function errorHandler(
         });
     }
 
-    console.log("error: from error handler");
     console.dir(error, { depth: Infinity });
-
     return reply.code(500).send({ ok: false });
 }
