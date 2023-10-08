@@ -23,7 +23,7 @@ export const protectedResource = [
     identityPath,
     localAuthPath,
     join(identityPath, ":id"),
-    join(identityPath, ":id", "inactivate"),
+    join(identityPath, ":id", "deactivate"),
     join(tokenPath, "rotate"),
     join(tokenPath, "sessions"),
     join(tokenPath, "sessions", "active"),

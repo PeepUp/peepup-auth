@@ -78,14 +78,14 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             },
             {
                 method: "POST",
-                url: "/identities/:id/inactivate",
+                url: "/identities/:id/deactivate",
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.update,
                         subject: "Identity",
                     },
                 ]),
-                handler: identityHandler.inactivate,
+                handler: identityHandler.deactivate,
                 schema: {
                     request: {
                         body: schema.$ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),

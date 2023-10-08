@@ -40,7 +40,7 @@ class IdentityRepository implements IdentityAccessor {
         return <T>result;
     }
 
-    async update<T>(id: ID, identity: Identity): Promise<T | void> {
+    async update<T = Readonly<Identity>>(id: ID, identity: Identity): Promise<T | void> {
         const result = await this.dataSource.update(id, identity);
         return <T>result;
     }
