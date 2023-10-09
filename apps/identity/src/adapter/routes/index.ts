@@ -8,12 +8,13 @@ import mainRoutes from "./metadata/main";
 import openapiRoutes from "./metadata/openapi";
 import versionRoutes from "./metadata/version";
 import identityRoutes from "./identity/identity";
+import { deviceIdHook } from "../middleware/deviceId";
 import AbilityGuard from "../middleware/guard/abilty";
 import checkhealthRoutes from "./metadata/checkhealth";
 import localIdentityRoutes from "./auth/local.identity";
 import dependencies from "../../infrastructure/diConfig";
-import { deviceIdHook } from "../middleware/deviceId";
 import AuthenticationMiddleware from "../middleware/guard/jwt";
+import { securityHeaders } from "../middleware/security-headers";
 
 /**
  * @todo
@@ -39,6 +40,10 @@ export function routes(
     server.addHook("onRequest", (request, reply, done: DoneFuncWithErrOrRes) =>
         deviceIdHook(request, reply, done)
     );
+
+    server.addHook("onSend", (request, reply, payload, done: DoneFuncWithErrOrRes) => {
+        securityHeaders(request, reply, done);
+    });
 
     // Routes List
     const token = tokenRoutes(tokenManagementService).routes;

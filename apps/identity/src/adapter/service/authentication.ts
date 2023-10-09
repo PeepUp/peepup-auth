@@ -107,7 +107,7 @@ export default class AuthenticationService {
             tokenJtiAndIdentityId
         );
 
-        if (!token) throw new UnauthorizedException("Error: cannot verifyToken token!");
+        if (!token) throw new UnauthorizedException("Error: cannot verify Token!");
 
         const userTokens =
             await this.tokenManagementService.getTokenSessions(access_token);

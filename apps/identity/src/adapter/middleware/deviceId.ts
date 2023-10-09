@@ -19,15 +19,15 @@ export function deviceIdHook(
 
     reply.header(
         "set-cookie",
-        `${cookieConfig.cookies.deviceId}=${cryptoUtils.hashString(
-            cryptoUtils.generateRandomSHA256(32)
+        `${cookieConfig.cookies.deviceId}=${cryptoUtils.generateRandomString(
+            12
         )}; Path=/; HttpOnly; SameSite=Strict;`
     );
 
     reply.header(
         "set-cookie",
-        `${cookieConfig.cookies.user_session}=${cryptoUtils.hashString(
-            cryptoUtils.generateRandomString(64)
+        `${cookieConfig.cookies.user_session}=${cryptoUtils.generateRandomString(
+            16
         )}; Path=/; HttpOnly; SameSite=Strict;`
     );
 
