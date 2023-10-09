@@ -37,6 +37,7 @@ class TokenFactory {
     static simplePayloadIdentity(
         data: TokenPayloadIdentityReadonly
     ): TokenPayloadIdentityReadonly {
+        console.log({ dataPayload: data });
         return {
             id: data.id,
             email: data.email,
