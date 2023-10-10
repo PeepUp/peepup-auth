@@ -1,7 +1,7 @@
-import type { RequestHandler } from "@/types/types";
-
-import { clientURL, serverURL } from "@/common/constant";
+import * as constant from "@/common/constant";
 import openapi from "@/application/config/openapi.json";
+
+import type { RequestHandler } from "@/types/types";
 
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {
@@ -12,8 +12,8 @@ class MetadataHandler {
 
     docs: RequestHandler = async (_, reply) => {
         reply.code(200).send({
-            docs: `${clientURL}/docs`,
-            openapi: `${serverURL}/openapi/v1/schemas`,
+            docs: `${constant.clientURL}/docs`,
+            openapi: `${constant.serverURL}/openapi/v1/schemas`,
         });
     };
 
