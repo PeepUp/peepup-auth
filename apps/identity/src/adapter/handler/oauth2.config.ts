@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
-import { existsSync } from "fs";
 import { join } from "path";
+import { existsSync } from "fs";
 import { fileUtils } from "@/common/utils/utils";
 
 import type { RequestHandler, unknown as _ } from "@/types/types";
@@ -11,10 +11,11 @@ class OAuthConfigurationHandler {
     jwksKeys: RequestHandler = async (_, reply) => {
         const jwksPath = join(constant.publicDirPath, constant.jwksPath);
 
-        if (!existsSync(jwksPath))
+        if (!existsSync(jwksPath)) {
             return reply.code(404).send({
                 status: "not found",
             });
+        }
 
         const jwksContent = fileUtils.readFile(jwksPath, "utf-8");
 
@@ -25,7 +26,6 @@ class OAuthConfigurationHandler {
         }
 
         const json = await JSON.parse(jwksContent);
-
         return reply.code(200).send(json);
     };
 

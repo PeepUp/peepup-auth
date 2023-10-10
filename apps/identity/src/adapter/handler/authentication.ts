@@ -3,7 +3,7 @@ import type AuthenticationService from "@/adapter/service/authentication";
 
 import * as schema from "@/adapter/schema/auth";
 import * as utils from "@/common/utils/utils";
-import { cookieConfig } from "@/application/config/cookie.config";
+import * as config from "@/application/config/cookie.config";
 
 /**
  * @todo:
@@ -31,7 +31,7 @@ class AuthLocalStrategyHandler {
         const result = await this.authenticationService.login(
             body,
             ip_address,
-            cookies![cookieConfig.cookies.deviceId] as string
+            cookies![config.cookieConfig.cookies.deviceId] as string
         );
 
         if (!result) {

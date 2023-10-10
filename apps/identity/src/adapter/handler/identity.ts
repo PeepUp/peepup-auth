@@ -1,8 +1,4 @@
-import type {
-    GetIdentityParamsId,
-    IdentityQueryPartial,
-    PutIdentityBody,
-} from "@/adapter/schema/identity";
+import type * as Schema from "@/adapter/schema/identity";
 import type { RequestHandler, unknown as _ } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
 import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
@@ -20,7 +16,7 @@ import * as schemaAuth from "@/adapter/schema/auth";
 class IdentityHandler {
     constructor(private readonly identitiesService: IdentityService) {}
 
-    identities: RequestHandler<_, _, _, _, IdentityQueryPartial> = async (
+    identities: RequestHandler<_, _, _, _, Schema.IdentityQueryPartial> = async (
         request,
         reply
     ) => {
@@ -84,7 +80,7 @@ class IdentityHandler {
         });
     };
 
-    getIdentityById: RequestHandler<_, _, _, GetIdentityParamsId> = async (
+    getIdentityById: RequestHandler<_, _, _, Schema.GetIdentityParamsId> = async (
         request,
         reply
     ) => {
@@ -121,41 +117,43 @@ class IdentityHandler {
         });
     };
 
-    updateIdentityById: RequestHandler<_, _, PutIdentityBody, GetIdentityParamsId> =
-        async (request, reply) => {
-            const { id } = request.params;
-            const { lastName, firstName, avatar } = request.body;
-            const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(
-                request.params
-            );
+    updateIdentityById: RequestHandler<
+        _,
+        _,
+        Schema.PutIdentityBody,
+        Schema.GetIdentityParamsId
+    > = async (request, reply) => {
+        const { id } = request.params;
+        const { lastName, firstName, avatar } = request.body;
+        const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
-            if (!parseId.success) {
-                return reply.code(400).send({
-                    code: 400,
-                    message: "bad request",
-                });
-            }
-
-            const data = await this.identitiesService.updateIdentityById(id, {
-                lastName,
-                firstName,
-                avatar,
+        if (!parseId.success) {
+            return reply.code(400).send({
+                code: 400,
+                message: "bad request",
             });
+        }
 
-            if (!data) {
-                return reply.code(400).send({
-                    code: 400,
-                    status: "bad request",
-                    message: "cannot update identity record",
-                });
-            }
+        const data = await this.identitiesService.updateIdentityById(id, {
+            lastName,
+            firstName,
+            avatar,
+        });
 
-            return reply.code(200).send({
-                data,
+        if (!data) {
+            return reply.code(400).send({
+                code: 400,
+                status: "bad request",
+                message: "cannot update identity record",
             });
-        };
+        }
 
-    deleteIdentityById: RequestHandler<_, _, _, GetIdentityParamsId> = async (
+        return reply.code(200).send({
+            data,
+        });
+    };
+
+    deleteIdentityById: RequestHandler<_, _, _, Schema.GetIdentityParamsId> = async (
         request,
         reply
     ) => {
