@@ -4,7 +4,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { fileUtils } from "@/common/utils/utils";
 
-import type { RequestHandler } from "@/types/types";
+import type { RequestHandler, unknown as _ } from "@/types/types";
 import * as constant from "@/common/constant";
 
 class OAuthConfigurationHandler {
@@ -29,10 +29,7 @@ class OAuthConfigurationHandler {
         return reply.code(200).send(json);
     };
 
-    jwksCerts: RequestHandler<unknown, unknown, unknown, { "*": string }> = async (
-        request,
-        reply
-    ) => {
+    jwksCerts: RequestHandler<_, _, _, { "*": string }> = async (request, reply) => {
         const { "*": path } = request.params;
         const jwksPath = join(process.cwd(), "public/.well-known", path);
 

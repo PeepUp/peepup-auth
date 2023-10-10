@@ -1,4 +1,4 @@
-import type { RequestHandler } from "@/types/types";
+import type { RequestHandler, unknown as _ } from "@/types/types";
 import type AuthenticationService from "@/adapter/service/authentication";
 
 import * as schema from "@/adapter/schema/auth";
@@ -13,10 +13,7 @@ import { cookieConfig } from "@/application/config/cookie.config";
 class AuthLocalStrategyHandler {
     constructor(private readonly authenticationService: AuthenticationService) {}
 
-    login: RequestHandler<unknown, unknown, schema.LoginIdentityBody> = async (
-        request,
-        reply
-    ) => {
+    login: RequestHandler<_, _, schema.LoginIdentityBody> = async (request, reply) => {
         const { body } = request;
         const ip_address = utils.httpUtils.getIpAddress(Object.freeze(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
@@ -50,7 +47,7 @@ class AuthLocalStrategyHandler {
         return reply.status(200).send(result);
     };
 
-    registration: RequestHandler<unknown, unknown, schema.RegisterIdentityBody> = async (
+    registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
         request,
         reply
     ) => {
@@ -66,7 +63,7 @@ class AuthLocalStrategyHandler {
         });
     };
 
-    logout: RequestHandler<unknown> = async (request, reply) => {
+    logout: RequestHandler<_> = async (request, reply) => {
         await this.authenticationService.logout(request.headers.authorization as string);
         return reply.status(204).send();
     };

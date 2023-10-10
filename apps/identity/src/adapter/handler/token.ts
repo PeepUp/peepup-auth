@@ -2,50 +2,29 @@ import { ip_schema } from "@/adapter/schema/auth";
 import { POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA } from "@/adapter/schema/token";
 import TokenManagementService from "@/adapter/service/tokens/token";
 
-import type { RequestHandler } from "@/types/types";
-import type {
-    PostRefreshTokenParams,
-    TokenQueryString,
-    idTokenParams,
-} from "../schema/token";
+import type { RequestHandler, unknown as _ } from "@/types/types";
+import type * as Schema from "@/adapter/schema/token";
 
 class TokenHandler {
-    constructor(private tokenManagementService: TokenManagementService) {}
+    constructor(private tokenService: TokenManagementService) {}
 
-    getTokenSessionById: RequestHandler<unknown, unknown, unknown, idTokenParams> =
-        async (request, reply) => {
-            const { params } = request;
-            const data = await this.tokenManagementService.getTokenById(params.id);
-
-            reply.code(200).send({
-                data,
-            });
-        };
-
-    deleteSessionById: RequestHandler<unknown, unknown, unknown, idTokenParams> = async (
+    getTokenById: RequestHandler<_, _, _, Schema.idTokenParams> = async (
         request,
         reply
     ) => {
         const { params } = request;
-        const data = await this.tokenManagementService.revokeToken(params.id);
+        const data = await this.tokenService.getTokenById(params.id);
 
-        if (!data) {
-            return reply.code(400).send({
-                code: 400,
-                message: "Bad Request",
-            });
-        }
-
-        return reply.code(204).send();
+        return reply.code(200).send({
+            data,
+        });
     };
 
-    getWhoAmI: RequestHandler = async (request, reply) => {
+    whoAmI: RequestHandler = async (request, reply) => {
         const { headers } = request;
-        const token = this.tokenManagementService.splitAuthzHeader(
-            headers.authorization as string
-        );
+        const token = this.tokenService.splitAuthzHeader(headers.authorization as string);
 
-        const data = await this.tokenManagementService.decodeToken(token);
+        const data = await this.tokenService.decodeToken(token);
         if (!data) {
             return reply.code(400).send({
                 code: 400,
@@ -56,15 +35,12 @@ class TokenHandler {
         return reply.code(200).send({ data });
     };
 
-    getDecodedToken: RequestHandler<
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        TokenQueryString
-    > = async (request, reply) => {
+    getDecodedToken: RequestHandler<_, _, _, _, Schema.TokenQueryString> = async (
+        request,
+        reply
+    ) => {
         const { query } = request;
-        const data = await this.tokenManagementService.decodeToken(query.token);
+        const data = await this.tokenService.decodeToken(query.token);
 
         if (!data) {
             return reply.code(400).send({
@@ -78,15 +54,11 @@ class TokenHandler {
         });
     };
 
-    roteteToken: RequestHandler<
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        PostRefreshTokenParams
-    > = async (request, reply) => {
+    roteteToken: RequestHandler<_, _, _, _, Schema.PostRefreshTokenParams> = async (
+        request,
+        reply
+    ) => {
         const valid = POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA.safeParse(request.query);
-
         const ip_address =
             ip_schema.safeParse(request.ip).success === true ? request.ip : "";
         const device_id = request.headers["x-device-id"] as string;
@@ -98,7 +70,7 @@ class TokenHandler {
             });
         }
 
-        const data = await this.tokenManagementService.rotateToken(
+        const data = await this.tokenService.rotateToken(
             request.query,
             ip_address,
             device_id
@@ -107,15 +79,13 @@ class TokenHandler {
         return reply.code(200).send(data);
     };
 
-    getSessions: RequestHandler = async (request, reply) => {
+    getActiveTokenSessions: RequestHandler = async (request, reply) => {
         const { headers } = request;
-        console.log(headers);
-
-        const data = await this.tokenManagementService.getTokenSessions(
+        const data = await this.tokenService.getActiveTokenSessions(
             headers.authorization as string
         );
 
-        reply.code(200).send({
+        return reply.code(200).send({
             length: data?.length,
             data,
         });
@@ -124,25 +94,50 @@ class TokenHandler {
     getSessionsHistories: RequestHandler = async (request, reply) => {
         const { headers } = request;
 
-        const data = await this.tokenManagementService.getTokenHistories(
+        const data = await this.tokenService.getTokenHistories(
             headers.authorization as string
         );
 
-        reply.code(200).send({
+        return reply.code(200).send({
+            length: data?.length,
+            data,
+        });
+    };
+
+    getAllTokenSessions: RequestHandler = async (request, reply) => {
+        const { headers } = request;
+
+        const data = await this.tokenService.getAllTokenSessions(
+            headers.authorization as string
+        );
+
+        return reply.code(200).send({
             length: data?.length,
             data,
         });
     };
 
     // eslint-disable-next-line class-methods-use-this
-    deleteSessions: RequestHandler = async (request, reply) => {
-        const { headers } = request;
-
-        console.log(headers);
-
+    deleteSessions: RequestHandler = async (_request, reply) =>
         reply.code(200).send({
             message: "success",
         });
+
+    deleteSessionById: RequestHandler<_, _, _, Schema.idTokenParams> = async (
+        request,
+        reply
+    ) => {
+        const { params } = request;
+        const data = await this.tokenService.revokeToken(params.id);
+
+        if (!data) {
+            return reply.code(400).send({
+                code: 400,
+                message: "Bad Request",
+            });
+        }
+
+        return reply.code(204).send();
     };
 }
 

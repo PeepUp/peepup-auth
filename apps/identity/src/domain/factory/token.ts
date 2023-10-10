@@ -13,7 +13,7 @@ import { cryptoUtils } from "@/common/utils/crypto";
 
 class TokenFactory {
     static accessToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {
-        return <GenerateTokenArgs>{
+        return {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
@@ -24,7 +24,7 @@ class TokenFactory {
     }
 
     static refreshToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {
-        return <GenerateTokenArgs>{
+        return {
             identity,
             ip_address: identity.ip_address,
             device_id: identity.device_id,
@@ -37,7 +37,6 @@ class TokenFactory {
     static simplePayloadIdentity(
         data: TokenPayloadIdentityReadonly
     ): TokenPayloadIdentityReadonly {
-        console.log({ dataPayload: data });
         return {
             id: data.id,
             email: data.email,
@@ -51,8 +50,8 @@ class TokenFactory {
         identity: TokenPayloadIdentity,
         type: TokenTypes,
         expirationTime: number
-    ) {
-        return <TokenPayloadWithIdentity>{
+    ): TokenPayloadWithIdentity {
+        return {
             type,
             email: identity.email,
             id: identity.id,

@@ -12,6 +12,7 @@ import { TokenRelatedArgs } from "@/application/repository/token";
 import { WhiteListedTokenCreateArgs } from "@/infrastructure/data-source/whitelist-token.data-source";
 
 type IdentityId = string;
+export type unknown = unknown;
 export type ID = number | IdentityId;
 export type Serializable = {
     readonly id?: ID;
