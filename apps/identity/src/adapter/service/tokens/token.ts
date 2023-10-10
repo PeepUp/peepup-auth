@@ -1,22 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 
-import type {
-    DecodedToken,
-    GenerateTokenArgs,
-    SupportedKeyAlgorithm,
-    TokenPayloadIdentity,
-    TokenPayloadWithIdentity,
-} from "@/types/token";
-import type {
-    AuthorizationHeaderOptions,
-    ID,
-    ParsedToken,
-    Token,
-    TokenAccessor,
-    TokenContract,
-    WhiteListedTokenAccessor,
-} from "@/types/types";
+import * as TokenType from "@/types/token";
+import * as Type from "@/types/types";
 import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { PostRefreshTokenParams } from "@/adapter/schema/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
@@ -32,25 +18,25 @@ import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
 import BadRequestException from "@/adapter/middleware/error/bad-request-exception";
 
 export default class TokenManagementService {
-    private keyId: SupportedKeyAlgorithm = <SupportedKeyAlgorithm>{};
+    private keyId: TokenType.SupportedKeyAlgorithm = <TokenType.SupportedKeyAlgorithm>{};
 
     private verifyOptions: JWTVerifyOptions = {};
 
     constructor(
-        private readonly tokenRepository: TokenAccessor,
-        private readonly wlTokenRepository: WhiteListedTokenAccessor
+        private readonly tokenRepository: Type.TokenAccessor,
+        private readonly wlTokenRepository: Type.WhiteListedTokenAccessor
     ) {
         this.setupKID();
         this.setupVerifyOptions();
     }
 
-    async getTokenById(jti: ID): Promise<Readonly<Token> | null> {
+    async getTokenById(jti: Type.ID): Promise<Readonly<Type.Token> | null> {
         return this.tokenRepository.getToken({
             jti: jti as string,
         });
     }
 
-    async generate(data: GenerateTokenArgs): Promise<Readonly<Token>> {
+    async generate(data: TokenType.GenerateTokenArgs): Promise<Readonly<Type.Token>> {
         const { identity, type, expiresIn, ip_address, device_id, algorithm: alg } = data;
 
         const kid = this.getKID(alg);
@@ -74,47 +60,72 @@ export default class TokenManagementService {
         return result;
     }
 
-    async saveToken(token: Token, identityId: ID): Promise<Readonly<Token> | null> {
+    async saveToken(
+        token: Type.Token,
+        identityId: Type.ID
+    ): Promise<Readonly<Type.Token> | null> {
         const data = await this.tokenRepository.saveToken(token, identityId);
         if (!data) throw new Error("Error: cannot save new token in database!");
         return data;
     }
 
-    async getTokenHistories(access_token: string): Promise<Readonly<Token[]> | null> {
+    async getTokenHistories(
+        access_token: string
+    ): Promise<Readonly<Type.Token[]> | null> {
         const token = this.splitAuthzHeader(access_token);
         const decode = JwtToken.decodeJwt(token);
         const data = await this.tokenRepository.getTokens(decode.id as string);
 
         if (!data) return [];
 
-        const result: Readonly<Token>[] = data.filter(
-            (t: Token) => t.tokenStatus === constant.TokenStatusType.revoked
+        const result: Readonly<Type.Token>[] = data.filter(
+            (t: Type.Token) => t.tokenStatus === constant.TokenStatusType.revoked
         );
 
         return result;
     }
 
-    async getTokenSessions(
+    async getActiveTokenSessions(
         access_token: string,
-        options?: AuthorizationHeaderOptions
-    ): Promise<Readonly<Token[]> | null> {
+        options?: Type.AuthorizationHeaderOptions
+    ): Promise<Readonly<Type.Token[]> | null> {
         const token = options?.authorizationHeader
             ? this.splitAuthzHeader(access_token)
             : access_token;
 
-        const decoded: DecodedToken = JwtToken.decodeJwt(token);
+        const decoded: TokenType.DecodedToken = JwtToken.decodeJwt(token);
         const data = await this.wlTokenRepository.findManyByIdentityId(decoded.id);
 
         if (!data) return [];
 
-        return data.map((t: Token) => ({
+        return data.map((t: Type.Token) => ({
             ...t,
             payload: JSON.parse(t.payload as string),
             header: JSON.parse(t.header as string),
         }));
     }
 
-    async revokeToken(jti: ID): Promise<boolean> {
+    async getAllTokenSessions(
+        access_token: string,
+        options?: Type.AuthorizationHeaderOptions
+    ): Promise<Readonly<Type.Token[]> | null> {
+        const token = options?.authorizationHeader
+            ? this.splitAuthzHeader(access_token)
+            : access_token;
+
+        const decoded: TokenType.DecodedToken = JwtToken.decodeJwt(token);
+        const data = await this.tokenRepository.getTokens(decoded.id as string);
+
+        if (!data) return [];
+
+        return data.map((t: Type.Token) => ({
+            ...t,
+            payload: JSON.parse(t.payload as string),
+            header: JSON.parse(t.header as string),
+        }));
+    }
+
+    async revokeToken(jti: Type.ID): Promise<boolean> {
         const result = await this.tokenRepository.revokeToken(jti);
 
         if (!result) {
@@ -124,10 +135,12 @@ export default class TokenManagementService {
         return result !== null;
     }
 
-    async decodeToken(token: string): Promise<Readonly<TokenPayloadWithIdentity> | null> {
+    async decodeToken(
+        token: string
+    ): Promise<Readonly<TokenType.TokenPayloadWithIdentity> | null> {
         const decode = JwtToken.decodeJwt(token);
 
-        return <TokenPayloadWithIdentity>{
+        return <TokenType.TokenPayloadWithIdentity>{
             id: decode.id,
             sid: decode.sid,
             jti: decode.jti,
@@ -147,7 +160,7 @@ export default class TokenManagementService {
         params: PostRefreshTokenParams,
         ip_address: string,
         device_id: string
-    ): Promise<Readonly<Pick<TokenContract, "access_token">>> {
+    ): Promise<Readonly<Pick<Type.TokenContract, "access_token">>> {
         const { refresh_token } = params;
         const decodedRefreshToken = JwtToken.decodeJwt(refresh_token);
 
@@ -160,17 +173,15 @@ export default class TokenManagementService {
 
         const [verifyRefreshToken, tokens] = await Promise.all([
             this.verifyToken(refresh_token, tokenJtiAndIdentityId),
-            this.getTokenSessions(decodedRefreshToken.id as string),
+            this.getActiveTokenSessions(decodedRefreshToken.id as string),
         ]);
-
-        console.log({ verifyRefreshToken, tokens });
 
         if (!tokens || !tokens.length) {
             throw new UnauthorizedException("Error: Token is expired or invalid!");
         }
 
         const token = tokens.filter(
-            (t: Token) =>
+            (t: Type.Token) =>
                 t.type === constant.TokenType.access &&
                 t.tokenStatus === constant.TokenStatusType.active &&
                 t.jti === decodedRefreshToken.jti &&
@@ -194,7 +205,7 @@ export default class TokenManagementService {
         const payload = await JSON.parse(stringPayload as string);
         const header: JWTHeaderParameters = await JSON.parse(stringHeader as string);
 
-        const identity: TokenPayloadIdentity = {
+        const identity: TokenType.TokenPayloadIdentity = {
             email: payload.email,
             id: payload.id,
             resource: payload.resource,
@@ -223,7 +234,7 @@ export default class TokenManagementService {
     async verifyToken(
         token: string,
         query: QueryWhitelistedTokenArgs
-    ): Promise<Readonly<Token> | null> {
+    ): Promise<Readonly<Type.Token> | null> {
         const jwt = new JwtToken(this.keyId.RS256, {}, {});
 
         // Get whitelistedTokens from database
@@ -239,7 +250,7 @@ export default class TokenManagementService {
             throw new UnauthorizedException("Error: Token is no longer active!");
         }
 
-        const { payload, header, jti, kid, ...rest }: ParsedToken =
+        const { payload, header, jti, kid, ...rest }: Type.ParsedToken =
             await JwtToken.parsedToken(whitelistedToken);
 
         if (!payload || !header) {
@@ -268,8 +279,6 @@ export default class TokenManagementService {
                 ip_address: data.ip_address as string,
             });
 
-            console.log({ relatedToken });
-            console.log({ access_token: data });
 
             if (relatedToken) {
                 if (relatedToken.type === TokenType.refresh && relatedToken.jti) {
@@ -304,8 +313,6 @@ export default class TokenManagementService {
         return whitelistedToken;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-
     async getLinkedToken({
         jti,
         identityId,
@@ -313,22 +320,16 @@ export default class TokenManagementService {
         ip_address,
     }: {
         jti?: string;
-        identityId?: string | ID;
+        identityId?: string;
         device_id?: string;
         ip_address?: string;
-    }): Promise<Readonly<Token> | null> {
-        console.log({ jti, identityId, device_id, ip_address });
-
+    }): Promise<Readonly<Type.Token> | null> {
         const data = await this.tokenRepository.findRelatedTokens({
             device_id: device_id as string,
             ip_address: ip_address as string,
         });
 
-        console.log({ whitelistedToken: data });
-
-        if (!data) {
-            return null;
-        }
+        if (!data) return null;
 
         return data;
     }

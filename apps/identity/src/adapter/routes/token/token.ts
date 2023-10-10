@@ -31,7 +31,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                         subject: constant.ResourceList.token,
                     },
                 ]),
-                handler: handler.getTokenSessionById,
+                handler: handler.getTokenById,
                 schema: {
                     request: {
                         params: schema.$ref("ID_TOKEN_PARAMS"),
@@ -39,10 +39,10 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 },
             },
             {
-                /* IT'LL REVOKED THE CURRENT SESSION,
-                 * NOT DELETED THE TOKEN SESSION */
+                /* !!! THIS WILL REVOKED THE CURRENT SESSION,
+                 * NOT DELETED THE TOKEN SESSION IN DATABASE */
                 method: "DELETE",
-                url: join(paths.sessions.root, ":id"),
+                url: join(paths.sessions.root, "/:id"),
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.delete,
@@ -56,18 +56,18 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                     },
                 },
             },
-
             {
                 method: paths.sessions.method,
-                url: paths.sessions.root,
+                url: paths.sessions.paths.active.path,
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
                         subject: constant.ResourceList.token,
                     },
                 ]),
-                handler: handler.getSessions,
+                handler: handler.getActiveTokenSessions,
             },
+
             {
                 method: paths.sessions.paths.histories.method,
                 url: paths.sessions.paths.histories.path,
@@ -89,7 +89,18 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                     },
                 ]),
 
-                handler: handler.getWhoAmI,
+                handler: handler.whoAmI,
+            },
+            {
+                method: paths.sessions.method,
+                url: paths.sessions.root,
+                onRequest: Authorization.policy([
+                    {
+                        action: constant.Action.read,
+                        subject: constant.ResourceList.token,
+                    },
+                ]),
+                handler: handler.getAllTokenSessions,
             },
             {
                 method: paths.decode.method,
