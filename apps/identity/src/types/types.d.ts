@@ -1,3 +1,5 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
 import type { Identity } from "@domain/entity/identity";
 import type { Prisma } from "@prisma/client";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -9,13 +11,12 @@ import type {
     QueryWhitelistedTokenArgs,
 } from "@/infrastructure/data-source/token.data-source";
 import { TokenRelatedArgs } from "@/application/repository/token";
-import { WhiteListedTokenCreateArgs } from "@/infrastructure/data-source/whitelist-token.data-source";
 
 type IdentityId = string;
 export type unknown = unknown;
 export type ID = number | IdentityId;
 export type Serializable = {
-    readonly id?: ID;
+    readonly id?: ID | null;
 };
 export type WildcardParams = {
     "*": string;
@@ -63,9 +64,9 @@ export type IdentityRoutes = Array<
         http.Server,
         Request,
         Reply,
-        any,
+        never,
         unknown,
-        any,
+        never,
         ZodTypeProvider,
         FastifyBaseLogger
     >

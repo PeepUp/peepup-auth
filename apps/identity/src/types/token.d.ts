@@ -70,12 +70,13 @@ export type KeyPair = {
     publicKey: string;
 };
 
-export type TokenPayloadIdentity = EmailAndIdentityId &
-    Pick<AccessInfo, "resource"> & {
+export type TokenPayloadIdentity = Required<EmailAndIdentityId> &
+    Required<Pick<AccessInfo, "resource">> &
+    Required<{
         role: Pick<AccessInfo, "resource">;
         ip_address?: string | null;
         device_id?: string | null;
-    };
+    }>;
 
 export type TokenPayloadIdentityReadonly = Readonly<TokenPayloadIdentity>;
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;

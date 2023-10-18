@@ -1,15 +1,7 @@
-import type { PrismaClient } from "@prisma/client";
-
 import type { Identity } from "@/domain/entity/identity";
-import type {
-    DataSourceSQL,
-    FindLoginIdentityQuery,
-    FindUniqeIdentityQuery,
-    HashPasswordArgs,
-    ID,
-    VerifyHashPasswordUtils,
-} from "@/types/types";
-import { passwordUtils } from "@/common/utils/utils";
+import type * as Types from "@/types/types";
+import type { PrismaProviderClient } from "@/infrastructure/database/prisma-provider";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * @todo:
@@ -18,31 +10,11 @@ import { passwordUtils } from "@/common/utils/utils";
  *
  */
 
-class IdentityStoreAdapter implements DataSourceSQL<Identity> {
-    constructor(private readonly db: PrismaClient) {
-        this.db.$extends({
-            model: {
-                identity: {
-                    async hashPassword(data: HashPasswordArgs) {
-                        const { _ } = data;
-                        const hashed = await passwordUtils.hash({
-                            _,
-                            salt: await passwordUtils.generateSalt(),
-                        });
-                        return hashed;
-                    },
+class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
+    private readonly db: PrismaClient;
 
-                    async verifyPassword(data: VerifyHashPasswordUtils) {
-                        const { _, __ } = data;
-                        const verified = await passwordUtils.verify({
-                            _,
-                            __,
-                        });
-                        return verified;
-                    },
-                },
-            },
-        });
+    constructor(prisma: PrismaProviderClient) {
+        this.db = prisma.getPrismaClient();
     }
 
     async query(query: Identity): Promise<Identity[]> {
@@ -58,7 +30,9 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         return result;
     }
 
-    async findUnique(query: FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
+    async findUnique(
+        query: Types.FindUniqeIdentityQuery
+    ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
                 email: query.email,
@@ -69,7 +43,9 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         return result;
     }
 
-    async findFirst(query: FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
+    async findFirst(
+        query: Types.FindUniqeIdentityQuery
+    ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findFirst({
             where: query,
         });
@@ -78,7 +54,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
     }
 
     async findUniqueLogin(
-        query: FindLoginIdentityQuery
+        query: Types.FindLoginIdentityQuery
     ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
@@ -125,7 +101,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         return result;
     }
 
-    async find(id: ID): Promise<Readonly<Identity> | null> {
+    async find(id: Types.ID): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity | null> = await this.db.identity.findFirst({
             where: {
                 id: <string>id,
@@ -135,7 +111,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         return Object.freeze(result);
     }
 
-    async update(id: ID, data: Identity): Promise<Identity> {
+    async update(id: Types.ID, data: Identity): Promise<Identity> {
         const result: Readonly<Identity> = await this.db.identity.update({
             where: {
                 id: <string>id,
@@ -153,7 +129,7 @@ class IdentityStoreAdapter implements DataSourceSQL<Identity> {
         return result;
     }
 
-    async delete(id: ID): Promise<void> {
+    async delete(id: Types.ID): Promise<void> {
         await this.db.identity.delete({
             where: {
                 id: <string>id,

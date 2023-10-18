@@ -1,8 +1,9 @@
 /* eslint-disable class-methods-use-this */
+import { TokenStatusType } from "@/common/constant";
+
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ID, Token, WhiteListedTokenDataSourceAdapter } from "@/types/types";
-
-import { TokenStatusType } from "@/common/constant";
+import type { PrismaProviderClient } from "../database/prisma-provider";
 
 /**
  * @todo:
@@ -15,7 +16,11 @@ export type QueryTokenArgs = Prisma.TokenWhereUniqueInput;
 export type QueryWhitelistedTokenArgs = Prisma.WhitelistedTokenWhereUniqueInput;
 
 class WhiteListedTokenStoreAdapter implements WhiteListedTokenDataSourceAdapter {
-    constructor(private readonly dataSource: PrismaClient) {}
+    private readonly dataSource: PrismaClient;
+
+    constructor(prisma: PrismaProviderClient) {
+        this.dataSource = prisma.getPrismaClient();
+    }
 
     async findMany(): Promise<Readonly<Token[]> | null> {
         const data = await this.dataSource.whitelistedToken.findMany({
