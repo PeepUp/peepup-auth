@@ -8,6 +8,8 @@ module.exports = {
     rules: {
         "import/prefer-default-export": ["off" | "warn" | "error", { target: "single" }],
         "no-console": "off",
+        "import/no-unresolved": "off",
+        "import/extensions": "off",
         "no-restricted-syntax": [
             "off",
             {

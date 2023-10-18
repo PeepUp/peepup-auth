@@ -1,9 +1,11 @@
 /* eslint-disable class-methods-use-this */
-import { TokenStatusTypes, type Prisma, type PrismaClient } from "@prisma/client";
+import { TokenStatusTypes } from "@prisma/client";
 
 import type { TokenQueryArgs } from "@/types/token";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ID, Token, TokenDataSourceAdapter } from "@/types/types";
 import type { TokenRelatedArgs } from "@/application/repository/token";
+import type { PrismaProviderClient } from "@/infrastructure/database/prisma-provider";
 
 /**
  * @todo:
@@ -16,7 +18,11 @@ export type QueryTokenArgs = Prisma.TokenWhereUniqueInput;
 export type QueryWhitelistedTokenArgs = Prisma.WhitelistedTokenWhereUniqueInput;
 
 class TokenStoreAdapter implements TokenDataSourceAdapter {
-    constructor(private readonly dataSource: PrismaClient) {}
+    private readonly dataSource: PrismaClient;
+
+    constructor(prisma: PrismaProviderClient) {
+        this.dataSource = prisma.getPrismaClient();
+    }
 
     async query(
         query: TokenQueryArgs

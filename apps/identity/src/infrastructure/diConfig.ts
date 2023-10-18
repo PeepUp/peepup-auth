@@ -6,10 +6,12 @@ import AuthenticationService from "@/adapter/service/authentication";
 import TokenStoreAdapter from "@/infrastructure/data-source/token.data-source";
 import IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
 import { WhiteListedTokenRepository } from "@/application/repository/whitelist-token";
+import PrismaProvider from "@/infrastructure/database/prisma-provider";
 import WhiteListedTokenStoreAdapter from "./data-source/whitelist-token.data-source";
-import prisma from "./prisma";
 
 import type { DependenciesService } from "./dependencies";
+
+const prisma = PrismaProvider.getInstance();
 
 const tokenManagementService = new TokenManagementService(
     new TokenRepository(new TokenStoreAdapter(prisma)),
