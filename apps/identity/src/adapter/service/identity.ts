@@ -1,8 +1,5 @@
-import IdentityRepository from "@/application/repository/identity";
-import TokenManagementService from "@/adapter/service/tokens/token";
-import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
-import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
-
+import type { PutIdentityBody } from "@/adapter/schema/identity";
+import type IdentityRepository from "@/application/repository/identity";
 import type { Identity } from "@/domain/entity/identity";
 import type {
     EmailUserName,
@@ -11,13 +8,14 @@ import type {
     RegisterIdentityBody,
     VerifyHashPasswordUtils,
 } from "@/types/types";
-import type { PutIdentityBody } from "@/adapter/schema/identity";
 
-import * as utils from "@/common/utils/utils";
+import PasswordUtil from "@/common/utils/password.util";
 import IdentityFactory from "@/domain/factory/identity";
-import { InactivatedIdentityBody } from "../schema/auth";
+import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
+import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
 import BadRequestException from "../middleware/error/bad-request-exception";
 import BadCredentialsException from "../middleware/error/bad-credential-exception";
+import type { InactivatedIdentityBody } from "../schema/auth";
 
 /*
  * @todo:
@@ -31,11 +29,7 @@ import BadCredentialsException from "../middleware/error/bad-credential-exceptio
  * */
 
 class IdentityService {
-    constructor(
-        private readonly identityRepository: IdentityRepository,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        private readonly tokenManagementService: TokenManagementService
-    ) {}
+    constructor(private readonly identityRepository: IdentityRepository) {}
 
     /**
      * @todo:
@@ -59,10 +53,7 @@ class IdentityService {
             IdentityFactory.defaultIdentity(payload)
         );
 
-        if (!identity) {
-            console.error("UnhandledError: failed creating new identity!");
-            throw new Error("UnhandledError: failed creating new identity!");
-        }
+        if (!identity) throw new Error("UnhandledError: failed creating new identity!");
 
         return identity;
     }
@@ -112,9 +103,10 @@ class IdentityService {
 
     /* eslint-disable-next-line class-methods-use-this */
     async verifyPassword(data: VerifyHashPasswordUtils): Promise<boolean> {
-        if (!(await utils.passwordUtils.verify(data))) {
+        if (!(await PasswordUtil.verify(data))) {
             throw new BadCredentialsException();
         }
+
         return true;
     }
 

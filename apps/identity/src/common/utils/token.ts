@@ -1,5 +1,17 @@
 /* eslint-disable class-methods-use-this */
 
+import JWTException from "@/adapter/middleware/error/jwt-error";
+import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
+import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
+import {
+    jwksURL,
+    publicKeyFile,
+    cwd,
+    ecsdaKeysDirPath,
+    rsaKeysDirPath,
+    TokenAlgorithm,
+} from "@/common/constant";
+
 import path from "path";
 import * as fs from "fs";
 import { createPublicKey } from "crypto";
@@ -19,18 +31,7 @@ import type {
     TokenPayloadIdentity,
     TokenPayloadProtected,
 } from "@/types/token";
-import JWTException from "@/adapter/middleware/error/jwt-error";
-import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
-import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
-import {
-    jwksURL,
-    publicKeyFile,
-    cwd,
-    ecsdaKeysDirPath,
-    rsaKeysDirPath,
-    TokenAlgorithm,
-} from "@/common/constant";
-import * as utils from "@/common/utils/utils";
+import FileUtil from "./file.util";
 
 class JwtToken {
     constructor(
@@ -87,8 +88,8 @@ class JwtToken {
         try {
             const keysList: JWK[] = [];
             const jwksPath = path.join(cwd, "public", ".well-known");
-            const rsakeys = utils.fileUtils.getFolderNames(rsaKeysDirPath);
-            const ecsdakeys = utils.fileUtils.getFolderNames(ecsdaKeysDirPath);
+            const rsakeys = FileUtil.getDir(rsaKeysDirPath);
+            const ecsdakeys = FileUtil.getDir(ecsdaKeysDirPath);
 
             if (rsakeys.length === 0) return;
             if (ecsdakeys.length === 0) return;
@@ -96,9 +97,10 @@ class JwtToken {
             await Promise.all(
                 rsakeys.map(async (keyId) => {
                     const jwk = await this.JWKFromPEM(
-                        utils.fileUtils.readFile(
-                            path.join(rsaKeysDirPath, keyId, publicKeyFile)
-                        ),
+                        FileUtil.readFile({
+                            path: path.join(rsaKeysDirPath, keyId, publicKeyFile),
+                            encoding: "utf-8",
+                        }),
                         kid,
                         TokenAlgorithm.RS256
                     );
@@ -109,9 +111,10 @@ class JwtToken {
             await Promise.all(
                 ecsdakeys.map(async (keyId) => {
                     const jwk = await this.JWKFromPEM(
-                        utils.fileUtils.readFile(
-                            path.join(ecsdaKeysDirPath, keyId, publicKeyFile)
-                        ),
+                        FileUtil.readFile({
+                            path: path.join(ecsdaKeysDirPath, keyId, publicKeyFile),
+                            encoding: "utf-8",
+                        }),
                         ecsdaKeyId,
                         TokenAlgorithm.ES256
                     );
@@ -119,9 +122,7 @@ class JwtToken {
                 })
             );
 
-            if (!utils.fileUtils.checkDirectory(jwksPath)) {
-                fs.mkdirSync(jwksPath, { recursive: true });
-            }
+            if (!FileUtil.checkDir(jwksPath)) fs.mkdirSync(jwksPath, { recursive: true });
 
             const jwks = JSON.stringify({ keys: keysList }, null, 2);
             fs.writeFileSync(path.join(jwksPath, "jwks.json"), jwks);

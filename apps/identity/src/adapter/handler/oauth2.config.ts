@@ -1,23 +1,22 @@
-/* eslint-disable class-methods-use-this */
-
 import { join } from "path";
 import { existsSync } from "fs";
-import { fileUtils } from "@/common/utils/utils";
+
+import * as constant from "@/common/constant";
+import FileUtil from "@/common/utils/file.util";
 
 import type { RequestHandler, unknown as _ } from "@/types/types";
-import * as constant from "@/common/constant";
 
 class OAuthConfigurationHandler {
-    jwksKeys: RequestHandler = async (_, reply) => {
-        const jwksPath = join(constant.publicDirPath, constant.jwksPath);
+    private readonly jwksPath: string = join(constant.publicDirPath, constant.jwksPath);
 
-        if (!existsSync(jwksPath)) {
+    jwksKeys: RequestHandler = async (_request, reply) => {
+        if (!existsSync(this.jwksPath)) {
             return reply.code(404).send({
                 status: "not found",
             });
         }
 
-        const jwksContent = fileUtils.readFile(jwksPath, "utf-8");
+        const jwksContent = FileUtil.readFile({ path: this.jwksPath, encoding: "utf-8" });
 
         if (jwksContent === null) {
             return reply.code(404).send({
@@ -30,16 +29,16 @@ class OAuthConfigurationHandler {
     };
 
     jwksCerts: RequestHandler<_, _, _, { "*": string }> = async (request, reply) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { "*": path } = request.params;
-        const jwksPath = join(process.cwd(), "public/.well-known", path);
 
-        if (!existsSync(jwksPath)) {
+        if (!existsSync(this.jwksPath)) {
             return reply.code(404).send({
                 status: "not found",
             });
         }
 
-        const jwksContent = fileUtils.readFile(jwksPath, "utf-8");
+        const jwksContent = FileUtil.readFile({ path: this.jwksPath, encoding: "utf-8" });
 
         if (jwksContent === null) {
             return reply.code(404).send({

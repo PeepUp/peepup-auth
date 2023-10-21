@@ -53,17 +53,17 @@ class TokenFactory {
     ): TokenPayloadWithIdentity {
         return {
             type,
-            email: identity.email,
             id: identity.id,
-            resource: identity.resource,
-            sid: constant.TokenSID.active,
-            aud: constant.audience,
-            iat: Math.floor(Date.now() / 1000),
-            nbf: Date.now() / 1000,
             exp: expirationTime,
             iss: constant.issuer,
+            email: identity.email,
             sub: constant.clientId,
+            aud: constant.audience,
+            nbf: Date.now() / 1000,
+            resource: identity.resource,
+            sid: constant.TokenSID.active,
             jti: cryptoUtils.generateCUID(),
+            iat: Math.floor(Date.now() / 1000),
         };
     }
 

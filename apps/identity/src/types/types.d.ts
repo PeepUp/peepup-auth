@@ -359,12 +359,16 @@ export type HashPasswordArgs = {
     _: ReadonlyPassword;
 };
 
-export type HashPasswordUtils = HashPasswordArgs & {
-    salt: string;
-};
-export type VerifyHashPasswordUtils = HashPasswordArgs & {
-    __: ReadonlyPassword;
-};
+export type HashPasswordUtils = Readonly<
+    HashPasswordArgs & {
+        salt: string;
+    }
+>;
+export type VerifyHashPasswordUtils = Readonly<
+    HashPasswordArgs & {
+        __: ReadonlyPassword;
+    }
+>;
 
 export interface IdentityAccessor {
     create<T>(identity: Identity): Promise<T | void>;

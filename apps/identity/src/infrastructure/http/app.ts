@@ -9,8 +9,7 @@ import { schemas } from "@/adapter/schema";
 import JwtToken from "@/common/utils/token";
 import { ecsdaKeysDirPath, keysPath, rsaKeysDirPath } from "@/common/constant";
 import Certificate from "@/common/utils/certs";
-import { fileUtils } from "@/common/utils/utils";
-import { cryptoUtils } from "@/common/utils/crypto";
+import FileUtil from "@/common/utils/file.util";
 
 import * as fastifyPlugin from "@/application/plugin";
 import fastifyConfig from "@/application/config/fastify.config";
@@ -22,6 +21,7 @@ import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { join } from "path";
+import CryptoUtil from "@/common/utils/crypto";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -51,8 +51,8 @@ async function initSchemaValidatorAndSerializer(
 }
 
 async function initJWKS() {
-    const checkKeysDirectory = fileUtils.checkDirectory("keys");
-    const checkWellKnownDirectory = fileUtils.checkDirectory("public/.well-known");
+    const checkKeysDirectory = FileUtil.checkDir("keys");
+    const checkWellKnownDirectory = FileUtil.checkDir("public/.well-known");
 
     console.log({
         checkKeysDirectory,
@@ -65,10 +65,13 @@ async function initJWKS() {
     if (!checkKeysDirectory) {
         const ecsda: Certificate = new Certificate(keysPath);
         const rsa256: Certificate = new Certificate(keysPath);
-        console.log("Generating RSA256 and ECSDA keys...");
 
-        rsa256KeyId = cryptoUtils.generateRandomSHA256(32);
-        ecsdaKeyId = cryptoUtils.generateRandomSHA256(32);
+        console.log({
+            message: "Generating RSA256 and ECSDA keys...",
+        });
+
+        rsa256KeyId = CryptoUtil.generateRandomSHA256(32);
+        ecsdaKeyId = CryptoUtil.generateRandomSHA256(32);
 
         mkdirSync(join(rsaKeysDirPath, rsa256KeyId), { recursive: true });
         mkdirSync(join(ecsdaKeysDirPath, ecsdaKeyId), { recursive: true });
@@ -81,14 +84,14 @@ async function initJWKS() {
     }
 
     if (checkKeysDirectory) {
-        rsa256KeyId = fileUtils.getFolderNames("keys/RSA");
-        ecsdaKeyId = fileUtils.getFolderNames("keys/ECSDA");
-        console.log({ message: "jwt setup OK!" });
+        rsa256KeyId = FileUtil.getDir("keys/RSA");
+        ecsdaKeyId = FileUtil.getDir("keys/ECSDA");
+        console.log({ message: "Output: JWKS ALREADY SETUP & OK!" });
     }
 
     if (!checkWellKnownDirectory) {
         if (rsa256KeyId[0] && ecsdaKeyId[0]) {
-            console.log("Generating JWKS...");
+            console.log({ message: "Generating JWKS KEY..." });
             console.log({ rsa256KeyId, ecsdaKeyId });
 
             new JwtToken(rsa256KeyId[0], {}, <JWTHeaderParameters>{}).buildJWKSPublicKey(
@@ -96,7 +99,7 @@ async function initJWKS() {
                 ecsdaKeyId[0]
             );
 
-            console.log("JWKS successfully generated");
+            console.log({ message: "JWKS successfully generated" });
         }
     }
 }

@@ -1,8 +1,8 @@
 import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
 import JwtToken from "@/common/utils/token";
 import * as constant from "@/common/constant";
-import * as utils from "@/common/utils/utils";
 import AbilityFactory from "@/domain/factory/ability";
+import HTTPUtil from "@/common/utils/http.util";
 
 class AbilityGuard {
     // eslint-disable-next-line class-methods-use-this
@@ -20,10 +20,12 @@ class AbilityGuard {
             });
         }
 
-        const token: string = utils.httpUtils.getAuthorizationToken({
-            value: authorization as string,
-            authType: "Bearer",
-            checkType: true,
+        const token: string = HTTPUtil.getAuthorization({
+            value: authorization,
+            options: {
+                checkType: true,
+                authType: "Bearer",
+            },
         });
 
         const { id, resource } = JwtToken.decodeJwt(token as string);
