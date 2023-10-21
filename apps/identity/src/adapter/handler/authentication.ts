@@ -1,23 +1,27 @@
+import type { FastifyRequest } from "fastify";
 import type { RequestHandler, unknown as _ } from "@/types/types";
 import type AuthenticationService from "@/adapter/service/authentication";
 
 import * as schema from "@/adapter/schema/auth";
-import * as utils from "@/common/utils/utils";
 import * as config from "@/application/config/cookie.config";
+import HTTPUtil from "@/common/utils/http.util";
 
 /**
  * @todo:
  *  ☐ clean up this mess (code smells & clean code)
  *
  */
-class AuthLocalStrategyHandler {
+export default class AuthLocalStrategyHandler {
     constructor(private readonly authenticationService: AuthenticationService) {}
 
-    login: RequestHandler<_, _, schema.LoginIdentityBody> = async (request, reply) => {
+    protected login: RequestHandler<_, _, schema.LoginIdentityBody> = async (
+        request,
+        reply
+    ) => {
         const { body } = request;
-        const ip_address = utils.httpUtils.getIpAddress(Object.freeze(request));
+        const ip_address = HTTPUtil.getIpAddress(Object.freeze<FastifyRequest>(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
-        const cookies = utils.httpUtils.parseCookies(request.headers.cookie as string);
+        const cookies = HTTPUtil.parseCookies(request.headers.cookie as string);
 
         if ("success" in parsedBody === false) {
             return reply.status(400).send({
@@ -47,7 +51,7 @@ class AuthLocalStrategyHandler {
         return reply.status(200).send(result);
     };
 
-    registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
+    protected registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
         request,
         reply
     ) => {
@@ -63,10 +67,8 @@ class AuthLocalStrategyHandler {
         });
     };
 
-    logout: RequestHandler<_> = async (request, reply) => {
+    protected logout: RequestHandler<_> = async (request, reply) => {
         await this.authenticationService.logout(request.headers.authorization as string);
         return reply.status(204).send();
     };
 }
-
-export default AuthLocalStrategyHandler;

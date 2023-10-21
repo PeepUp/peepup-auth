@@ -6,9 +6,9 @@ import type { TokenContract } from "@/types/types";
 import BadCredentialsException from "@/adapter/middleware/error/bad-credential-exception";
 import BadRequestException from "@/adapter/middleware/error/bad-request-exception";
 import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
-import * as utils from "@/common/utils/utils";
 import TokenFactory from "@/domain/factory/token";
-import IdentityService from "./identity";
+import PasswordUtil from "@/common/utils/password.util";
+import type IdentityService from "./identity";
 
 export default class AuthenticationService {
     constructor(
@@ -18,10 +18,9 @@ export default class AuthenticationService {
 
     async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password } = body;
-
-        const hashed = await utils.passwordUtils.hash({
+        const hashed = await PasswordUtil.hash({
             _: password,
-            salt: await utils.passwordUtils.generateSalt(32),
+            salt: await PasswordUtil.generateSalt(32),
         });
 
         await this.identityService.create({
@@ -85,7 +84,8 @@ export default class AuthenticationService {
         }
 
         const authorization = this.tokenManagementService.splitAuthzHeader(access_token);
-        const validate = await this.tokenManagementService.getTokenSessions(access_token);
+        const validate =
+            await this.tokenManagementService.getAllTokenSessions(access_token);
 
         if (!validate || (validate && !validate?.length)) {
             throw new BadRequestException("Untracked credential, you can login again!");
@@ -110,7 +110,7 @@ export default class AuthenticationService {
         if (!token) throw new UnauthorizedException("Error: cannot verify Token!");
 
         const userTokens =
-            await this.tokenManagementService.getTokenSessions(access_token);
+            await this.tokenManagementService.getAllTokenSessions(access_token);
 
         if (!userTokens)
             throw new UnauthorizedException("Error: cannot get token sessions!");

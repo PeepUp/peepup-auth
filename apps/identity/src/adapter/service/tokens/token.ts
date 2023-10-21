@@ -10,7 +10,7 @@ import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/tok
 import { join } from "path";
 import JwtToken from "@/common/utils/token";
 import * as constant from "@/common/constant";
-import * as utils from "@/common/utils/utils";
+import FileUtil from "@/common/utils/file.util";
 import TokenFactory from "@/domain/factory/token";
 import JWTException from "@/adapter/middleware/error/jwt-error";
 import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
@@ -176,6 +176,12 @@ export default class TokenManagementService {
             this.getActiveTokenSessions(decodedRefreshToken.id as string),
         ]);
 
+        if (verifyRefreshToken === null) {
+            throw new UnauthorizedException(
+                "Error: Refresh or Access token is expired or invalid!"
+            );
+        }
+
         if (!tokens || !tokens.length) {
             throw new UnauthorizedException("Error: Token is expired or invalid!");
         }
@@ -336,14 +342,12 @@ export default class TokenManagementService {
 
     setupKID(): void {
         const { keysPath } = constant;
-        const isRSADirectoryExist = utils.fileUtils.checkDirectory(join(keysPath, "RSA"));
-        const isECSDADirectoryExist = utils.fileUtils.checkDirectory(
-            join(keysPath, "ECSDA")
-        );
+        const isRSADirectoryExist = FileUtil.checkDir(join(keysPath, "RSA"));
+        const isECSDADirectoryExist = FileUtil.checkDir(join(keysPath, "ECSDA"));
 
         if (isRSADirectoryExist && isECSDADirectoryExist) {
-            const [ecsdaKeyId] = utils.fileUtils.getFolderNames(join(keysPath, "ECSDA"));
-            const [rsa256KeyId] = utils.fileUtils.getFolderNames(join(keysPath, "RSA"));
+            const [ecsdaKeyId] = FileUtil.getDir(join(keysPath, "ECSDA"));
+            const [rsa256KeyId] = FileUtil.getDir(join(keysPath, "RSA"));
             this.keyId.RS256 = rsa256KeyId as string;
             this.keyId.ES256 = ecsdaKeyId as string;
         }
@@ -379,10 +383,8 @@ export default class TokenManagementService {
             name
         );
 
-        const key = utils.fileUtils.readFile(path, "utf-8");
-
+        const key = FileUtil.readFile({ path });
         if (!key) throw new Error(`Error: cannot read key file, with path: ${path}`);
-
         return key;
     }
 

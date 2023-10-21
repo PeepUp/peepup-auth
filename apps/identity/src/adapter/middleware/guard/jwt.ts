@@ -2,9 +2,9 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import JwtToken from "@/common/utils/token";
-import { httpUtils } from "@/common/utils/utils";
 import { protectedResource } from "@/common/constant";
 import type TokenManagementService from "@/adapter/service/tokens/token";
+import HTTPUtil from "@/common/utils/http.util";
 
 class AuthenticationMiddleware {
     static async jwt(
@@ -25,10 +25,12 @@ class AuthenticationMiddleware {
                 });
             }
 
-            const token: string = httpUtils.getAuthorizationToken({
+            const token: string = HTTPUtil.getAuthorization({
                 value: authorization,
-                authType: "Bearer",
-                checkType: true,
+                options: {
+                    authType: "Bearer",
+                    checkType: true,
+                },
             });
 
             if (!token) {

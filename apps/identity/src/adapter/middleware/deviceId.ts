@@ -1,14 +1,14 @@
 import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
-import { httpUtils } from "@/common/utils/utils";
-import { cryptoUtils } from "@/common/utils/crypto";
 import { cookieConfig } from "@/application/config/cookie.config";
+import HTTPUtil from "@/common/utils/http.util";
+import CryptoUtil from "@/common/utils/crypto";
 
 export function deviceIdHook(
     request: FastifyRequest,
     reply: FastifyReply,
     done: DoneFuncWithErrOrRes
 ) {
-    const cookies = httpUtils.parseCookies(request.headers.cookie as string);
+    const cookies = HTTPUtil.parseCookies(request.headers.cookie as string);
 
     if (
         cookies?.[cookieConfig.cookies.deviceId] &&
@@ -19,14 +19,14 @@ export function deviceIdHook(
 
     reply.header(
         "set-cookie",
-        `${cookieConfig.cookies.deviceId}=${cryptoUtils.generateRandomString(
+        `${cookieConfig.cookies.deviceId}=${CryptoUtil.generateRandomString(
             12
         )}; Path=/; HttpOnly; SameSite=Strict;`
     );
 
     reply.header(
         "set-cookie",
-        `${cookieConfig.cookies.user_session}=${cryptoUtils.generateRandomString(
+        `${cookieConfig.cookies.user_session}=${CryptoUtil.generateRandomString(
             16
         )}; Path=/; HttpOnly; SameSite=Strict;`
     );

@@ -5,11 +5,11 @@ import { join } from "path";
 
 import type { KeyPair } from "@/types/token";
 
-class Certificate {
+export default class Certificate {
     constructor(
         public path: string,
-        private readonly privateKey?: string,
-        private readonly publicKey?: string
+        private privateKey?: string | null,
+        private publicKey?: string | null
     ) {}
 
     public generateKeyPairRSA(length = 4096): KeyPair {
@@ -29,11 +29,19 @@ class Certificate {
     }
 
     public getPrivateKey(): Readonly<string> {
-        return this.privateKey;
+        return this.privateKey ?? "";
+    }
+
+    public setPrivateKey(privateKey: string): void {
+        this.privateKey = privateKey;
+    }
+
+    public setPublicKey(publicKey: string): void {
+        this.publicKey = publicKey;
     }
 
     public getPublicKey(): Readonly<string> {
-        return this.publicKey;
+        return this.publicKey ?? "";
     }
 
     public generateKeyPairECDSA(namedCurve = "prime256v1"): KeyPair {
@@ -68,5 +76,3 @@ class Certificate {
         }
     }
 }
-
-export default Certificate;

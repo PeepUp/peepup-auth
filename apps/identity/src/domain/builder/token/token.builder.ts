@@ -121,6 +121,11 @@ export default class TokenBuilder {
         return this;
     }
 
+    public setTokenStatus(tokenStatus: TokenStatus | null): TokenBuilder {
+        this.tokenStatus = tokenStatus;
+        return this;
+    }
+
     public build(): Token {
         return new Token(
             this.value,
@@ -135,7 +140,8 @@ export default class TokenBuilder {
             this.createdAt,
             this.identityId,
             this.device_id,
-            this.ip_address
+            this.ip_address,
+            this.tokenStatus
         );
     }
 }

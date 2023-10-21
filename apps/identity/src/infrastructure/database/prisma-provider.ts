@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import * as utils from "@/common/utils/utils";
 
 import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
+import PasswordUtil from "@/common/utils/password.util";
 
 export type PrismaProviderClient = PrismaProvider;
 
@@ -41,15 +41,15 @@ class PrismaProvider {
                 model: {
                     identity: {
                         async hashPassword(data: HashPasswordArgs) {
-                            return utils.passwordUtils.hash({
+                            return PasswordUtil.hash({
                                 _: data._,
-                                salt: await utils.passwordUtils.generateSalt(),
+                                salt: await PasswordUtil.generateSalt(),
                             });
                         },
 
                         async verifyPassword(data: VerifyHashPasswordUtils) {
                             const { _, __ } = data;
-                            const verified = await utils.passwordUtils.verify({ _, __ });
+                            const verified = await PasswordUtil.verify({ _, __ });
                             return verified;
                         },
                     },
