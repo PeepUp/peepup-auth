@@ -3,8 +3,14 @@ import dotenv from "dotenv";
 
 import type { Identity } from "@/types/main";
 
+const envPath = (nodeEnv: string): string => {
+    if (nodeEnv === "test") return ".env.test";
+    if (nodeEnv === "development") return ".env.local";
+    return ".env";
+};
+
 dotenv.config({
-    path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+    path: envPath(process.env.NODE_ENV as string),
 });
 
 const TOKEN_PATH = "/tokens";
