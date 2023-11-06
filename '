@@ -8,7 +8,6 @@ import type {
 import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
 import CustomError from "./errors/custom-error";
 import BadCredentialsException from "./errors/bad-credential-exception";
-import JWTException from "./errors/jwt-error";
 
 export async function errorHandler(
     this: FastifyInstance,
@@ -27,18 +26,20 @@ export async function errorHandler(
                 });
             }
             default: {
-                return reply.code(500).send({
-                    status: "UnhandleError",
-                    code: 500,
-                    description: "Unhandled Error",
-                    error: error.message,
-                });
             }
+        }
+
+        if (error.code === 400 && error.name === "BadRequestException") {
+            return reply.code(error.code).send({
+                code: error.code,
+                codeStatus: "Bad Request",
+                message: error.message,
+            });
         }
     }
 
-    if (error.statusCode === 409 && error.name === "ResourceAlreadyExistException") {
-        return reply.code(error.statusCode).send({
+    if (error.code === 409 && error.name === "ResourceAlreadyExistException") {
+        return reply.code(error.code).send({
             status: "failed",
             code: error.code,
             codeStatus: "Conflict",
@@ -47,13 +48,13 @@ export async function errorHandler(
     }
 
     if (error && error instanceof JWTException) {
-        return reply.code(error.statusCode ?? 400).send({
+        return reply.code(error.code ?? 400).send({
             ok: false,
             code: error.code ?? 400,
             error: {
                 message: error.message,
-                cause: error.data.message,
-                other: error.data.rest,
+                cause: error.data.cause,
+                other: error.data.stack,
             },
         });
     }
@@ -70,7 +71,7 @@ export async function errorHandler(
         });
     }
 
-    /* if (error.code === 403 && error.name === "ForbiddenException") {
+    if (error.code === 403 && error.name === "ForbiddenException") {
         return reply.code(403).send({
             ok: false,
             code: 403,
@@ -90,7 +91,7 @@ export async function errorHandler(
                 message: error.message,
             },
         });
-    } */
+    }
 
     if (error instanceof ResourceAlreadyExistException) {
         return reply.code(409).send({

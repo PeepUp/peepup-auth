@@ -9,7 +9,7 @@ import type {
 } from "@/types/token";
 
 import * as constant from "@/common/constant";
-import { cryptoUtils } from "@/common/utils/crypto";
+import CryptoUtils from "@/common/lib/crypto";
 
 class TokenFactory {
     static accessToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {
@@ -62,7 +62,7 @@ class TokenFactory {
             nbf: Date.now() / 1000,
             resource: identity.resource,
             sid: constant.TokenSID.active,
-            jti: cryptoUtils.generateCUID(),
+            jti: CryptoUtils.generateCUID(),
             iat: Math.floor(Date.now() / 1000),
         };
     }

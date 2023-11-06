@@ -3,9 +3,9 @@ import type TokenManagementService from "@/adapter/service/tokens/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 import type { TokenContract } from "@/types/types";
 
-import BadCredentialsException from "@/adapter/middleware/error/bad-credential-exception";
-import BadRequestException from "@/adapter/middleware/error/bad-request-exception";
-import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
+import BadCredentialsException from "@/adapter/middleware/errors/bad-credential-exception";
+import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
+import UnauthorizedException from "@/adapter/middleware/errors/unauthorized";
 import TokenFactory from "@/domain/factory/token";
 import PasswordUtil from "@/common/utils/password.util";
 import type IdentityService from "./identity";

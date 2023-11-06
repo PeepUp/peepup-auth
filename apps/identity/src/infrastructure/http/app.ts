@@ -6,9 +6,9 @@ import fastify from "fastify";
 import cors from "@fastify/cors";
 import { routes } from "@/adapter/routes";
 import { schemas } from "@/adapter/schema";
-import JwtToken from "@/common/utils/token";
-import { ecsdaKeysDirPath, keysPath, rsaKeysDirPath } from "@/common/constant";
-import Certificate from "@/common/utils/certs";
+import JwtToken from "@/common/lib/token";
+import { constant } from "@/common";
+import Certificate from "@/common/lib/certs";
 import FileUtil from "@/common/utils/file.util";
 
 import * as fastifyPlugin from "@/application/plugin";
@@ -21,7 +21,7 @@ import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { join } from "path";
-import CryptoUtil from "@/common/utils/crypto";
+import CryptoUtil from "@/common/lib/crypto";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -53,6 +53,7 @@ async function initSchemaValidatorAndSerializer(
 async function initJWKS() {
     const checkKeysDirectory = FileUtil.checkDir("keys");
     const checkWellKnownDirectory = FileUtil.checkDir("public/.well-known");
+    const { keysPath, rsaKeysDirPath, ecsdaKeysDirPath } = constant;
 
     console.log({
         checkKeysDirectory,
@@ -86,7 +87,7 @@ async function initJWKS() {
     if (checkKeysDirectory) {
         rsa256KeyId = FileUtil.getDir("keys/RSA");
         ecsdaKeyId = FileUtil.getDir("keys/ECSDA");
-        console.log({ message: "Output: JWKS ALREADY SETUP & OK!" });
+        console.log({ message: "JWKS ready & ok!" });
     }
 
     if (!checkWellKnownDirectory) {

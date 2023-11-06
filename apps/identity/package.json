@@ -17,7 +17,7 @@
         "db:reset": "dotenv -e .env.local -- npx prisma migrate reset --force",
         "db:seed": "dotenv -e .env.local -- npx prisma db seed",
         "db:studio": "dotenv -e .env.local -- npx prisma studio",
-        "dev": "NODE_ENV=development npx nodemon",
+        "dev": "dotenv -e .env.local -- npx nodemon",
         "lint": "eslint src --fix",
         "precommit": "lint-staged",
         "pretty": "prettier --write \"src/**/*.ts\"",

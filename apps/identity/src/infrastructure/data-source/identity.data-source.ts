@@ -1,7 +1,8 @@
 import type { Identity } from "@/domain/entity/identity";
 import type * as Types from "@/types/types";
 import type { PrismaProviderClient } from "@/infrastructure/database/prisma-provider";
-import { PrismaClient } from "@prisma/client";
+
+import type { PrismaClient } from "@prisma/client";
 
 /**
  * @todo:

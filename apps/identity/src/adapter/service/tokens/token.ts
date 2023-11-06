@@ -3,19 +3,20 @@
 
 import * as TokenType from "@/types/token";
 import * as Type from "@/types/types";
-import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
-import type { PostRefreshTokenParams } from "@/adapter/schema/token";
-import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
 import { join } from "path";
-import JwtToken from "@/common/utils/token";
+import JwtToken from "@/common/lib/token";
 import * as constant from "@/common/constant";
 import FileUtil from "@/common/utils/file.util";
 import TokenFactory from "@/domain/factory/token";
-import JWTException from "@/adapter/middleware/error/jwt-error";
-import UnauthorizedException from "@/adapter/middleware/error/unauthorized";
-import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
-import BadRequestException from "@/adapter/middleware/error/bad-request-exception";
+import JWTException from "@/adapter/middleware/errors/jwt-error";
+import UnauthorizedException from "@/adapter/middleware/errors/unauthorized";
+import ForbiddenException from "@/adapter/middleware/errors/forbidden-exception";
+import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
+
+import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
+import type { PostRefreshTokenParams } from "@/adapter/schema/token";
+import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
 export default class TokenManagementService {
     private keyId: TokenType.SupportedKeyAlgorithm = <TokenType.SupportedKeyAlgorithm>{};

@@ -1,16 +1,17 @@
 import { PrismaClient } from "@prisma/client";
+import PasswordUtil from "@/common/utils/password.util";
 
 import type { HashPasswordArgs, VerifyHashPasswordUtils } from "@/types/types";
-import PasswordUtil from "@/common/utils/password.util";
 
 export type PrismaProviderClient = PrismaProvider;
 
-class PrismaProvider {
+class PrismaProvider extends PrismaClient {
     private static db: PrismaProvider;
 
     private readonly prisma: PrismaClient;
 
     private constructor() {
+        super();
         this.prisma = new PrismaClient();
         this.initializeExtends();
         console.log({
@@ -27,12 +28,12 @@ class PrismaProvider {
         return this.prisma;
     }
 
-    public async connect(): Promise<void> {
-        await this.prisma.$connect();
+    public connect(): void {
+        this.prisma.$connect();
     }
 
-    public async disconnect(): Promise<void> {
-        await this.prisma.$disconnect();
+    public disconnect(): void {
+        this.prisma.$disconnect();
     }
 
     public async initializeExtends(): Promise<void> {
