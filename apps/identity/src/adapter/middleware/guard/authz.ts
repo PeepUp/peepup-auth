@@ -2,7 +2,7 @@ import type { FastifyRequest } from "fastify";
 import { ForbiddenError } from "@casl/ability";
 import type { RequiredAbility } from "@/types/ability";
 
-import ForbiddenException from "@/adapter/middleware/error/forbidden-exception";
+import ForbiddenException from "@/adapter/middleware/errors/forbidden-exception";
 
 class Authorization {
     static policy(rules: RequiredAbility[]) {

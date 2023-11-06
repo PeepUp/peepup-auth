@@ -8,7 +8,7 @@ const identity: Prisma.IdentityCreateInput = {
     state: "active",
     emailVerified: new Date(),
     password:
-        "$argon2id$v=19$m=65536,t=3,p=4$CUsArk9CbT6eVPTTqyV7Vg$asdklfhjk3l4wjr23iojoiasdjfiodsafjiods75Z2GayCOWUJpd34",
+        "NmVhNzgzOWE2ZjhmZWVlOGE3NjJmZWZkMTg0YzZjNjY0YzU0ZjZhOTg4NzY4OTU2ZDg0MmY1MTc0MmEwNzc5NTBjODBlNzY5MWU2YzVlZTAzNzJlZjM1MGJmNTg0ZjVhN2VlMWU1ZTBmNTM2MDUzNTBmMTZlZDFiMjdhNmRmOGNkNTU1OTZiMmIwYzcxNGJjNGZiMzdkMzQ2OWNlNjQ2MjcwYzViMDk3YjQxY2JjMzlmYWQ0MDg1YzEwMzhkZDg1ZjJlMGM4YzhkYzY3ZDFjYTRiZjIzNzc3NzViNGYzMTU1NWMzNjFkYzBjNmRkNmY5MzUwNTZjMTQ3ZGYxZTAxMQ==",
     avatar: "https://www.google.com",
     firstName: "John",
     lastName: "Doe",

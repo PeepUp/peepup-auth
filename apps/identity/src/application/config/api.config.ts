@@ -17,9 +17,14 @@ const TOKEN_PATH = "/tokens";
 const config: Identity.Config.Api = {
     environment: {
         env: process.env.NODE_ENV,
-        port: parseInt(<string>process.env.PORT, 10),
+        port: parseInt(process.env.PORT as string, 10),
         host: process.env.HOST,
         whiteListClient: process.env.WHITE_LISTED_DOMAINS?.split(","),
+        encryption: {
+            algorithm: process.env.ENCRYPTION_ALGORITHM as string,
+            secret_key: process.env.ENCRYPTION_SECRET_KEY as string,
+            secret_iv: process.env.ENCRYPTION_SECRET_IV as string,
+        },
     },
     logging: {
         level: process.env.LOG_LEVEL,

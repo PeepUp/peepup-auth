@@ -10,6 +10,11 @@ declare namespace Identity {
                 port: number;
                 host?: string;
                 whiteListClient?: string[];
+                encryption: {
+                    algorithm: string;
+                    secret_key: string;
+                    secret_iv: string;
+                };
             };
             logging: {
                 level: Api.LogLevel;

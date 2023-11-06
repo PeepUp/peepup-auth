@@ -1,8 +1,8 @@
 import type { Routes, IdentityRoutes } from "@/types/types";
-import type AuthenticationService from "../../service/authentication";
+import type AuthenticationService from "@/adapter/service/authentication";
 
-import * as schema from "../../schema";
-import AuthLocalStrategyHandler from "../../handler/authentication";
+import * as schema from "@/adapter/schema";
+import AuthLocalStrategyHandler from "@/adapter/handler/authentication";
 
 /**
  * @todo

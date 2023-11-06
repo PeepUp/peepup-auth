@@ -1,7 +1,8 @@
 {
-    "openapi": "3.0.0",
+    "openapi": "3.0.3",
     "info": {
-        "title": "DoFavour API with RBAC/ABAC authorization",
+        "title": "DoFavour-auth API",
+        "summary": "DoFavour-auth API",
         "description": "This is an DoFavour API written in Typescript and features authentication and authorization",
         "contact": {
             "name": "API Support",
@@ -10,11 +11,24 @@
         },
         "license": {
             "name": "Apache 2.0",
+            "identifier": "Apache-2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
         "version": "1.0.1"
     },
-    "host": "http://localhost:3000",
+    "server": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Local server (development)"
+        },
+        {
+            "url": "https://api.dofavour.com",
+            "description": "Production server (production)"
+        }
+    ],
+
+    "termsOfService": "http://www.dofavour.com/terms",
+    "host": "http://localhost:4334",
     "basePath": "/",
     "schemes": ["http"],
     "produces": ["application/json"],
@@ -2780,6 +2794,11 @@
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
+            },
+            "name": {
+                "type": "apiKey",
+                "name": "api_key",
+                "in": "query"
             }
         }
     }

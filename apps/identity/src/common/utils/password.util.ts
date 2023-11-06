@@ -4,6 +4,7 @@ import argon2 from "argon2";
 import { randomBytes } from "crypto";
 
 import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
+import CryptoUtil from "../lib/crypto";
 
 export default class PasswordUtil {
     private static readonly DEFAULT_ENCODING: BufferEncoding = "hex";
@@ -12,8 +13,8 @@ export default class PasswordUtil {
 
     public static async hash(data: HashPasswordUtils): Promise<string> {
         /**
-         * @argument data.salt
-         * @argument data._
+         * @argument data.salt : string
+         * @argument data._    : string
          *
          * @readme
          *  [Warn!] DON'T CHANGE this order of arguments because
@@ -24,8 +25,10 @@ export default class PasswordUtil {
          */
         try {
             const { salt, _ } = data;
-            return await argon2.hash(_, {
-                salt: Buffer.from(salt, this.DEFAULT_ENCODING),
+            return CryptoUtil.encryptData({
+                value: await argon2.hash(_, {
+                    salt: Buffer.from(salt, this.DEFAULT_ENCODING),
+                }),
             });
         } catch (error) {
             throw new Error("Password hashing failed");
@@ -35,8 +38,8 @@ export default class PasswordUtil {
     public static async verify(data: VerifyHashPasswordUtils): Promise<boolean> {
         try {
             /**
-             * @argument data.__
-             * @argument data._
+             * @argument data.__ (encrypted)
+             * @argument data._  (not encrypted)
              *
              * @readme
              *  [Warn!] DON'T CHANGE! this order of arguments because
@@ -45,7 +48,11 @@ export default class PasswordUtil {
              *  to a string with a method replace*() or other methods
              *  that change the string value (not the reference)
              */
-            return await argon2.verify(data.__, data._);
+
+            return await argon2.verify(
+                CryptoUtil.decryptData({ value: data.__ }),
+                data._
+            );
         } catch (error) {
             throw new Error("Password verification failed");
         }

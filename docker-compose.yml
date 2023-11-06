@@ -8,7 +8,7 @@ services:
         ports:
             - 15432:5432
         env_file:
-            - ./apps/identity/.env
+            - ./apps/identity/.env.local
         networks:
             - identity-service-network
         volumes:

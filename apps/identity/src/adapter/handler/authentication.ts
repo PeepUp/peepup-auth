@@ -14,10 +14,7 @@ import HTTPUtil from "@/common/utils/http.util";
 export default class AuthLocalStrategyHandler {
     constructor(private readonly authenticationService: AuthenticationService) {}
 
-    protected login: RequestHandler<_, _, schema.LoginIdentityBody> = async (
-        request,
-        reply
-    ) => {
+    login: RequestHandler<_, _, schema.LoginIdentityBody> = async (request, reply) => {
         const { body } = request;
         const ip_address = HTTPUtil.getIpAddress(Object.freeze<FastifyRequest>(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
@@ -51,10 +48,14 @@ export default class AuthLocalStrategyHandler {
         return reply.status(200).send(result);
     };
 
-    protected registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
+    // 6 nov 2023 13:41
+    // last here
+    registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
         request,
         reply
     ) => {
+        schema.POST_REGISTER_IDENTITY_BODY_SCHEMA.parse(request.body);
+
         await this.authenticationService.registration({
             ...request.body,
         });
@@ -67,7 +68,7 @@ export default class AuthLocalStrategyHandler {
         });
     };
 
-    protected logout: RequestHandler<_> = async (request, reply) => {
+    logout: RequestHandler<_> = async (request, reply) => {
         await this.authenticationService.logout(request.headers.authorization as string);
         return reply.status(204).send();
     };

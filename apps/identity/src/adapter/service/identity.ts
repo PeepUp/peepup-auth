@@ -12,10 +12,10 @@ import type {
 import PasswordUtil from "@/common/utils/password.util";
 import IdentityFactory from "@/domain/factory/identity";
 import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
-import ResourceAlreadyExistException from "@/adapter/middleware/error/resource-exists";
-import BadRequestException from "../middleware/error/bad-request-exception";
-import BadCredentialsException from "../middleware/error/bad-credential-exception";
-import type { InactivatedIdentityBody } from "../schema/auth";
+import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
+import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
+import BadCredentialsException from "@/adapter/middleware/errors/bad-credential-exception";
+import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 
 /*
  * @todo:
@@ -44,6 +44,7 @@ class IdentityService {
      * */
     async create(payload: RegisterIdentityBody): Promise<void | Identity> {
         const { email } = payload;
+        console.log("payload", payload);
 
         if (await this.identityRepository.getIdentity({ email })) {
             throw new ResourceAlreadyExistException("Error: Identity Already Exists!");
