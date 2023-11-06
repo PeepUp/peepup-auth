@@ -18,6 +18,18 @@ export type ID = number | IdentityId;
 export type Serializable = {
     readonly id?: ID | null;
 };
+export type RefineParams = {
+    // override error message
+    message?: string;
+
+    // appended to error path
+    path?: (string | number)[];
+
+    // params object you can use to customize message
+    // in error map
+    params?: object;
+};
+
 export type WildcardParams = {
     "*": string;
 };
@@ -66,7 +78,7 @@ export type IdentityRoutes = Array<
         Reply,
         never,
         unknown,
-        never,
+        any,
         ZodTypeProvider,
         FastifyBaseLogger
     >

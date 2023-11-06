@@ -20,19 +20,37 @@ const identitySchema = z.object({
             required_error: "username is required or cannot be empty!",
         })
         .optional(),
+
     lastName: z.string().optional(),
     firstName: z.string().optional(),
+    /*
+     *  TODO:
+     *  ☐ add phone number validation
+     *  */
+    phone_number: z.string().min(0).max(15).nullish(),
     avatar: z.string().url().optional(),
-    email: z.string().email().optional(),
+    email: z.string().nullish(),
     emailVerified: z.boolean().optional(),
     createdAt: z.string().datetime().optional(),
     providerId: z.string().optional(),
 });
 
-const usernameOrEmail = identitySchema.pick({
-    email: true,
-    username: true,
-});
+const phoneNumberOrEmail = identitySchema
+    .pick({
+        email: true,
+        phone_number: true,
+    })
+    .strict()
+    .refine(
+        (data) =>
+            (data.email && data.phone_number === "") ||
+            (data.phone_number && data.email === "") ||
+            (data.phone_number && data.email),
+        {
+            message: "phone number or/and email is required!",
+            path: ["phone_number", "email"],
+        }
+    );
 
 export const PUT_IDENTITY_BODY_SCHEMA = identitySchema.required().pick({
     lastName: true,
@@ -40,14 +58,14 @@ export const PUT_IDENTITY_BODY_SCHEMA = identitySchema.required().pick({
     avatar: true,
 });
 
-export const createIdentityForRegistration = usernameOrEmail;
+export const createIdentityForRegistration = phoneNumberOrEmail;
 
 export const GET_IDENTITIES_RESPONSE_SCHEMA = z.object({
     data: z.array(identitySchema).optional(),
 });
 
 export const GET_IDENTITY_PARTIAL_QUERY_SCHEMA = z.object({
-    ...usernameOrEmail.shape,
+    phoneNumberOrEmail,
 });
 
 export const GET_IDENTITY_PARAMS_ID_SCHEMA = identitySchema.pick({ id: true });

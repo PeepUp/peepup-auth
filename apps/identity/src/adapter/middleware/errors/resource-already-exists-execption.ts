@@ -1,23 +1,15 @@
 import { HttpStatusCode } from "@/common/constant";
+import CustomError from "./custom-error";
 
-class ResourceAlreadyExistException extends Error {
-    private status: HttpStatusCode;
-
-    private statusCodeText: string;
-
-    constructor(readonly message: string = "Resource already exists") {
-        super(message);
-        this.name = "ResourceAlreadyExistException";
-        this.status = HttpStatusCode.Conflict;
-        this.statusCodeText = "Conflict";
-    }
-
-    public getCode(): HttpStatusCode {
-        return this.status;
-    }
-
-    public getCodeText(): string {
-        return this.statusCodeText;
+class ResourceAlreadyExistException extends CustomError {
+    constructor(
+        readonly message: string = "Resource already exists",
+        description?: string
+    ) {
+        super("ResourceAlreadyExistException", message);
+        this.code = HttpStatusCode.Conflict;
+        this.status = "Conflict";
+        this.description = description ?? message;
     }
 }
 

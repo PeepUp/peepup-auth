@@ -16,6 +16,13 @@ export default class AuthenticationService {
         private readonly tokenManagementService: TokenManagementService
     ) {}
 
+    /*
+     * TODO:
+     *  ☐ handle the traits email or phone number
+     *     - if email, then send email verification
+     *     - if phone number, then send sms verification
+     *
+     * */
     async registration(body: RegisterIdentityBody): Promise<void> {
         const { traits, password } = body;
         const hashed = await PasswordUtil.hash({
@@ -26,7 +33,7 @@ export default class AuthenticationService {
         await this.identityService.create({
             email: traits.email as string,
             password: hashed,
-            username: traits.username as string,
+            username: traits.phone_number as string,
         });
     }
 

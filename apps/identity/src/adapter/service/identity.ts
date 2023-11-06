@@ -44,6 +44,7 @@ class IdentityService {
      * */
     async create(payload: RegisterIdentityBody): Promise<void | Identity> {
         const { email } = payload;
+        console.log("payload", payload);
 
         if (await this.identityRepository.getIdentity({ email })) {
             throw new ResourceAlreadyExistException("Error: Identity Already Exists!");

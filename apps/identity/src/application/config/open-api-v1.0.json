@@ -1,0 +1,152 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "DoFavour-auth API",
+        "description": "This is an DoFavour API written in Typescript and features authentication and authorization",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.dofavour.com/support",
+            "email": "support@dofavour.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.1"
+    },
+    "servers": [
+        { "url": "http://localhost:4334", "description": "Development server" },
+        { "url": "https://api.dofavour.test", "description": "Test server" },
+        { "url": "https://api.dofavour.com", "description": "Production server" }
+    ],
+    "paths": {
+        "/local/register": {
+            "post": {
+                "summary": "Register a new identity with local strategy",
+                "tags": ["Auth"],
+                "description": "Register a new identity with local strategy",
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/register_identity_body"
+                },
+                "responses": {
+                    "201": {
+                        "description": "created"
+                    },
+                    "default": {
+                        "$ref": "#/components/responses/unexpected_error_response"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "requestBodies": {
+            "register_identity_body": {
+                "description": "New identity body payload with local strategy",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "traits": { "$ref": "#/components/schemas/traits_props" },
+                                "method": {
+                                    "$ref": "#/components/schemas/register_method"
+                                },
+                                "password": { "$ref": "#/components/schemas/password" }
+                            },
+                            "required": ["traits"]
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "unexpected_error_response": {
+                "description": "Unexpected Error Responses",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/error"
+                        },
+                        "example": {
+                            "ok": false,
+                            "code": 500,
+                            "status": "Internal Server Error",
+                            "description": "unexpected error",
+                            "error": "unexpected error"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "error": {
+                "type": "object",
+                "properties": {
+                    "ok": { "type": "boolean", "default": false },
+                    "code": { "type": "integer", "format": "int32" },
+                    "status": { "type": "string" },
+                    "description": { "type": "string" },
+                    "error": { "type": "string" }
+                },
+                "additionalProperties": true
+            },
+            "traits_props": {
+                "type": "object",
+                "properties": {
+                    "phone_number": { "$ref": "#/components/schemas/phone_number" },
+                    "email": { "$ref": "#/components/schemas/email_address" }
+                },
+                "minProperties": 1,
+                "maxProperties": 3,
+                "nullable": false,
+                "additionalProperties": false
+            },
+            "identity": {
+                "type": "object",
+                "properties": {
+                    "username": { "$ref": "#/components/schemas/username" },
+                    "email": { "$ref": "#/components/schemas/email_address" },
+                    "phone_number": { "$ref": "#/components/schemas/phone_number" }
+                }
+            },
+            "phone_number": {
+                "example": "+49123456789",
+                "type": "string",
+                "maxLength": 16,
+                "minLength": 0,
+                "nullable": true
+            },
+            "username": {
+                "maxLength": 30,
+                "minLength": 0,
+                "example": "myUsername",
+                "type": "string",
+                "nullable": true
+            },
+            "email_address": {
+                "example": "you@example.com",
+                "minLength": 0,
+                "maxLength": 255,
+                "type": "string",
+                "format": "email",
+                "nullable": true
+            },
+            "password": {
+                "type": "string",
+                "format": "password",
+                "maxLength": 255,
+                "minLength": 8,
+                "exclusiveMaximum": true,
+                "example": "mySecretPassword",
+                "nullable": false,
+                "writeOnly": true
+            },
+            "register_method": {
+                "type": "string",
+                "enum": ["password", "magic_link"],
+                "default": "password"
+            }
+        }
+    }
+}

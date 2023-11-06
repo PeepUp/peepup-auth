@@ -6,9 +6,13 @@ import type {
 } from "fastify";
 
 import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
+import { ZodError } from "zod";
 import CustomError from "./errors/custom-error";
 import BadCredentialsException from "./errors/bad-credential-exception";
 import JWTException from "./errors/jwt-error";
+import ForbiddenException from "./errors/forbidden-exception";
+import UnauthorizedException from "./errors/unauthorized";
+import BadRequestException from "./errors/bad-request-exception";
 
 export async function errorHandler(
     this: FastifyInstance,
@@ -16,99 +20,102 @@ export async function errorHandler(
     _request: FastifyRequest,
     reply: FastifyReply
 ) {
+    console.log("error handler");
+    console.dir(error, { depth: Infinity });
+
     if (error instanceof CustomError) {
         switch (true) {
             case error instanceof BadCredentialsException: {
-                return reply.code(error.getCode()).send({
+                reply.code(error.getCode()).send({
                     status: error.status,
                     code: error.code,
                     description: error.description,
                     error: error.message,
                 });
+                break;
             }
-            default: {
-                return reply.code(500).send({
-                    status: "UnhandleError",
-                    code: 500,
-                    description: "Unhandled Error",
+
+            case error instanceof ForbiddenException: {
+                reply.code(error.getCode()).send({
+                    status: error.status,
+                    code: error.code,
+                    description: error.description,
                     error: error.message,
                 });
+                break;
             }
+            case error instanceof UnauthorizedException: {
+                reply.code(error.getCode()).send({
+                    status: error.status,
+                    code: error.code,
+                    description: error.description,
+                    error: error.message,
+                });
+                break;
+            }
+            case error instanceof ResourceAlreadyExistException: {
+                reply.code(error.getCode()).send({
+                    status: error.status,
+                    code: error.code,
+                    description: error.description,
+                    error: error.message,
+                });
+                break;
+            }
+
+            case error instanceof JWTException: {
+                reply.code(error.getCode()).send({
+                    ok: false,
+                    code: error.code,
+                    description: error.description,
+                    message: error.message,
+                });
+                break;
+            }
+
+            case error instanceof BadRequestException: {
+                reply.code(error.getCode()).send({
+                    ok: false,
+                    code: error.code,
+                    description: error.description,
+                    message: error.message,
+                });
+                break;
+            }
+            default:
+                break;
         }
     }
 
-    if (error.statusCode === 409 && error.name === "ResourceAlreadyExistException") {
-        return reply.code(error.statusCode).send({
-            status: "failed",
-            code: error.code,
-            codeStatus: "Conflict",
-            message: error.message,
-        });
-    }
-
-    if (error && error instanceof JWTException) {
-        return reply.code(error.statusCode ?? 400).send({
-            ok: false,
-            code: error.code ?? 400,
-            error: {
-                message: error.message,
-                cause: error.data.message,
-                other: error.data.rest,
-            },
-        });
-    }
-
-    if (error.validation) {
+    if (error instanceof ZodError) {
         return reply.code(400).send({
             ok: false,
-            code: error.code,
-            codeStatus: "Bad Request",
-            error: {
-                context: error.validationContext,
-                message: error.message,
-            },
+            code: "Bad Request",
+            status: "Bad Request",
+            description: error.cause ?? "Validation exception",
+            errors: error.formErrors
+                ? error.issues.map((e) => ({
+                      message: e.message,
+                      at: e.path,
+                  }))
+                : "please check again your request",
         });
     }
 
-    /* if (error.code === 403 && error.name === "ForbiddenException") {
-        return reply.code(403).send({
+    if (error.code === "FST_ERR_VALIDATION") {
+        return reply.code(400).send({
             ok: false,
-            code: 403,
-            codeStatus: "Forbidden",
-            error: {
-                message: error.message,
-            },
+            code: "Bad Request",
+            status: "Bad Request",
+            errors: error.validation
+                ? error.validation.map((e) => ({
+                      message: e.message,
+                      at: e.instancePath,
+                      keyword: e.params.format,
+                  }))
+                : "we're sorry, please check again your request",
         });
     }
 
-    if (error.code === 401 && error.name === "UnauthorizedException") {
-        return reply.code(401).send({
-            ok: false,
-            code: 401,
-            codeStatus: "Unauthorized",
-            error: {
-                message: error.message,
-            },
-        });
-    } */
-
-    if (error instanceof ResourceAlreadyExistException) {
-        return reply.code(409).send({
-            ok: false,
-            code: 409,
-            codeStatus: "Conflict",
-        });
-    }
-
-    if (error instanceof Error) {
-        return reply.code(500).send({
-            code: 500,
-            error: {
-                message: error.message,
-            },
-        });
-    }
-
-    console.dir(error, { depth: Infinity });
-    return reply.code(500).send({ ok: false });
+    return reply;
 }

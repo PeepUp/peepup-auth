@@ -1,3 +1,5 @@
+import CustomError from "./custom-error";
+
 type JWTExceptionDataArgs = {
     message: string;
     name?: string;
@@ -7,10 +9,13 @@ type JWTExceptionDataArgs = {
     rest?: object | null;
 };
 
-class JWTException extends Error {
+class JWTException extends CustomError {
     public constructor(public data: JWTExceptionDataArgs) {
-        super(data.message);
-        this.name = data.name ?? "JWTException";
+        super("JWTException", data.message);
+        this.name = "JWTException";
+        this.code = data.statusCode ?? 400;
+        this.description = data.cause ?? data.message;
+        this.status = "Bad Request";
     }
 }
 

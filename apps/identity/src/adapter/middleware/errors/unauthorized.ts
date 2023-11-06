@@ -1,23 +1,13 @@
 import { HttpStatusCode } from "@/common/constant";
+import CustomError from "./custom-error";
 
-class UnauthorizedException extends Error {
-    private status: HttpStatusCode;
-
-    private statusCodeText: string;
-
-    public constructor(message: string) {
-        super(message);
+class UnauthorizedException extends CustomError {
+    public constructor(message: string, description?: string) {
+        super("UnauthorizedException", message);
+        this.status = "Unauthorized";
         this.name = "UnauthorizedException";
-        this.status = HttpStatusCode.Unauthorized;
-        this.statusCodeText = "Unauthorized";
-    }
-
-    public getCode(): number {
-        return this.status;
-    }
-
-    public getCodeText(): string {
-        return this.statusCodeText;
+        this.code = HttpStatusCode.Unauthorized;
+        this.description = description ?? message;
     }
 }
 

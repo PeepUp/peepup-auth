@@ -1,23 +1,15 @@
 import { HttpStatusCode } from "@/common/constant";
+import CustomError from "./custom-error";
 
-class ForbiddenException extends Error {
-    private status: HttpStatusCode;
-
-    private statusCodeText: string;
-
-    public constructor(message: string = "the user action is forbidden") {
-        super(message);
-        this.name = "ForbiddenException";
-        this.status = 403;
-        this.statusCodeText = "Forbidden";
-    }
-
-    public getCode(): number {
-        return this.status;
-    }
-
-    public getCodeText(): string {
-        return this.statusCodeText;
+class ForbiddenException extends CustomError {
+    public constructor(
+        message: string = "the user action is forbidden",
+        description?: string
+    ) {
+        super("ForbiddenException", message);
+        this.code = HttpStatusCode.Forbidden;
+        this.description = description ?? message;
+        this.status = "Forbidden";
     }
 }
 
