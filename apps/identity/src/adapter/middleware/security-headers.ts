@@ -1,7 +1,7 @@
 import { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
 
 export async function securityHeaders(
-    request: FastifyRequest,
+    _: FastifyRequest,
     reply: FastifyReply,
     done: DoneFuncWithErrOrRes
 ) {

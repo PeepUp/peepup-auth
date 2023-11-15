@@ -15,7 +15,15 @@ export default class FileUtil {
     }
 
     public static checkDir(path: string): boolean {
-        return fs.statSync(path).isDirectory();
+        try {
+            return fs.statSync(path).isDirectory();
+        } catch (error) {
+            if (error) {
+                console.info(`Directory in path: ${path} not found!`);
+                return false;
+            }
+            return false;
+        }
     }
 
     public static checkFile(path: string): boolean {

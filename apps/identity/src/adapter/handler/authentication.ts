@@ -6,19 +6,18 @@ import * as schema from "@/adapter/schema/auth";
 import * as config from "@/application/config/cookie.config";
 import HTTPUtil from "@/common/utils/http.util";
 
-/**
- * @todo:
- *  ☐ clean up this mess (code smells & clean code)
- *
- */
 export default class AuthLocalStrategyHandler {
+    private DEVICE_ID_COOKIES_NAME: string = config.cookieConfig.cookies.deviceId;
+
     constructor(private readonly authenticationService: AuthenticationService) {}
 
     login: RequestHandler<_, _, schema.LoginIdentityBody> = async (request, reply) => {
         const { body } = request;
         const ip_address = HTTPUtil.getIpAddress(Object.freeze<FastifyRequest>(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
-        const cookies = HTTPUtil.parseCookies(request.headers.cookie as string);
+        const device_id = HTTPUtil.parseCookies(request.headers.cookie as string)[
+            this.DEVICE_ID_COOKIES_NAME
+        ] as string;
 
         if ("success" in parsedBody === false) {
             return reply.status(400).send({
@@ -29,11 +28,11 @@ export default class AuthLocalStrategyHandler {
             });
         }
 
-        const result = await this.authenticationService.login(
+        const result = await this.authenticationService.login({
             body,
             ip_address,
-            cookies![config.cookieConfig.cookies.deviceId] as string
-        );
+            device_id,
+        });
 
         if (!result) {
             return reply.status(401).send({
@@ -54,12 +53,7 @@ export default class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        schema.POST_REGISTER_IDENTITY_BODY_SCHEMA.parse(request.body);
-
-        await this.authenticationService.registration({
-            ...request.body,
-        });
-
+        await this.authenticationService.registration(request.body);
         return reply.status(201).send({
             status: "ok",
             code: 201,

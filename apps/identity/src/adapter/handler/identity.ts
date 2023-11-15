@@ -5,34 +5,27 @@ import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 
 import * as schema from "@/adapter/schema/identity";
 import * as schemaAuth from "@/adapter/schema/auth";
+import { selectQueryOption } from "../schema/db";
 
-/**
- * @todo:
- *  ☐ check smells code
- *
- *  ☑️ clean up this mess (code smells & clean code)
- *
- */
 class IdentityHandler {
     constructor(private readonly identitiesService: IdentityService) {}
 
-    identities: RequestHandler<_, _, _, _, Schema.IdentityQueryPartial> = async (
+    identities: RequestHandler<_, _, _, _, Schema.GetIdentitiesQuery> = async (
         request,
         reply
     ) => {
-        const { email, username } = request.query;
         const hasKeys = Object.values(request.query).length > 0;
 
-        console.log({
-            ability: request.ability,
-        });
-
         if (hasKeys) {
-            const parseQuery = schema.GET_IDENTITY_PARTIAL_QUERY_SCHEMA.safeParse(
+            const parseQuery = await schema.GET_IDENTITIES_QUERY_SCHEMA.parseAsync(
                 request.query
             );
 
-            if (!parseQuery.success) {
+            const parsedSelectOptions = await JSON.parse(request.query.select ?? "{}");
+            const parsedDBOptions =
+                await selectQueryOption.parseAsync(parsedSelectOptions);
+
+            if (!parseQuery || !parsedDBOptions) {
                 return reply.code(400).send({
                     code: 400,
                     message: "bad request",
@@ -43,33 +36,36 @@ class IdentityHandler {
             }
 
             const data = await this.identitiesService.getIdentityByQuery({
-                email,
-                username,
+                ...parseQuery,
+                take:
+                    typeof parseQuery.take === "string"
+                        ? parseInt(parseQuery.take, 10)
+                        : parseQuery.take,
+                select: parsedDBOptions,
             });
 
             if (data === null || Object.entries(data).length <= 0) {
                 return reply.code(200).send({
-                    code: 404,
+                    code: 200,
+                    ok: true,
                     message: "data identity record not found",
                     data: [],
                 });
             }
 
             return reply.code(200).send({
+                ok: true,
                 data,
+                length: data.length,
             });
         }
 
         const data = await this.identitiesService.getIdentities();
 
         if (data === null || data.length === 0) {
-            /**
-             * @todo
-             *  ☐ make this as error no data found
-             *
-             */
             return reply.code(200).send({
-                code: 404,
+                code: 200,
+                ok: true,
                 message: "data identity record not found",
                 data,
             });

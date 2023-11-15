@@ -11,6 +11,14 @@ import type {
     QueryWhitelistedTokenArgs,
 } from "@/infrastructure/data-source/token.data-source";
 import { TokenRelatedArgs } from "@/application/repository/token";
+import { IdentityQueryPartial } from "@/adapter/schema/identity";
+import { QueryOptions } from "@/adapter/schema/db";
+
+interface LoginServiceArgs {
+    body: LoginIdentityBody;
+    ip_address: string;
+    device_id: string;
+}
 
 type IdentityId = string;
 export type unknown = unknown;
@@ -101,7 +109,7 @@ export type UserQuery = {
 };
 
 export type RegisterIdentityBody = Readonly<
-    Partial<Pick<Identity, "email" | "password" | "username">>
+    Partial<Pick<Identity, "email" | "password" | "phoneNumber">>
 >;
 export type Entity = Serializable;
 
@@ -191,7 +199,7 @@ export type EmailUserName = Pick<Identity, "email" | "username">;
 export type Password = string;
 export type ReadonlyPassword = Readonly<Password>;
 
-export type FindUniqeIdentityQuery = Partial<EmailUserName>;
+export type FindUniqeIdentityQuery = IdentityQueryPartial;
 
 export type FindLoginIdentityQuery = {
     where: FindUniqeIdentityQuery;
@@ -206,7 +214,10 @@ export interface DataSourceSQL<T> {
     findMany(): Promise<Readonly<T>[] | null>;
     update(id: ID, data: T): Promise<Readonly<T>>;
     delete(id: ID): Promise<void>;
-    query(query: Partial<T>): Promise<Readonly<T> | Readonly<T>[] | null>;
+    query(
+        query: Partial<T>,
+        options?: QueryOptions
+    ): Promise<Readonly<T> | Readonly<T>[] | null>;
 }
 
 export interface DataSourceSQLGeneric<T> {
@@ -388,7 +399,10 @@ export interface IdentityAccessor {
     deleteById(id: ID): Promise<void>;
     getIdentityById<T>(id: ID): Promise<Readonly<T> | null>;
     getIdentity<T>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null>;
-    getLoginIdentity<T>(query: FindLoginIdentityQuery): Promise<Readonly<T> | null>;
+    getLoginIdentity<T>(
+        query: FindUniqeIdentityQuery,
+        options?: QueryOptions
+    ): Promise<Readonly<T> | null>;
     getIdentities(query?: FindUniqeIdentityQuery): Promise<Readonly<Identity>[] | null>;
 }
 

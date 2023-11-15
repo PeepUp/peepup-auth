@@ -3,7 +3,7 @@ import { join } from "path";
 const localAuthPath = "/local";
 const identityPath = "/identities";
 const tokenPath = "/tokens";
-const remoteJWKSPath = "oauth2/v1/jwks/keys";
+const remoteJWKSUrl = "oauth2/v1/jwks/keys";
 
 export const clientURL = process.env.CLIENT_URL || "http://127.0.0.1:3000";
 export const serverURL = process.env.SERVER_URL || "http://127.0.0.1:4334";
@@ -18,10 +18,10 @@ export const publicDirPath = join(cwd, "/public");
 export const rsaKeysDirPath = join(keysPath, "RSA");
 export const ecsdaKeysDirPath = join(keysPath, "ECSDA");
 export const jwksDirPath = join(publicDirPath, jwksPath);
-export const jwksURL = new URL(join(serverURL, remoteJWKSPath));
+export const jwksURL = new URL(join(serverURL, remoteJWKSUrl));
 export const protectedResource = [
     identityPath,
-    localAuthPath,
+    join(localAuthPath, "logout", "api"),
     join(identityPath, ":id"),
     join(identityPath, ":id", "deactivate"),
     join(tokenPath, "rotate"),

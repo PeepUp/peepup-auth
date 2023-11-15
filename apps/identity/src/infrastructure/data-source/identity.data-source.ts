@@ -3,6 +3,7 @@ import type * as Types from "@/types/types";
 import type { PrismaProviderClient } from "@/infrastructure/database/prisma-provider";
 
 import type { PrismaClient } from "@prisma/client";
+import { QueryOptions } from "@/adapter/schema/db";
 
 /**
  * @todo:
@@ -14,19 +15,37 @@ import type { PrismaClient } from "@prisma/client";
 class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
     private readonly db: PrismaClient;
 
+    private options = {
+        defaultSelect: {
+            email: true,
+            id: true,
+            username: true,
+            providerId: true,
+            emailVerified: true,
+            lastName: true,
+            firstName: true,
+            avatar: true,
+            state: true,
+        },
+        take: 5,
+    };
+
     constructor(prisma: PrismaProviderClient) {
         this.db = prisma.getPrismaClient();
     }
 
-    async query(query: Identity): Promise<Identity[]> {
-        const result: Readonly<Identity>[] = await this.db.identity.findMany({
+    async query(query: Identity, options?: QueryOptions): Promise<Identity[]> {
+        console.log({ query_identities: query, options });
+        const result: Readonly<Identity>[] = (await this.db.identity.findMany({
             where: {
                 email: { contains: query.email },
                 id: { contains: query.id as string },
                 username: { contains: query.username as string },
                 password: { contains: query.password as string },
             },
-        });
+            select: options?.select ?? this.options.defaultSelect,
+            take: (options?.take as number) ?? this.options.take,
+        })) as Identity[];
 
         return result;
     }
@@ -36,8 +55,8 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
     ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
-                email: query.email,
-                username: query.username,
+                email: query.email as string,
+                phoneNumber: query.phone_number as string,
             },
         });
 
@@ -48,19 +67,24 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
         query: Types.FindUniqeIdentityQuery
     ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findFirst({
-            where: query,
+            where: {
+                OR: [
+                    { email: query.email as string },
+                    { phoneNumber: query.phone_number as string },
+                ],
+            },
         });
 
         return result;
     }
 
     async findUniqueLogin(
-        query: Types.FindLoginIdentityQuery
+        query: Types.FindUniqeIdentityQuery
     ): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
-                email: query.where.email,
-                username: query.where.username,
+                email: query.email as string,
+                phoneNumber: query.phone_number as string,
             },
         });
 
@@ -86,6 +110,7 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
             data: {
                 email: identity.email,
                 username: identity.username,
+                phoneNumber: identity.phoneNumber,
                 password: identity.password,
                 firstName: identity.firstName,
                 lastName: identity.lastName,

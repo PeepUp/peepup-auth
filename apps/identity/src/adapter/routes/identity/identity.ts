@@ -1,10 +1,10 @@
 import type { IdentityRoutes, Routes } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
 
-import * as schema from "../../schema";
-import * as constant from "../../../common/constant";
-import IdentityHandler from "../../handler/identity";
-import Authorization from "../../middleware/guard/authz";
+import * as schema from "@/adapter/schema";
+import * as constant from "@/common/constant";
+import IdentityHandler from "@/adapter/handler/identity";
+import Authorization from "@/adapter/middleware/guard/authz";
 
 export default (identityService: IdentityService): Routes<IdentityRoutes> => {
     const identityHandler = new IdentityHandler(identityService);
@@ -16,14 +16,14 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
                 url: "/identities",
                 onRequest: Authorization.policy([
                     {
-                        action: constant.Action.readAll,
+                        action: constant.Action.read,
                         subject: "Identity",
                     },
                 ]),
                 handler: identityHandler.identities,
                 schema: {
                     request: {
-                        querystring: schema.$ref("GET_IDENTITY_PARTIAL_QUERY_SCHEMA"),
+                        querystring: schema.$ref("GET_IDENTITIES_QUERY_SCHEMA"),
                     },
                 },
             },

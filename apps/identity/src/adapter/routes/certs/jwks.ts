@@ -1,5 +1,5 @@
 import type { IdentityRoutes, Routes } from "@/types/types";
-import OAuthConfigurationHandler from "../../handler/oauth2.config";
+import OAuthConfigurationHandler from "@/adapter/handler/oauth2.config";
 
 export default (): Routes<IdentityRoutes> => {
     const handler = new OAuthConfigurationHandler();
@@ -8,7 +8,7 @@ export default (): Routes<IdentityRoutes> => {
         routes: [
             {
                 method: "GET",
-                url: "/oauth2/v1/jwks/:*",
+                url: "/oauth2/v1/jwks/certs",
                 handler: handler.jwksCerts,
                 schema: {
                     request: {

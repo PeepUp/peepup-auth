@@ -11,14 +11,14 @@ class IdentityFactory {
             firstName: "",
             providerId: null,
             email: data.email,
-            phoneNumber: null,
+            username: data.email.split("@")[0],
             emailVerified: null,
             role: RoleType.member,
             createdAt: new Date(),
             updatedAt: new Date(),
             password: data.password,
             state: IdentityStateTypes.unverified,
-            username: data.username ?? data.email?.split("@")[0],
+            phoneNumber: data.phoneNumber,
         } as Identity;
     }
 }

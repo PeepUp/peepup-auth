@@ -4,49 +4,57 @@ import { existsSync } from "fs";
 import * as constant from "@/common/constant";
 import FileUtil from "@/common/utils/file.util";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { RequestHandler, unknown as _ } from "@/types/types";
 
 class OAuthConfigurationHandler {
-    private readonly jwksPath: string = join(constant.publicDirPath, constant.jwksPath);
+    private readonly jwksCertsPath: string = join(
+        constant.publicDirPath,
+        constant.jwksPath
+    );
 
-    jwksKeys: RequestHandler = async (_request, reply) => {
-        if (!existsSync(this.jwksPath)) {
-            return reply.code(404).send({
-                status: "not found",
-            });
+    // eslint-disable-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    jwksKeys: RequestHandler = async (_, reply) => {
+        if (!existsSync(this.jwksCertsPath)) {
+            return reply.code(200).send({ data: [] });
         }
 
-        const jwksContent = FileUtil.readFile({ path: this.jwksPath, encoding: "utf-8" });
+        const jwksContent = FileUtil.readFile({
+            path: this.jwksCertsPath,
+            encoding: "utf-8",
+        });
 
         if (jwksContent === null) {
-            return reply.code(404).send({
-                status: "not found",
-            });
+            return reply.code(200).send({ data: [] });
         }
 
-        const json = await JSON.parse(jwksContent);
-        return reply.code(200).send(json);
+        const data = await JSON.parse(jwksContent);
+        return reply.code(200).send(data);
     };
 
-    jwksCerts: RequestHandler<_, _, _, { "*": string }> = async (request, reply) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { "*": path } = request.params;
-
-        if (!existsSync(this.jwksPath)) {
-            return reply.code(404).send({
-                status: "not found",
-            });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    jwksCerts: RequestHandler = async (_, reply) => {
+        if (!existsSync(this.jwksCertsPath)) {
+            return reply.code(200).send({ data: [] });
         }
 
-        const jwksContent = FileUtil.readFile({ path: this.jwksPath, encoding: "utf-8" });
+        const data = FileUtil.readFile({
+            path: this.jwksCertsPath,
+            encoding: "utf-8",
+        });
 
-        if (jwksContent === null) {
-            return reply.code(404).send({
-                status: "not found",
-            });
+        if (data === null) {
+            return reply.code(200).send({ data: [] });
         }
 
-        return reply.type("application/octet-stream").send(jwksContent);
+        return reply
+            .type("application/octet-stream")
+            .headers({
+                "Content-Disposition": `attachment; filename=jwks.json`,
+                "Content-Type": "application/json",
+            })
+            .send(data);
     };
 }
 
