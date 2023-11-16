@@ -1,7 +1,9 @@
-import type { LoginIdentityBody, RegisterIdentityBody } from "@/adapter/schema/auth";
+import { POST_REGISTER_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/auth";
+
+import type { RegisterIdentityBody } from "@/adapter/schema/auth";
 import type TokenManagementService from "@/adapter/service/tokens/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
-import type { TokenContract } from "@/types/types";
+import type { LoginServiceArgs, TokenContract } from "@/types/types";
 
 import BadCredentialsException from "@/adapter/middleware/errors/bad-credential-exception";
 import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
@@ -24,38 +26,36 @@ export default class AuthenticationService {
      *
      * */
     async registration(body: RegisterIdentityBody): Promise<void> {
-        const { traits, password } = body;
-        const hashed = await PasswordUtil.hash({
-            _: password,
-            salt: await PasswordUtil.generateSalt(32),
-        });
+        const { traits, password: _ } = body;
 
+        await POST_REGISTER_IDENTITY_BODY_SCHEMA.parseAsync(body);
         await this.identityService.create({
             email: traits.email as string,
-            password: hashed,
-            username: traits.phone_number as string,
+            password: await PasswordUtil.hash({
+                _,
+                salt: await PasswordUtil.generateSalt(32),
+            }),
+            phoneNumber: traits.phone_number as string,
         });
     }
 
-    async login(
-        body: LoginIdentityBody,
-        ip_address: string,
-        device_id: string
-    ): Promise<Readonly<TokenContract> | null> {
-        const { password: _, traits } = body;
+    async login(data: LoginServiceArgs): Promise<Readonly<TokenContract> | null> {
+        const {
+            body: { password: _, traits },
+            ip_address,
+            device_id,
+        } = data;
         const identity = await this.identityService.getIdentityByTraits(traits);
+
+        console.log({ this_identity_try_to_login: { ...identity } });
 
         if (!identity) throw new BadCredentialsException();
         if ("id" in identity === undefined) throw new BadCredentialsException();
 
         const { id, email, username, role, state, password: __ } = identity;
+        const traitsIdentity = { email, username };
 
-        await this.identityService.checkAndAutoActivateState(state, true, {
-            email,
-            username,
-        });
-
-        // verify password
+        await this.identityService.checkAndAutoActivateState(state, true, traitsIdentity);
         await this.identityService.verifyPassword({ _, __ });
 
         const payload = TokenFactory.simplePayloadIdentity({

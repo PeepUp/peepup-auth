@@ -17,11 +17,12 @@ import { errorHandler } from "@/adapter/middleware/error.handler";
 import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
+import { join } from "path";
+import CryptoUtil from "@/common/lib/crypto";
+
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { join } from "path";
-import CryptoUtil from "@/common/lib/crypto";
 
 const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
     fastify(fastifyConfig.fastifyOption);
@@ -53,6 +54,7 @@ async function initSchemaValidatorAndSerializer(
 async function initJWKS() {
     const checkKeysDirectory = FileUtil.checkDir("keys");
     const checkWellKnownDirectory = FileUtil.checkDir("public/.well-known");
+
     const { keysPath, rsaKeysDirPath, ecsdaKeysDirPath } = constant;
 
     console.log({

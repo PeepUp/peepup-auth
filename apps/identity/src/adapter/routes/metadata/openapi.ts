@@ -15,5 +15,17 @@ export default (): Routes<IdentityRoutes> => ({
                 },
             },
         },
+        {
+            method: "GET",
+            url: "/openapi/schemas/docs/:fn",
+            handler: new MetadataHandler().downloadOpenApi,
+            schema: {
+                request: {
+                    params: {
+                        fn: { type: "string" },
+                    },
+                },
+            },
+        },
     ],
 });

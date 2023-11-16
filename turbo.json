@@ -1,54 +1,54 @@
 {
-   "$schema": "https://turbo.build/schema.json",
-   "globalDependencies": ["tsconfig.json"],
-   "pipeline": {
-      "build": {
-         "dependsOn": ["^build"],
-         "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
-      },
-      "lint": {
-         "outputs": []
-      },
-      "check-types": {},
-      "dev": {
-         "cache": false,
-         "persistent": true
-      },
-      "test": {
-         "cache": false,
-         "outputs": ["^test"]
-      },
-      "clean": {
-         "cache": false,
-         "outputs": ["^clean"]
-      },
-      "pretty": {
-         "cache": false,
-         "outputs": ["^pretty"]
-      },
-      "db:generate": {
-         "cache": false,
-         "outputs": ["^generate"]
-      },
-      "db:reset": {
-         "cache": false,
-         "outputs": ["^reset"]
-      },
-      "db:format": {
-         "cache": false,
-         "outputs": ["^format"]
-      },
-      "db:migrate": {
-         "cache": false,
-         "outputs": ["^migrate"]
-      },
-      "db:seed": {
-         "cache": false,
-         "outputs": ["^seed"]
-      },
-      "db:studio": {
-         "cache": false,
-         "outputs": ["^studio"]
-      }
-   }
+    "$schema": "https://turbo.build/schema.json",
+    "globalDependencies": ["tsconfig.json"],
+    "pipeline": {
+        "build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+        },
+        "lint": {
+            "outputs": []
+        },
+        "check-types": {},
+        "dev": {
+            "cache": false,
+            "persistent": true
+        },
+        "test": {
+            "cache": false,
+            "outputs": ["^test"]
+        },
+        "clean": {
+            "cache": false,
+            "outputs": ["^clean"]
+        },
+        "pretty": {
+            "cache": false,
+            "outputs": ["^pretty"]
+        },
+        "db:generate": {
+            "cache": false,
+            "outputs": ["^generate"]
+        },
+        "db:reset": {
+            "cache": false,
+            "outputs": ["^reset"]
+        },
+        "db:format": {
+            "cache": false,
+            "outputs": ["^format"]
+        },
+        "db:migrate": {
+            "cache": false,
+            "outputs": ["^migrate"]
+        },
+        "db:seed": {
+            "cache": false,
+            "outputs": ["^seed"]
+        },
+        "db:studio": {
+            "cache": false,
+            "outputs": ["^studio"]
+        }
+    }
 }

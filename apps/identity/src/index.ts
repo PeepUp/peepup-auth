@@ -9,14 +9,14 @@ export async function main(): Promise<void> {
         host: server.config.environment.host as string,
     });
 
-    console.info(`🐢 Server listening on ${app}`);
+    console.info(`🐢 Identity Server listening on ${app}`);
 }
 
 main().catch((error: unknown) => {
     if (error) {
-        console.error({ error });
+        console.dir(error, { depth: Infinity });
         server.close(() => {
-            server.log.error("Server has been shut down");
+            server.log.error("Identity Server has been shut down");
             process.exit(0);
         });
         PrismaProvider.getInstance().disconnect();

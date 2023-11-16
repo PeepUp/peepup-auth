@@ -1,17 +1,13 @@
-import type {
-    FindLoginIdentityQuery,
-    FindUniqeIdentityQuery,
-    ID,
-    IdentityAccessor,
-} from "@/types/types";
+import type { FindUniqeIdentityQuery, ID, IdentityAccessor } from "@/types/types";
 import type { Identity } from "@/domain/entity/identity";
 import type IdentityStoreAdapter from "@/infrastructure/data-source/identity.data-source";
+import { QueryOptions } from "@/adapter/schema/db";
 
 class IdentityRepository implements IdentityAccessor {
     constructor(private readonly dataSource: IdentityStoreAdapter) {}
 
     async getLoginIdentity<T = Identity>(
-        query: FindLoginIdentityQuery
+        query: FindUniqeIdentityQuery
     ): Promise<Readonly<T> | null> {
         const data = await this.dataSource.findUniqueLogin(query);
         return <T>data ?? null;
@@ -20,7 +16,7 @@ class IdentityRepository implements IdentityAccessor {
     async getIdentity<T = Identity>(
         query: FindUniqeIdentityQuery
     ): Promise<Readonly<T> | null> {
-        const data = await this.dataSource.findUnique(query);
+        const data = await this.dataSource.findFirst(query);
         return <T>data ?? null;
     }
 
@@ -29,8 +25,11 @@ class IdentityRepository implements IdentityAccessor {
         return <T>data ?? null;
     }
 
-    async getIdentityByQuery<T>(query: Identity): Promise<Readonly<T> | null> {
-        const data = await this.dataSource.query(query);
+    async getIdentityByQuery<T>(
+        query: Identity,
+        options?: QueryOptions
+    ): Promise<Readonly<T> | null> {
+        const data = await this.dataSource.query(query, options);
 
         return <T>data ?? null;
     }
@@ -51,7 +50,7 @@ class IdentityRepository implements IdentityAccessor {
 
     async getIdentities(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        query?: FindUniqeIdentityQuery
+        _?: FindUniqeIdentityQuery
     ): Promise<Readonly<Identity>[] | null> {
         const result: Readonly<Identity>[] | null = await this.dataSource.findMany();
         return result ?? null;

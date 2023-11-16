@@ -1,5 +1,10 @@
-import type { PutIdentityBody } from "@/adapter/schema/identity";
+import type {
+    GetIdentitiesQuery,
+    IdentityQueryPartial,
+    PutIdentityBody,
+} from "@/adapter/schema/identity";
 import type IdentityRepository from "@/application/repository/identity";
+import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 import type { Identity } from "@/domain/entity/identity";
 import type {
     EmailUserName,
@@ -15,48 +20,25 @@ import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
 import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
 import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
 import BadCredentialsException from "@/adapter/middleware/errors/bad-credential-exception";
-import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
-
-/*
- * @todo:
- *  ☐ make type for class IdentityService
- *  ☐ where should I put the validation?
- *  ☐ make factory to encapsulte creating identity object
- *  ☐ don't identity already exists
- *  ☐ separate the logic of authentication and identity management
- *  ☐ implement type for IdentityManagementServiceType
- *
- * */
+import UnprocessableContentException from "@/adapter/middleware/errors/unprocessable-content-exception";
 
 class IdentityService {
     constructor(private readonly identityRepository: IdentityRepository) {}
 
-    /**
-     * @todo:
-     *  ☐ validate email
-     *  ☐ validate password
-     *  ☐ hash password
-     *  ☐ check identity already exists
-     *
-     *  @figure
-     *   🤔
-     *
-     * */
     async create(payload: RegisterIdentityBody): Promise<void | Identity> {
-        const { email } = payload;
-        console.log("payload", payload);
+        const { email, phoneNumber: phone_number } = payload;
 
-        if (await this.identityRepository.getIdentity({ email })) {
-            throw new ResourceAlreadyExistException("Error: Identity Already Exists!");
+        if (await this.getIdentityByTraits({ email, phone_number })) {
+            throw new ResourceAlreadyExistException("Error: Identity already exists!");
         }
 
         const identity = await this.identityRepository.create(
             IdentityFactory.defaultIdentity(payload)
         );
 
-        if (!identity) throw new Error("UnhandledError: failed creating new identity!");
-
-        return identity;
+        if (!identity) {
+            throw new UnprocessableContentException("Error: failed create new identity");
+        }
     }
 
     async getIdentities(): Promise<Readonly<IdentityOmitted>[] | null> {
@@ -85,7 +67,6 @@ class IdentityService {
      *    ☑ [DONE]: make this method return IdentityOmitted type
      *    ☑ [DONE]: make this method dont spoil the password attribute
      */
-
     async getIdentityById(id: string): Promise<Readonly<IdentityOmitted> | null> {
         const data = await this.identityRepository.getIdentityById<Identity>(id);
         if (data === null) return data;
@@ -96,7 +77,7 @@ class IdentityService {
     }
 
     async getIdentityByTraits(
-        payload: FindUniqeIdentityQuery
+        payload: IdentityQueryPartial
     ): Promise<Readonly<Identity> | null> {
         const data = await this.identityRepository.getIdentity<Identity>(payload);
         return data ?? null;
@@ -192,15 +173,45 @@ class IdentityService {
     }
 
     async getIdentityByQuery(
-        query: FindUniqeIdentityQuery
-    ): Promise<Readonly<IdentityOmitted> | null> {
-        const data = await this.identityRepository.getIdentity<Identity>(query);
+        query: GetIdentitiesQuery
+    ): Promise<Readonly<Array<IdentityOmitted>> | null> {
+        if (Object.keys(query).length === 0) {
+            throw new BadRequestException("Error: query cannot be empty!");
+        }
+
+        const data = await this.identityRepository.getIdentityByQuery<
+            Array<Identity> | Identity
+        >(
+            {
+                id: query.id as string,
+                email: query.email as string,
+                username: query.username as string,
+            } as Identity,
+            {
+                select: query.select,
+                take: query.take,
+            }
+        );
+
         if (!data) return data;
 
-        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
-            data;
+        let result: Readonly<Array<IdentityOmitted>> | null = null;
 
-        return result;
+        if (data && Array.isArray(data) && data.length > 0) {
+            result = data.map((identity: Identity) => {
+                const {
+                    password,
+                    providerId,
+                    phoneNumber,
+                    updatedAt,
+                    ...rest
+                }: typeof identity = identity;
+
+                return rest;
+            });
+        }
+
+        return result ?? null;
     }
 
     async updateIdentityById(

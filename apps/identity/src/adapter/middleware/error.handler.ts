@@ -13,6 +13,7 @@ import JWTException from "./errors/jwt-error";
 import ForbiddenException from "./errors/forbidden-exception";
 import UnauthorizedException from "./errors/unauthorized";
 import BadRequestException from "./errors/bad-request-exception";
+import UnprocessableContentException from "./errors/unprocessable-content-exception";
 
 export async function errorHandler(
     this: FastifyInstance,
@@ -44,6 +45,7 @@ export async function errorHandler(
                 });
                 break;
             }
+
             case error instanceof UnauthorizedException: {
                 reply.code(error.getCode()).send({
                     status: error.status,
@@ -53,7 +55,18 @@ export async function errorHandler(
                 });
                 break;
             }
+
             case error instanceof ResourceAlreadyExistException: {
+                reply.code(error.getCode()).send({
+                    status: error.status,
+                    code: error.code,
+                    description: error.description,
+                    error: error.message,
+                });
+                break;
+            }
+
+            case error instanceof UnprocessableContentException: {
                 reply.code(error.getCode()).send({
                     status: error.status,
                     code: error.code,
@@ -82,6 +95,7 @@ export async function errorHandler(
                 });
                 break;
             }
+
             default:
                 break;
         }

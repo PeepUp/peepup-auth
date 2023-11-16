@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { queryOptions } from "./db";
 
 export const password = z.string().min(8).max(72);
 export const state = z.enum(["active", "inactive", "disabled"]);
@@ -29,7 +30,7 @@ const identitySchema = z.object({
      *  */
     phone_number: z.string().min(0).max(15).nullish(),
     avatar: z.string().url().optional(),
-    email: z.string().nullish(),
+    email: z.string().optional(),
     emailVerified: z.boolean().optional(),
     createdAt: z.string().datetime().optional(),
     providerId: z.string().optional(),
@@ -64,13 +65,20 @@ export const GET_IDENTITIES_RESPONSE_SCHEMA = z.object({
     data: z.array(identitySchema).optional(),
 });
 
-export const GET_IDENTITY_PARTIAL_QUERY_SCHEMA = z.object({
-    phoneNumberOrEmail,
-});
-
+export const GET_IDENTITY_PARTIAL_QUERY_SCHEMA = phoneNumberOrEmail;
 export const GET_IDENTITY_PARAMS_ID_SCHEMA = identitySchema.pick({ id: true });
 export const GET_IDENTITY_RESPONSE_SCHEMA = identitySchema;
+export const GET_IDENTITIES_QUERY_SCHEMA = identitySchema
+    .pick({
+        id: true,
+        username: true,
+        email: true,
+    })
+    .merge(queryOptions.pick({ take: true }))
+    .merge(z.object({ select: z.any() }))
+    .partial();
 
+export type GetIdentitiesQuery = z.infer<typeof GET_IDENTITIES_QUERY_SCHEMA>;
 export type GetIdentityParamsId = z.infer<typeof GET_IDENTITY_PARAMS_ID_SCHEMA>;
 export type GetIdentityResponse = z.infer<typeof GET_IDENTITY_RESPONSE_SCHEMA>;
 export type GetIdentitiesResponse = z.infer<typeof GET_IDENTITY_RESPONSE_SCHEMA>;
