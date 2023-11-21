@@ -1,7 +1,6 @@
 import type { FastifyCorsOptions } from "@fastify/cors";
 
 import { FastifyServerOptions } from "fastify";
-import config from "./api.config";
 
 const cors: FastifyCorsOptions = {
     origin: ["http://localhost:3000"],
