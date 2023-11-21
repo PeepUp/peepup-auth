@@ -15,7 +15,7 @@ model Identity {
   firstName     String             @default("")
   lastName      String             @default("")
   password      String
-  phoneNumber   String?            @unique
+  phoneNumber   String?            
   state         IdentityStateTypes @default(active)
   username      String?            @unique
   role          SystemRole         @default(member)

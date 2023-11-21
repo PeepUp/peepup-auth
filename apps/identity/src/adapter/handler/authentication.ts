@@ -53,7 +53,8 @@ export default class AuthLocalStrategyHandler {
         request,
         reply
     ) => {
-        await this.authenticationService.registration(request.body);
+        const { body } = request;
+        await this.authenticationService.registration(body);
         return reply.status(201).send({
             status: "ok",
             code: 201,
