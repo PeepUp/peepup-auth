@@ -69,8 +69,12 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
         const result: Readonly<Identity> | null = await this.db.identity.findFirst({
             where: {
                 OR: [
-                    { email: query.email as string },
-                    { phoneNumber: query.phone_number as string },
+                    {
+                        email: { contains: query.email as string },
+                    },
+                    {
+                        phoneNumber: { contains: query.phone_number as string },
+                    },
                 ],
             },
         });

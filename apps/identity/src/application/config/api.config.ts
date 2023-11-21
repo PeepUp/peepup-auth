@@ -19,7 +19,7 @@ const config: Identity.Config.Api = {
         env: process.env.NODE_ENV,
         port: parseInt(process.env.PORT as string, 10),
         host: process.env.HOST,
-        whiteListClient: process.env.WHITE_LISTED_DOMAINS?.split(","),
+        whiteListClient: process.env.WHITE_LISTED_DOMAINS?.split(",") as string[],
         encryption: {
             algorithm: process.env.ENCRYPTION_ALGORITHM as string,
             secret_key: process.env.ENCRYPTION_SECRET_KEY as string,

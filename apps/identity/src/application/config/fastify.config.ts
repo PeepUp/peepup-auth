@@ -4,7 +4,7 @@ import { FastifyServerOptions } from "fastify";
 import config from "./api.config";
 
 const cors: FastifyCorsOptions = {
-    origin: config.environment.whiteListClient,
+    origin: ["http://localhost:3000"],
     methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
@@ -14,12 +14,11 @@ const cors: FastifyCorsOptions = {
         "x-requested-with",
         "_device_id",
         "user_session",
-    ],
-    exposedHeaders: [
         "Access-Control-Allow-Origin",
         "Access-Control-Allow-Methods",
         "Access-Control-Allow-Headers",
     ],
+    exposedHeaders: ["Access-Control-Allow-Methods", "Access-Control-Allow-Headers"],
     credentials: true,
     maxAge: 86400,
     preflight: true,

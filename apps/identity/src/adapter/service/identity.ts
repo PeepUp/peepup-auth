@@ -28,12 +28,15 @@ class IdentityService {
     async create(payload: RegisterIdentityBody): Promise<void | Identity> {
         const { email, phoneNumber: phone_number } = payload;
 
-        if (await this.getIdentityByTraits({ email, phone_number })) {
+        const findIdentity = await this.getIdentityByQuery({
+            email,
+        });
+        if (findIdentity) {
             throw new ResourceAlreadyExistException("Error: Identity already exists!");
         }
 
         const identity = await this.identityRepository.create(
-            IdentityFactory.defaultIdentity(payload)
+            IdentityFactory.defaultIdentity({ ...payload, phoneNumber: phone_number })
         );
 
         if (!identity) {
