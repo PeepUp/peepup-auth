@@ -1,14 +1,14 @@
 /* eslint-disable */
 
-import { mkdirSync } from "fs";
 import http from "http";
 import fastify from "fastify";
+import { mkdirSync } from "fs";
 import cors from "@fastify/cors";
+import { constant } from "@/common";
 import { routes } from "@/adapter/routes";
 import { schemas } from "@/adapter/schema";
-import JwtToken from "@/common/lib/token";
-import { constant } from "@/common";
-import Certificate from "@/common/lib/certs";
+import JwtToken from "@/common/libs/token";
+import Certificate from "@/common/libs/certs";
 import FileUtil from "@/common/utils/file.util";
 
 import * as fastifyPlugin from "@/application/plugin";
@@ -18,7 +18,7 @@ import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import { join } from "path";
-import CryptoUtil from "@/common/lib/crypto";
+import CryptoUtil from "@/common/libs/crypto";
 
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";

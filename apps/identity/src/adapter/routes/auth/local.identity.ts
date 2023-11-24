@@ -19,6 +19,20 @@ export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
         routes: [
             {
                 method: "POST",
+                url: "/local/verify/email",
+                handler: handler.emailAddressChecker,
+                schema: {
+                    body: {
+                        type: "object",
+                        properties: {
+                            email: { type: "string" },
+                        },
+                        required: ["email"],
+                    },
+                },
+            },
+            {
+                method: "POST",
                 url: "/local/registration",
                 handler: handler.registration,
                 schema: {

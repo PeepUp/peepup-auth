@@ -39,6 +39,11 @@ export default class AuthenticationService {
         });
     }
 
+    async checkEmailExist(email: string): Promise<boolean> {
+        const identity = await this.identityService.getIdentityByTraits({ email });
+        return identity ? true : false;
+    }
+
     async login(data: LoginServiceArgs): Promise<Readonly<TokenContract> | null> {
         const {
             body: { password: _, traits },

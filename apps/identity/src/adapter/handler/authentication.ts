@@ -47,6 +47,23 @@ export default class AuthLocalStrategyHandler {
         return reply.status(200).send(result);
     };
 
+    emailAddressChecker: RequestHandler<
+        _,
+        _,
+        {
+            email: string;
+        }
+    > = async (request, reply) => {
+        const { email } = request.body;
+        const result = await this.authenticationService.checkEmailExist(email);
+
+        if (!result) {
+            return reply.status(204).send();
+        }
+
+        return reply.status(409).send();
+    };
+
     // 6 nov 2023 13:41
     // last here
     registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
