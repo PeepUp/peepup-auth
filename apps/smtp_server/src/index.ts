@@ -4,7 +4,7 @@ import { generateOTP } from "./otp-generator";
 
 const transporter = createTransport({
     host: process.env.MAIL_HOST,
-    port: parseInt(process.env.MAIL_PORT as string),
+    port: parseInt(process.env.MAIL_PORT as string, 10),
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASSWORD,
@@ -30,4 +30,4 @@ async function main() {
     });
 }
 
-void main();
+main();

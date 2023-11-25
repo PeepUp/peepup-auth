@@ -3,7 +3,7 @@ import type { FastifyCorsOptions } from "@fastify/cors";
 import { FastifyServerOptions } from "fastify";
 
 const cors: FastifyCorsOptions = {
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
     methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
@@ -16,8 +16,13 @@ const cors: FastifyCorsOptions = {
         "Access-Control-Allow-Origin",
         "Access-Control-Allow-Methods",
         "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Credentials",
     ],
-    exposedHeaders: ["Access-Control-Allow-Methods", "Access-Control-Allow-Headers"],
+    exposedHeaders: [
+        "Access-Control-Allow-Methods",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Credentials",
+    ],
     credentials: true,
     maxAge: 86400,
     preflight: true,

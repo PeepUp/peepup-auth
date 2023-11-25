@@ -1,17 +1,19 @@
 /* eslint-disable */
+import * as fastifyPlugin from "@/application/plugin";
 
 import http from "http";
 import fastify from "fastify";
-import { mkdirSync } from "fs";
 import cors from "@fastify/cors";
-import { constant } from "@/common";
-import { routes } from "@/adapter/routes";
-import { schemas } from "@/adapter/schema";
+import cookie, { FastifyCookieOptions } from "@fastify/cookie";
 import JwtToken from "@/common/libs/token";
 import Certificate from "@/common/libs/certs";
 import FileUtil from "@/common/utils/file.util";
 
-import * as fastifyPlugin from "@/application/plugin";
+import { mkdirSync } from "fs";
+import { constant } from "@/common";
+import { routes } from "@/adapter/routes";
+import { schemas } from "@/adapter/schema";
+
 import fastifyConfig from "@/application/config/fastify.config";
 import { errorHandler } from "@/adapter/middleware/error.handler";
 import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
@@ -111,6 +113,11 @@ async function setup() {
     await server.register(cors, fastifyConfig.cors);
     await server.register(fastifyPlugin.configPlugin);
     await server.register(fastifyPlugin.signal, { timeout: 10000 });
+    await server.register(cookie, {
+        secret: "my-secret",
+        hook: "onRequest",
+        parseOptions: {},
+    } satisfies FastifyCookieOptions);
 
     await initSchemaValidatorAndSerializer(server);
 

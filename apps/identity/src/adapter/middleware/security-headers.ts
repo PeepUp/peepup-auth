@@ -7,7 +7,7 @@ export async function securityHeaders(
 ) {
     reply.header("Server", "dofavour_v1");
     reply.header("Access-Control-Allow-Methods", "GET, OPTIONS");
-    reply.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    reply.header("Access-Control-Allow-Origin", ["http://localhost:3000"]);
     reply.header("Access-Control-Allow-Credentials", "true");
     reply.header("X-Content-Type-Options", "nosniff");
     reply.header("Cache-control", "no-cache, no-store, max-age=0, must-revalidate");

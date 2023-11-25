@@ -15,6 +15,16 @@ export default class CryptoUtil {
 
     private static DEFAULT_PAD = "0";
 
+    public static generateRandomBytesString(len: number): string {
+        const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
     public static generateRandomSHA256(len: number): string {
         const randomData = crypto.randomBytes(len ?? this.DEFAULT_RANDOM_LENGTH);
         const hash = crypto

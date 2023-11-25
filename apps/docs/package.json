@@ -3,15 +3,15 @@
     "version": "0.0.1",
     "description": "Documentation for the Dofavour project api & service",
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev -p 4000",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -p 4000",
         "pretty": "prettier --write .",
         "precommit": "lint-staged",
         "lint": "eslint . --fix"
     },
     "dependencies": {
-        "next": "^14.0.2",
+        "next": "^14.0.3",
         "nextra": "2.13.2",
         "nextra-theme-blog": "2.13.2",
         "nextra-theme-docs": "2.13.2",
@@ -19,10 +19,10 @@
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/node": "20.9.0",
-        "@types/react": "18.2.37",
+        "@types/node": "20.10.0",
+        "@types/react": "18.2.38",
         "config": "workspace:*",
         "lint-staged": "15.1.0",
-        "typescript": "^5.2.2"
+        "typescript": "^5.3.2"
     }
 }

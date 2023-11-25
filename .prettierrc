@@ -4,8 +4,8 @@
     "semi": true,
     "singleQuote": false,
     "printWidth": 90,
-    "brackerSpacing": true,
-    "brackerSameLine": true,
+    "bracketSpacing": true,
+    "bracketSameLine": true,
     "arrowParens": "always",
     "htmlWhitespaceSensitivity": "strict",
     "singleAttributePerLine": false

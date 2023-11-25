@@ -79,6 +79,12 @@ export type TokenContract = {
 export type Routes<T> = {
     routes: T;
 };
+
+export type HookArgs = {
+    request: FastifyRequest;
+    reply: FastifyReply;
+    done: DoneFuncWithErrOrRes;
+};
 export type IdentityRoutes = Array<
     RouteOptions<
         http.Server,

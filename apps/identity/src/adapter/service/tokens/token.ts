@@ -20,6 +20,7 @@ import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/tok
 
 export default class TokenManagementService {
     private keyId: TokenType.SupportedKeyAlgorithm = <TokenType.SupportedKeyAlgorithm>{};
+
     private verifyOptions: JWTVerifyOptions = {};
 
     constructor(

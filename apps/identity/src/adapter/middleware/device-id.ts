@@ -17,19 +17,24 @@ export function deviceIdHook(
         return done();
     }
 
-    reply.header(
-        "set-cookie",
-        `${cookieConfig.cookies.deviceId}=${CryptoUtil.generateRandomString(
-            12
-        )}; Path=/; HttpOnly; SameSite=Strict;`
-    );
+    reply.cookie(cookieConfig.cookies.user_session, CryptoUtil.generateRandomString(16), {
+        domain: "localhost",
+        expires: new Date(Date.now() + 86400000),
+        signed: true,
+        secure: true,
+        httpOnly: true,
+        sameSite: "none",
+    });
 
-    reply.header(
-        "set-cookie",
-        `${cookieConfig.cookies.user_session}=${CryptoUtil.generateRandomString(
-            16
-        )}; Path=/; HttpOnly; SameSite=Strict;`
-    );
+    reply.cookie(cookieConfig.cookies.deviceId, CryptoUtil.generateRandomString(12), {
+        domain: "localhost",
+        expires: new Date(Date.now() + 86400000),
+        signed: true,
+        secure: true,
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+    });
 
     return done();
 }
