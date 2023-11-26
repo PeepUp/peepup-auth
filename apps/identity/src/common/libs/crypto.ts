@@ -15,6 +15,15 @@ export default class CryptoUtil {
 
     private static DEFAULT_PAD = "0";
 
+    public static generateRandomBytesString(len: number): string {
+        const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
 
     public static generateRandomSHA256(len: number): string {
         const randomData = crypto.randomBytes(len ?? this.DEFAULT_RANDOM_LENGTH);
@@ -48,16 +57,28 @@ export default class CryptoUtil {
         return sha256.update(value).digest(this.DEFAULT_DIGEST_TO);
     }
 
-    public static encryptData(data: {value: Readonly<string>}): Readonly<string> {
+    public static encryptData(data: { value: Readonly<string> }): Readonly<string> {
         const { algorithm, secret_key, secret_iv } = this.encConfig;
-        const cipher = crypto.createCipheriv(algorithm, Buffer.from(secret_key, "base64"), Buffer.from(secret_iv, "base64"));
-        return Buffer.from( cipher.update(data.value, 'utf8', 'hex') + cipher.final('hex')).toString('base64');
+        const cipher = crypto.createCipheriv(
+            algorithm,
+            Buffer.from(secret_key, "base64"),
+            Buffer.from(secret_iv, "base64")
+        );
+        return Buffer.from(
+            cipher.update(data.value, "utf8", "hex") + cipher.final("hex")
+        ).toString("base64");
     }
 
-    public static decryptData(data: {value: Readonly<string>}): Readonly<string> {
-        const buffer = Buffer.from(data.value, 'base64').toString('utf-8');
+    public static decryptData(data: { value: Readonly<string> }): Readonly<string> {
+        const buffer = Buffer.from(data.value, "base64").toString("utf-8");
         const { algorithm, secret_key, secret_iv } = this.encConfig;
-        const decipher = crypto.createDecipheriv(algorithm, Buffer.from(secret_key, "base64"), Buffer.from(secret_iv, "base64"));
-        return Buffer.from(decipher.update(buffer, 'hex', 'utf8') + decipher.final('utf8')).toString("utf-8")
+        const decipher = crypto.createDecipheriv(
+            algorithm,
+            Buffer.from(secret_key, "base64"),
+            Buffer.from(secret_iv, "base64")
+        );
+        return Buffer.from(
+            decipher.update(buffer, "hex", "utf8") + decipher.final("utf8")
+        ).toString("utf-8");
     }
 }

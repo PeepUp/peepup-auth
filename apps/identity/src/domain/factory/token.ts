@@ -9,7 +9,7 @@ import type {
 } from "@/types/token";
 
 import * as constant from "@/common/constant";
-import CryptoUtils from "@/common/lib/crypto";
+import CryptoUtils from "@/common/libs/crypto";
 
 class TokenFactory {
     static accessToken(identity: TokenPayloadIdentityReadonly): GenerateTokenArgs {

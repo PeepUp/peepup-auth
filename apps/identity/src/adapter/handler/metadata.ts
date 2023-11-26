@@ -1,9 +1,11 @@
 import * as constant from "@/common/constant";
 
-import type { RequestHandler } from "@/types/types";
-import { join } from "path";
 import FileUtil from "@/common/utils/file.util";
-import BadRequestException from "../middleware/errors/bad-request-exception";
+import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
+
+import { join } from "path";
+
+import type { RequestHandler } from "@/types/types";
 
 /* eslint-disable class-methods-use-this */
 class MetadataHandler {
@@ -14,7 +16,8 @@ class MetadataHandler {
 
     docs: RequestHandler = async (_, reply) => {
         reply.code(200).send({
-            docs: `${constant.clientURL}/docs`,
+            client: `${constant.clientURL}`,
+            docs: "http://127.0.0.1:4000/docs",
             openapi: `${constant.serverURL}/openapi/schemas/open-api-v1.0`,
             certs: `${constant.serverURL}/oauth2/v1/jwks/keys`,
             "download OpenApi": `${constant.serverURL}/openapi/schemas/docs/open-api-v1.0`,

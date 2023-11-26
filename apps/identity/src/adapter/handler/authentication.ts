@@ -15,6 +15,9 @@ export default class AuthLocalStrategyHandler {
         const { body } = request;
         const ip_address = HTTPUtil.getIpAddress(Object.freeze<FastifyRequest>(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
+        const fgp = request.cookies?.[config.cookieConfig.cookies.fingerprint];
+        console.log({ fgp });
+
         const device_id = HTTPUtil.parseCookies(request.headers.cookie as string)[
             this.DEVICE_ID_COOKIES_NAME
         ] as string;
@@ -29,6 +32,7 @@ export default class AuthLocalStrategyHandler {
         }
 
         const result = await this.authenticationService.login({
+            fgp: fgp as string,
             body,
             ip_address,
             device_id,
@@ -45,6 +49,23 @@ export default class AuthLocalStrategyHandler {
         }
 
         return reply.status(200).send(result);
+    };
+
+    emailAddressChecker: RequestHandler<
+        _,
+        _,
+        {
+            email: string;
+        }
+    > = async (request, reply) => {
+        const { email } = request.body;
+        const result = await this.authenticationService.checkEmailExist(email);
+
+        if (!result) {
+            return reply.status(204).send();
+        }
+
+        return reply.status(409).send();
     };
 
     // 6 nov 2023 13:41

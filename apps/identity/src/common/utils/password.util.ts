@@ -4,7 +4,7 @@ import argon2 from "argon2";
 import { randomBytes } from "crypto";
 
 import type { HashPasswordUtils, VerifyHashPasswordUtils } from "@/types/types";
-import CryptoUtil from "../lib/crypto";
+import CryptoUtil from "@/common/libs/crypto";
 
 export default class PasswordUtil {
     private static readonly DEFAULT_ENCODING: BufferEncoding = "hex";

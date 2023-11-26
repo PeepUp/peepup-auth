@@ -1,6 +1,6 @@
 {
     "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
     "ext": ".ts,.js",
-    "ignore": [],
+    "ignore": ["--trace-deprecation", "--trace-warnings"],
     "watch": ["./src"]
 }

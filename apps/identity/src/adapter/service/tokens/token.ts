@@ -5,7 +5,7 @@ import * as TokenType from "@/types/token";
 import * as Type from "@/types/types";
 
 import { join } from "path";
-import JwtToken from "@/common/lib/token";
+import JwtToken from "@/common/libs/token";
 import * as constant from "@/common/constant";
 import FileUtil from "@/common/utils/file.util";
 import TokenFactory from "@/domain/factory/token";
