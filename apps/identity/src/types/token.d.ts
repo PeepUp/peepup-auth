@@ -48,8 +48,10 @@ export type GenerateTokenArgs = {
     type: TokenTypes;
     ip_address: string;
     device_id: string;
+    fingerprint?: string;
     readonly algorithm: TokenAlgorithm | string;
     readonly expiresIn: number;
+    readonly subject?: string;
 };
 
 export type VerifyTokenArgs = KeyPair & {
@@ -74,8 +76,9 @@ export type TokenPayloadIdentity = Required<EmailAndIdentityId> &
     Required<Pick<AccessInfo, "resource">> &
     Required<{
         role: Pick<AccessInfo, "resource">;
-        ip_address?: string | null;
-        device_id?: string | null;
+        ip_address?: string;
+        device_id?: string;
+        fingerprint?: string;
     }>;
 
 export type TokenPayloadIdentityReadonly = Readonly<TokenPayloadIdentity>;

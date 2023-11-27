@@ -44,33 +44,39 @@ export default class AuthenticationService {
         return !!identity;
     }
 
-    async login(
-        data: LoginServiceArgs & { fgp: string }
-    ): Promise<Readonly<TokenContract> | null> {
+    async login(data: LoginServiceArgs & { fgp: string }): Promise<Readonly<TokenContract> | null> {
         const {
             body: { password: _, traits },
             ip_address,
             device_id,
+            fgp: fingerprint,
         } = data;
+
         const identity = await this.identityService.getIdentityByTraits(traits);
 
-        console.log({ this_identity_try_to_login: { ...identity } });
+        if (!identity || Object.values(identity).length === 0) {
+            throw new BadCredentialsException();
+        }
 
-        if (!identity) throw new BadCredentialsException();
-        if ("id" in identity === undefined) throw new BadCredentialsException();
+        console.log({ this_identity_try_to_login: { ...identity } });
 
         const { id, email, username, role, state, password: __ } = identity;
         const traitsIdentity = { email, username };
 
-        await this.identityService.checkAndAutoActivateState(state, true, traitsIdentity);
+        await this.identityService.checkAndAutoActivateState({
+            state,
+            activate: true,
+            traits: traitsIdentity,
+        });
         await this.identityService.verifyPassword({ _, __ });
 
         const payload = TokenFactory.simplePayloadIdentity({
             id,
-            email,
-            ip_address,
-            device_id,
             role,
+            email,
+            device_id,
+            ip_address,
+            fingerprint,
         });
 
         const [{ value: access_token }, { value: refresh_token }] = await Promise.all([
@@ -98,8 +104,7 @@ export default class AuthenticationService {
         }
 
         const authorization = this.tokenManagementService.splitAuthzHeader(access_token);
-        const validate =
-            await this.tokenManagementService.getAllTokenSessions(access_token);
+        const validate = await this.tokenManagementService.getAllTokenSessions(access_token);
 
         if (!validate || (validate && !validate?.length)) {
             throw new BadRequestException("Untracked credential, you can login again!");
@@ -123,11 +128,9 @@ export default class AuthenticationService {
 
         if (!token) throw new UnauthorizedException("Error: cannot verify Token!");
 
-        const userTokens =
-            await this.tokenManagementService.getAllTokenSessions(access_token);
+        const userTokens = await this.tokenManagementService.getAllTokenSessions(access_token);
 
-        if (!userTokens)
-            throw new UnauthorizedException("Error: cannot get token sessions!");
+        if (!userTokens) throw new UnauthorizedException("Error: cannot get token sessions!");
 
         const refreshTokens = userTokens?.filter((t) => t.type === "refresh").at(0);
         const revoked = await Promise.all([

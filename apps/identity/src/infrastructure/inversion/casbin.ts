@@ -5,26 +5,12 @@ import { cwd } from "@/common/constant";
 class Casbin {
     /* eslint-disable class-methods-use-this */
     private getModelPath(): string {
-        return join(
-            cwd,
-            "src",
-            "domain",
-            "model",
-            "casbin",
-            "rbac_with_domain_model.conf"
-        );
+        return join(cwd, "src", "domain", "model", "casbin", "rbac_with_domain_model.conf");
     }
 
     /* eslint-disable class-methods-use-this */
     private getPolicyPath(): string {
-        return join(
-            cwd,
-            "src",
-            "domain",
-            "model",
-            "casbin",
-            "rbac_with_domain_policy.csv"
-        );
+        return join(cwd, "src", "domain", "model", "casbin", "rbac_with_domain_policy.csv");
     }
 
     async init(): Promise<void> {

@@ -29,9 +29,7 @@ export const POST_INACTIVATED_IDENTITY_BODY_SCHEMA = localStrategy
 
 export const ip_schema = z.string().ip();
 
-export const POST_LOGIN_IDENTITY_BODY_SCHEMA = localStrategy.merge(
-    z.object({ password })
-);
+export const POST_LOGIN_IDENTITY_BODY_SCHEMA = localStrategy.merge(z.object({ password }));
 
 export type InactivatedIdentityBody = z.infer<typeof POST_REGISTER_IDENTITY_BODY_SCHEMA>;
 export type RegisterIdentityBody = z.infer<typeof POST_REGISTER_IDENTITY_BODY_SCHEMA>;

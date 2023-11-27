@@ -10,6 +10,7 @@ import versionRoutes from "@/adapter/routes/metadata/version";
 import identityRoutes from "@/adapter/routes/identity/identity";
 import checkhealthRoutes from "@/adapter/routes/metadata/checkhealth";
 import localIdentityRoutes from "@/adapter/routes/auth/local.identity";
+import csrfTokenRoutes from "@/adapter/routes/token/csrf";
 
 import { deviceIdHook } from "@/adapter/middleware/device-id";
 import { fingerprintHook } from "@/adapter/middleware/fingerprint";
@@ -25,15 +26,10 @@ import type { DoneFuncWithErrOrRes, FastifyInstance } from "fastify";
  *  ☑️ destructuring routes
  *  ☑️ [SOON] may be i need to add some prefix to routes
  */
-export function routes(
-    server: FastifyInstance<Server, IncomingMessage, ServerResponse>
-): { routes: IdentityRoutes } {
-    const { identityService, authenticationService, tokenManagementService } =
-        dependencies;
-
-    server.addHook("onRequest", (request, reply) =>
-        AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
-    );
+export function routes(server: FastifyInstance<Server, IncomingMessage, ServerResponse>): {
+    routes: IdentityRoutes;
+} {
+    const { identityService, authenticationService, tokenManagementService } = dependencies;
 
     server.addHook("onRequest", (request, reply, done) => {
         new AbilityGuard().abac(request, reply, done);
@@ -47,6 +43,10 @@ export function routes(
         fingerprintHook(request, reply, done)
     );
 
+    server.addHook("onRequest", (request, reply) =>
+        AuthenticationMiddleware.jwt(request, reply, tokenManagementService)
+    );
+
     server.addHook("onSend", (request, reply, _, done: DoneFuncWithErrOrRes) => {
         securityHeaders(request, reply, done);
     });
@@ -56,6 +56,7 @@ export function routes(
     const localStrategy = localIdentityRoutes(authenticationService).routes;
     const identity = identityRoutes(identityService).routes;
     const checkhealth = checkhealthRoutes().routes;
+    const csrf = csrfTokenRoutes(tokenManagementService).routes;
     const main = mainRoutes().routes;
     const openapi = openapiRoutes().routes;
     const version = versionRoutes().routes;
@@ -71,6 +72,7 @@ export function routes(
             ...version,
             ...identity,
             ...localStrategy,
+            ...csrf,
         ],
     };
 }

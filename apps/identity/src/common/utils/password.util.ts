@@ -49,10 +49,7 @@ export default class PasswordUtil {
              *  that change the string value (not the reference)
              */
 
-            return await argon2.verify(
-                CryptoUtil.decryptData({ value: data.__ }),
-                data._
-            );
+            return await argon2.verify(CryptoUtil.decryptData({ value: data.__ }), data._);
         } catch (error) {
             throw new Error("Password verification failed");
         }

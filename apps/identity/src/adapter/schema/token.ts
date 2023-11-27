@@ -21,8 +21,6 @@ export const ID_TOKEN_PARAMS = z.object({ id: z.string().nonempty() });
 
 export const TOKEN_QUERY_STRING = token;
 
-export type PostRefreshTokenParams = z.infer<
-    typeof POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA
->;
+export type PostRefreshTokenParams = z.infer<typeof POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA>;
 export type TokenQueryString = z.infer<typeof TOKEN_QUERY_STRING>;
 export type idTokenParams = z.infer<typeof ID_TOKEN_PARAMS>;

@@ -15,12 +15,8 @@ export default class AuthLocalStrategyHandler {
         const { body } = request;
         const ip_address = HTTPUtil.getIpAddress(Object.freeze<FastifyRequest>(request));
         const parsedBody = schema.POST_LOGIN_IDENTITY_BODY_SCHEMA.safeParse(body);
-        const fgp = request.cookies?.[config.cookieConfig.cookies.fingerprint];
-        console.log({ fgp });
-
-        const device_id = HTTPUtil.parseCookies(request.headers.cookie as string)[
-            this.DEVICE_ID_COOKIES_NAME
-        ] as string;
+        const fgp = request.cookies?.[config.cookieConfig.cookies.fingerprint] ?? "";
+        const device_id = request.cookies?.[this.DEVICE_ID_COOKIES_NAME] ?? "";
 
         if ("success" in parsedBody === false) {
             return reply.status(400).send({
@@ -32,10 +28,10 @@ export default class AuthLocalStrategyHandler {
         }
 
         const result = await this.authenticationService.login({
-            fgp: fgp as string,
+            fgp,
             body,
-            ip_address,
             device_id,
+            ip_address,
         });
 
         if (!result) {
@@ -43,8 +39,7 @@ export default class AuthLocalStrategyHandler {
                 status: "failed",
                 code: 401,
                 codeStatus: "Unauthorized",
-                message:
-                    "Please cross check again! username, email or password are incorrect!",
+                message: "Please cross check again! username, email or password are incorrect!",
             });
         }
 
@@ -70,10 +65,7 @@ export default class AuthLocalStrategyHandler {
 
     // 6 nov 2023 13:41
     // last here
-    registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (
-        request,
-        reply
-    ) => {
+    registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (request, reply) => {
         const { body } = request;
         await this.authenticationService.registration(body);
         return reply.status(201).send({

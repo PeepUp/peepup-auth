@@ -50,9 +50,7 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
         return result;
     }
 
-    async findUnique(
-        query: Types.FindUniqeIdentityQuery
-    ): Promise<Readonly<Identity> | null> {
+    async findUnique(query: Types.FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
                 email: query.email as string,
@@ -63,9 +61,7 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
         return result;
     }
 
-    async findFirst(
-        query: Types.FindUniqeIdentityQuery
-    ): Promise<Readonly<Identity> | null> {
+    async findFirst(query: Types.FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findFirst({
             where: {
                 OR: [
@@ -82,9 +78,7 @@ class IdentityStoreAdapter implements Types.DataSourceSQL<Identity> {
         return result;
     }
 
-    async findUniqueLogin(
-        query: Types.FindUniqeIdentityQuery
-    ): Promise<Readonly<Identity> | null> {
+    async findUniqueLogin(query: Types.FindUniqeIdentityQuery): Promise<Readonly<Identity> | null> {
         const result: Readonly<Identity> | null = await this.db.identity.findUnique({
             where: {
                 email: query.email as string,

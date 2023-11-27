@@ -158,21 +158,15 @@ export const create_account_response_schema = z.object({
 export type ACCOUNT_SCHEMA_TYPE = z.infer<typeof account_schema>;
 export type CREATE_ACCOUNT_BODY_SCHEMA_TYPE = z.infer<typeof create_account_body_schema>;
 
-export type GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE = z.infer<
-    typeof get_account_params_id_schema
->;
+export type GET_ACCOUNT_PARAMS_ID_SCHEMA_TYPE = z.infer<typeof get_account_params_id_schema>;
 
-export type GET_ACCOUNT_PARAMS_EMAIL_SCHEMA_TYPE = z.infer<
-    typeof get_account_params_email_schema
->;
+export type GET_ACCOUNT_PARAMS_EMAIL_SCHEMA_TYPE = z.infer<typeof get_account_params_email_schema>;
 
 export type GET_ACCOUNT_PARAMS_USERNAME_SCHEMA_TYPE = z.infer<
     typeof get_account_params_username_schema
 >;
 
-export type GET_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<
-    typeof get_account_response_schema
->;
+export type GET_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<typeof get_account_response_schema>;
 
 export type CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE = z.infer<
     typeof create_account_request_body_schema
@@ -181,9 +175,7 @@ export type CREATE_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE = z.infer<
 export type LOGIN_ACCOUNT_REQUEST_BODY_SCHEMA_TYPE = z.infer<
     typeof login_account_request_body_schema
 >;
-export type LOGIN_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<
-    typeof login_account_response_schema
->;
+export type LOGIN_ACCOUNT_RESPONSE_SCHEMA_TYPE = z.infer<typeof login_account_response_schema>;
 
 export type ERROR_GONE_RESPONSE_REGISTRATION_ACCOUNT_SCHEMA = z.infer<
     typeof gone_response_registration_account_schema

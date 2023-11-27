@@ -19,7 +19,7 @@ export async function securityHeaders(
     reply.header("Strict-Transport-Security", "max-age=31536000; includeSubdomains;");
     reply.header(
         "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
+        "Origin, X-Requested-With, Content-Type, Accept, x-csrf-token, X-CSRF-TOKEN, X-CSRF-Token, Authorization, authorization"
     );
     reply.header("Cross-Origin-Embedder-Policy", "require-corp");
     reply.header("Access-Control-Max-Age", "86400");

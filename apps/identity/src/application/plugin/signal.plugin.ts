@@ -1,8 +1,8 @@
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyInstance, FastifyPluginAsync } from "fastify";
 import type { FastifyGracefulExitOptions } from "@/types/types";
 
 export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
-    fastify,
+    fastify: FastifyInstance,
     options = {
         timeout: 3000,
         message: "🌿 Server is shutting down",
@@ -12,7 +12,7 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
     const { log } = fastify;
     let closePromise: Promise<undefined> | null = null;
 
-    const gracefullyClose = async (sign: string): Promise<unknown> => {
+    const gracefullyClose = async (sign: string): Promise<NodeJS.Process | undefined | unknown> => {
         if (closePromise) return closePromise;
 
         console.warn(
@@ -48,5 +48,5 @@ export const signal: FastifyPluginAsync<FastifyGracefulExitOptions> = async (
         });
     }
 
-    fastify.decorate("signal", gracefullyClose);
+    fastify.decorate("gracefully_shutdown", gracefullyClose);
 };

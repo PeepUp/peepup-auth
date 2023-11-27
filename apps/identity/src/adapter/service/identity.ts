@@ -50,13 +50,8 @@ class IdentityService {
         if (!data) return data;
 
         const result = data.map((identity) => {
-            const {
-                password,
-                providerId,
-                phoneNumber,
-                updatedAt,
-                ...rest
-            }: typeof identity = identity;
+            const { password, providerId, phoneNumber, updatedAt, ...rest }: typeof identity =
+                identity;
 
             return rest;
         });
@@ -74,14 +69,11 @@ class IdentityService {
         const data = await this.identityRepository.getIdentityById<Identity>(id);
         if (data === null) return data;
 
-        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data =
-            data;
+        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data = data;
         return result;
     }
 
-    async getIdentityByTraits(
-        payload: IdentityQueryPartial
-    ): Promise<Readonly<Identity> | null> {
+    async getIdentityByTraits(payload: IdentityQueryPartial): Promise<Readonly<Identity> | null> {
         const data = await this.identityRepository.getIdentity<Identity>(payload);
         return data ?? null;
     }
@@ -95,11 +87,15 @@ class IdentityService {
         return true;
     }
 
-    async checkAndAutoActivateState(
-        state: string,
-        activate?: boolean,
-        traits?: EmailUserName
-    ): Promise<boolean> {
+    async checkAndAutoActivateState({
+        state,
+        activate,
+        traits,
+    }: {
+        state: string;
+        activate?: boolean;
+        traits?: EmailUserName;
+    }): Promise<boolean> {
         if (!activate && !traits) {
             if (state === "deactive") return false;
             return false;
@@ -182,9 +178,7 @@ class IdentityService {
             throw new BadRequestException("Error: query cannot be empty!");
         }
 
-        const data = await this.identityRepository.getIdentityByQuery<
-            Array<Identity> | Identity
-        >(
+        const data = await this.identityRepository.getIdentityByQuery<Array<Identity> | Identity>(
             {
                 id: query.id as string,
                 email: query.email as string,
@@ -202,13 +196,8 @@ class IdentityService {
 
         if (data && Array.isArray(data) && data.length > 0) {
             result = data.map((identity: Identity) => {
-                const {
-                    password,
-                    providerId,
-                    phoneNumber,
-                    updatedAt,
-                    ...rest
-                }: typeof identity = identity;
+                const { password, providerId, phoneNumber, updatedAt, ...rest }: typeof identity =
+                    identity;
 
                 return rest;
             });
@@ -247,23 +236,16 @@ class IdentityService {
         } as const;
 
         // @todo [SOON] delete assertion below
-        const updatedIdentity: Readonly<Identity> | void =
-            await this.identityRepository.update<Readonly<Identity>>(
-                id,
-                toBeUpdatedIdentity
-            );
+        const updatedIdentity: Readonly<Identity> | void = await this.identityRepository.update<
+            Readonly<Identity>
+        >(id, toBeUpdatedIdentity);
 
         if (!updatedIdentity) {
             return null;
         }
 
-        const {
-            password,
-            providerId,
-            phoneNumber,
-            updatedAt,
-            ...result
-        }: typeof updatedIdentity = updatedIdentity;
+        const { password, providerId, phoneNumber, updatedAt, ...result }: typeof updatedIdentity =
+            updatedIdentity;
 
         // @todo [SOON] what should I return type of error if identity not updated?
         if (Object.entries(result).length === 0) {
@@ -294,11 +276,7 @@ export default IdentityService;
 
 export type IdentityRegistration = Pick<Identity, "email" | "password">;
 export type IdentityResponse = Omit<Identity, "password">;
-export type IdentityDataOmittedValue =
-    | "password"
-    | "providerId"
-    | "phoneNumber"
-    | "updatedAt";
+export type IdentityDataOmittedValue = "password" | "providerId" | "phoneNumber" | "updatedAt";
 export type IdentityOmitted = Omit<Identity, IdentityDataOmittedValue>;
 export interface IdentityManagementService {
     getIdentityByQuery: (query: FindUniqeIdentityQuery) => Promise<Identity | null>;

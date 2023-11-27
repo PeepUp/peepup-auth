@@ -24,16 +24,10 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         this.dataSource = prisma.getPrismaClient();
     }
 
-    async query(
-        query: TokenQueryArgs
-    ): Promise<Readonly<Token>[] | Readonly<Token> | null> {
+    async query(query: TokenQueryArgs): Promise<Readonly<Token>[] | Readonly<Token> | null> {
         const results = await this.dataSource.token.findMany({
             where: {
-                OR: [
-                    { jti: query.jti },
-                    { value: query.value },
-                    { identityId: query.identityId },
-                ],
+                OR: [{ jti: query.jti }, { value: query.value }, { identityId: query.identityId }],
             },
         });
 
@@ -229,10 +223,7 @@ class TokenStoreAdapter implements TokenDataSourceAdapter {
         });
     }
 
-    async findMany(
-        identityId: ID,
-        tokenValue: string
-    ): Promise<Readonly<Token>[] | null> {
+    async findMany(identityId: ID, tokenValue: string): Promise<Readonly<Token>[] | null> {
         const result: Readonly<Token>[] | null = await this.dataSource.token.findMany({
             take: 10,
             orderBy: [

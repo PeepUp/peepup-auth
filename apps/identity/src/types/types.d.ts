@@ -220,10 +220,7 @@ export interface DataSourceSQL<T> {
     findMany(): Promise<Readonly<T>[] | null>;
     update(id: ID, data: T): Promise<Readonly<T>>;
     delete(id: ID): Promise<void>;
-    query(
-        query: Partial<T>,
-        options?: QueryOptions
-    ): Promise<Readonly<T> | Readonly<T>[] | null>;
+    query(query: Partial<T>, options?: QueryOptions): Promise<Readonly<T> | Readonly<T>[] | null>;
 }
 
 export interface DataSourceSQLGeneric<T> {
@@ -238,9 +235,7 @@ export interface DataSourceSQLGeneric<T> {
 
 export interface TokenDataSourceAdapter extends DataSourceSQLGeneric<Token | Token[]> {
     findUnique(query: QueryTokenArgs): Promise<Readonly<Token> | null>;
-    findUniqueInWhiteListed(
-        query: QueryWhitelistedTokenArgs
-    ): Promise<Readonly<Token> | null>;
+    findUniqueInWhiteListed(query: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null>;
     createMany<R = unknown>(data: T[], _: R): Promise<void>;
     revoke(jti: ID): Promise<Readonly<T> | null>;
     find(identityId: ID): Promise<Readonly<Token> | null>;
@@ -359,10 +354,7 @@ export interface WhiteListedTokenAccessor {
 
 export type TokenAndWhiteListed = TokenAccessor & WhiteListedTokenAccessor;
 export type CreateAccountInput = {
-    profile: Pick<
-        UserContract,
-        "email" | "firstName" | "lastName" | "username" | "password"
-    >;
+    profile: Pick<UserContract, "email" | "firstName" | "lastName" | "username" | "password">;
 };
 
 export interface AccountDataSource {

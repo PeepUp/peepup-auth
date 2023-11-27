@@ -13,8 +13,7 @@ class AbilityFactory {
     defineAbilityFor(identity: IdentityAbilityArgs) {
         if (identity) return createPrismaAbility(this.defineRulesFor(identity));
 
-        ANONYMOUS_ABILITY =
-            ANONYMOUS_ABILITY || createPrismaAbility(this.defineRulesFor());
+        ANONYMOUS_ABILITY = ANONYMOUS_ABILITY || createPrismaAbility(this.defineRulesFor());
         return ANONYMOUS_ABILITY;
     }
 
@@ -64,10 +63,7 @@ class AbilityFactory {
         });
     }
 
-    defineOrganizationRules(
-        identity: IdentityAbilityArgs,
-        b: AbilityBuilder<AppAbility>
-    ) {
+    defineOrganizationRules(identity: IdentityAbilityArgs, b: AbilityBuilder<AppAbility>) {
         b.can(Action.manage, "Identity", {
             id: {
                 equals: identity.id,

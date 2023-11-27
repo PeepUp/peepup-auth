@@ -57,6 +57,7 @@ class JwtToken {
                 .setAudience(payload.aud as string)
                 .setExpirationTime(payload.exp as number)
                 .setIssuer(payload.iss as string)
+                .setSubject(payload.sub as string)
                 .setIssuedAt(payload.iat as number)
                 .setJti(payload.jti as string)
                 .setNotBefore(payload.nbf as number)
@@ -257,9 +258,7 @@ class JwtToken {
         }
     }
 
-    public static async parsedToken(
-        token: Token | ParsedToken
-    ): Promise<Token | ParsedToken> {
+    public static async parsedToken(token: Token | ParsedToken): Promise<Token | ParsedToken> {
         return {
             ...token,
             payload: (await JSON.parse(token.header as string)) as TokenPayloadIdentity,
@@ -275,11 +274,7 @@ class JwtToken {
     ): Promise<boolean | Error> {
         try {
             const jwks = jose.createRemoteJWKSet(jwksURL);
-            const { payload, protectedHeader } = await jose.jwtVerify(
-                token,
-                jwks,
-                options
-            );
+            const { payload, protectedHeader } = await jose.jwtVerify(token, jwks, options);
 
             if (!payload || !protectedHeader) {
                 throw new ForbiddenException(
@@ -305,10 +300,7 @@ class JwtToken {
                 throw new UnauthorizedException("JWTException: Invalid token signature");
             }
 
-            if (
-                payload.resource === undefined &&
-                payload.resource !== identity.resource
-            ) {
+            if (payload.resource === undefined && payload.resource !== identity.resource) {
                 throw new UnauthorizedException("JWTException: Invalid token signature");
             }
 

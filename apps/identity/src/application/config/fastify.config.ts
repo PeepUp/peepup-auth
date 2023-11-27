@@ -1,3 +1,5 @@
+import { FastifyGracefulExitOptions } from "@/types/types";
+import { FastifyCookieOptions } from "@fastify/cookie";
 import type { FastifyCorsOptions } from "@fastify/cors";
 
 import { FastifyServerOptions } from "fastify";
@@ -31,7 +33,7 @@ const cors: FastifyCorsOptions = {
     hideOptionsRoute: true,
 };
 
-const fastifyOption: FastifyServerOptions = {
+const option: FastifyServerOptions = {
     pluginTimeout: 10000,
     logger: {
         level: "debug",
@@ -51,9 +53,21 @@ const fastifyOption: FastifyServerOptions = {
     disableRequestLogging: true,
 };
 
+const gracefullShutdown: FastifyGracefulExitOptions = {
+    timeout: 10000,
+    message: "🌿 Server is shutting down",
+};
+
+const cookies: FastifyCookieOptions = {
+    hook: "onRequest",
+    secret: (process.env.COOKIE_SECRET_KEY as string) || "secret",
+};
+
 const fastifyConfig = {
     cors,
-    fastifyOption,
+    option,
+    cookies,
+    gracefullShutdown,
 };
 
 export default fastifyConfig;

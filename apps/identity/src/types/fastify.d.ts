@@ -10,5 +10,6 @@ declare module "fastify" {
 
     interface FastifyRequest {
         ability: AppAbility;
+        fingerprint: string;
     }
 }

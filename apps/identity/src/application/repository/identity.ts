@@ -13,9 +13,7 @@ class IdentityRepository implements IdentityAccessor {
         return <T>data ?? null;
     }
 
-    async getIdentity<T = Identity>(
-        query: FindUniqeIdentityQuery
-    ): Promise<Readonly<T> | null> {
+    async getIdentity<T = Identity>(query: FindUniqeIdentityQuery): Promise<Readonly<T> | null> {
         const data = await this.dataSource.findFirst(query);
         return <T>data ?? null;
     }
