@@ -13,6 +13,4 @@ export const default_api_error_response_schema = z.object({
     }),
 });
 
-export type DEFAULT_API_ERROR_RESPONSE_SCHEMA = z.infer<
-    typeof default_api_error_response_schema
->;
+export type DEFAULT_API_ERROR_RESPONSE_SCHEMA = z.infer<typeof default_api_error_response_schema>;

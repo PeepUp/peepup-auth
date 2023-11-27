@@ -7,9 +7,7 @@ class NodeMailerAdapter implements EmailApi {
     private transporter: Mail;
 
     constructor() {
-        this.transporter = nodemailer.createTransport(
-            new NodemailerSmtpServer().getConfig()
-        );
+        this.transporter = nodemailer.createTransport(new NodemailerSmtpServer().getConfig());
     }
 
     /* eslint-disable class-methods-use-this */

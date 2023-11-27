@@ -13,7 +13,9 @@ const MyButton = () => {
 
     return (
         <div>
-            <button onClick={handleClick} className={styles.counter}>
+            <button
+                onClick={handleClick}
+                className={styles.counter}>
                 Clicked {count} times
             </button>
         </div>

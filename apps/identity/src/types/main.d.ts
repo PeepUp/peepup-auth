@@ -15,6 +15,9 @@ declare namespace Identity {
                     secret_key: string;
                     secret_iv: string;
                 };
+                cookies: {
+                    secret_key: string;
+                };
             };
             logging: {
                 level: Api.LogLevel;

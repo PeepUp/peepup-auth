@@ -3,10 +3,10 @@
     "tabWidth": 4,
     "semi": true,
     "singleQuote": false,
-    "printWidth": 90,
+    "printWidth": 100,
     "bracketSpacing": true,
     "bracketSameLine": true,
     "arrowParens": "always",
     "htmlWhitespaceSensitivity": "strict",
-    "singleAttributePerLine": false
+    "singleAttributePerLine": true
 }

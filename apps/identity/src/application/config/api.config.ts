@@ -25,6 +25,9 @@ const config: Identity.Config.Api = {
             secret_key: process.env.ENCRYPTION_SECRET_KEY as string,
             secret_iv: process.env.ENCRYPTION_SECRET_IV as string,
         },
+        cookies: {
+            secret_key: process.env.COOKIES_SECRET_KEY as string,
+        },
     },
     logging: {
         level: process.env.LOG_LEVEL,
@@ -47,7 +50,7 @@ const config: Identity.Config.Api = {
                     },
                     decode: {
                         path: join(TOKEN_PATH, "decode"),
-                        method: "POST",
+                        method: "GET",
                     },
                     sessions: {
                         root: join(TOKEN_PATH, "sessions"),

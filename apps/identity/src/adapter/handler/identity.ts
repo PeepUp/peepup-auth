@@ -10,28 +10,20 @@ import { selectQueryOption } from "../schema/db";
 class IdentityHandler {
     constructor(private readonly identitiesService: IdentityService) {}
 
-    identities: RequestHandler<_, _, _, _, Schema.GetIdentitiesQuery> = async (
-        request,
-        reply
-    ) => {
+    identities: RequestHandler<_, _, _, _, Schema.GetIdentitiesQuery> = async (request, reply) => {
         const hasKeys = Object.values(request.query).length > 0;
 
         if (hasKeys) {
-            const parseQuery = await schema.GET_IDENTITIES_QUERY_SCHEMA.parseAsync(
-                request.query
-            );
+            const parseQuery = await schema.GET_IDENTITIES_QUERY_SCHEMA.parseAsync(request.query);
 
             const parsedSelectOptions = await JSON.parse(request.query.select ?? "{}");
-            const parsedDBOptions =
-                await selectQueryOption.parseAsync(parsedSelectOptions);
+            const parsedDBOptions = await selectQueryOption.parseAsync(parsedSelectOptions);
 
             if (!parseQuery || !parsedDBOptions) {
                 return reply.code(400).send({
                     code: 400,
                     message: "bad request",
-                    details: `found _ / ${JSON.stringify(
-                        request.query
-                    )} / in query params`,
+                    details: `found _ / ${JSON.stringify(request.query)} / in query params`,
                 });
             }
 
@@ -113,41 +105,37 @@ class IdentityHandler {
         });
     };
 
-    updateIdentityById: RequestHandler<
-        _,
-        _,
-        Schema.PutIdentityBody,
-        Schema.GetIdentityParamsId
-    > = async (request, reply) => {
-        const { id } = request.params;
-        const { lastName, firstName, avatar } = request.body;
-        const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+    updateIdentityById: RequestHandler<_, _, Schema.PutIdentityBody, Schema.GetIdentityParamsId> =
+        async (request, reply) => {
+            const { id } = request.params;
+            const { lastName, firstName, avatar } = request.body;
+            const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
 
-        if (!parseId.success) {
-            return reply.code(400).send({
-                code: 400,
-                message: "bad request",
+            if (!parseId.success) {
+                return reply.code(400).send({
+                    code: 400,
+                    message: "bad request",
+                });
+            }
+
+            const data = await this.identitiesService.updateIdentityById(id, {
+                lastName,
+                firstName,
+                avatar,
             });
-        }
 
-        const data = await this.identitiesService.updateIdentityById(id, {
-            lastName,
-            firstName,
-            avatar,
-        });
+            if (!data) {
+                return reply.code(400).send({
+                    code: 400,
+                    status: "bad request",
+                    message: "cannot update identity record",
+                });
+            }
 
-        if (!data) {
-            return reply.code(400).send({
-                code: 400,
-                status: "bad request",
-                message: "cannot update identity record",
+            return reply.code(200).send({
+                data,
             });
-        }
-
-        return reply.code(200).send({
-            data,
-        });
-    };
+        };
 
     deleteIdentityById: RequestHandler<_, _, _, Schema.GetIdentityParamsId> = async (
         request,
@@ -177,13 +165,8 @@ class IdentityHandler {
         return reply.code(204).send();
     };
 
-    deactivate: RequestHandler<_, _, InactivatedIdentityBody> = async (
-        request,
-        reply
-    ) => {
-        const parsedBody = schemaAuth.POST_REGISTER_IDENTITY_BODY_SCHEMA.safeParse(
-            request.body
-        );
+    deactivate: RequestHandler<_, _, InactivatedIdentityBody> = async (request, reply) => {
+        const parsedBody = schemaAuth.POST_REGISTER_IDENTITY_BODY_SCHEMA.safeParse(request.body);
 
         if (!parsedBody.success) {
             return reply.code(400).send({

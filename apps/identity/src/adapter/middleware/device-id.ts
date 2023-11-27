@@ -10,15 +10,12 @@ export function deviceIdHook(
 ) {
     const cookies = HTTPUtil.parseCookies(request.headers.cookie as string);
 
-    if (
-        cookies?.[cookieConfig.cookies.deviceId] &&
-        cookies?.[cookieConfig.cookies.user_session]
-    ) {
+    if (cookies?.[cookieConfig.cookies.deviceId] && cookies?.[cookieConfig.cookies.user_session]) {
         return done();
     }
 
     reply.cookie(cookieConfig.cookies.user_session, CryptoUtil.generateRandomString(16), {
-        domain: "localhost",
+        domain: "127.0.0.1",
         expires: new Date(Date.now() + 86400000),
         signed: true,
         secure: true,
@@ -27,7 +24,7 @@ export function deviceIdHook(
     });
 
     reply.cookie(cookieConfig.cookies.deviceId, CryptoUtil.generateRandomString(12), {
-        domain: "localhost",
+        domain: "127.0.0.1",
         expires: new Date(Date.now() + 86400000),
         signed: true,
         secure: true,

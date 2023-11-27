@@ -33,9 +33,7 @@ class TokenRepository implements TokenAccessor {
         throw new Error("Method not implemented.");
     }
 
-    async WhitelistedToken(
-        query: QueryWhitelistedTokenArgs
-    ): Promise<Readonly<Token> | null> {
+    async WhitelistedToken(query: QueryWhitelistedTokenArgs): Promise<Readonly<Token> | null> {
         return this.tokenDataSource.findUniqueInWhiteListed(query);
     }
 
@@ -51,10 +49,7 @@ class TokenRepository implements TokenAccessor {
         throw new Error("Method not implemented.");
     }
 
-    async updateWhiteListedToken(
-        token: Token,
-        newToken: Token
-    ): Promise<Readonly<Token> | null> {
+    async updateWhiteListedToken(token: Token, newToken: Token): Promise<Readonly<Token> | null> {
         throw new Error("Method not implemented.");
     }
 

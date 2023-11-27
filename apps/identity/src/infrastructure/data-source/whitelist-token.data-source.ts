@@ -55,9 +55,7 @@ class WhiteListedTokenStoreAdapter implements WhiteListedTokenDataSourceAdapter 
         });
 
         const tokens: Readonly<Token>[] | null =
-            result.length > 0
-                ? (result.map((item) => item.token as Token) as Token[])
-                : null;
+            result.length > 0 ? (result.map((item) => item.token as Token) as Token[]) : null;
 
         return tokens ?? null;
     }

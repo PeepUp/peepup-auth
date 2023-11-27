@@ -3,6 +3,7 @@ import type AuthenticationService from "@/adapter/service/authentication";
 
 import * as schema from "@/adapter/schema";
 import AuthLocalStrategyHandler from "@/adapter/handler/authentication";
+import CSRFGuard from "@/adapter/middleware/guard/csrf";
 
 /**
  * @todo
@@ -43,6 +44,7 @@ export default (authService: AuthenticationService): Routes<IdentityRoutes> => {
                 method: "POST",
                 url: "/local/login",
                 handler: handler.login,
+                onRequest: CSRFGuard.verify,
                 schema: {
                     request: {
                         body: schema.$ref("POST_LOGIN_IDENTITY_BODY_SCHEMA"),

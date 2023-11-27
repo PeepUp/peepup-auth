@@ -4,8 +4,11 @@ import * as fastifyPlugin from "@/application/plugin";
 import http from "http";
 import fastify from "fastify";
 import cors from "@fastify/cors";
-import cookie, { FastifyCookieOptions } from "@fastify/cookie";
+import cookie from "@fastify/cookie";
+import fastifyConfig from "@/application/config/fastify.config";
+
 import JwtToken from "@/common/libs/token";
+import CryptoUtil from "@/common/libs/crypto";
 import Certificate from "@/common/libs/certs";
 import FileUtil from "@/common/utils/file.util";
 
@@ -14,20 +17,19 @@ import { constant } from "@/common";
 import { routes } from "@/adapter/routes";
 import { schemas } from "@/adapter/schema";
 
-import fastifyConfig from "@/application/config/fastify.config";
 import { errorHandler } from "@/adapter/middleware/error.handler";
 import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 import { join } from "path";
-import CryptoUtil from "@/common/libs/crypto";
 
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
-const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> =
-    fastify(fastifyConfig.fastifyOption);
+const server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> = fastify(
+    fastifyConfig.option
+);
 
 async function initRoutes(
     server: FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>
@@ -110,14 +112,13 @@ async function initJWKS() {
 }
 
 async function setup() {
-    await server.register(cors, fastifyConfig.cors);
+    // internal plugin
     await server.register(fastifyPlugin.configPlugin);
-    await server.register(fastifyPlugin.signal, { timeout: 10000 });
-    await server.register(cookie, {
-        secret: "my-secret",
-        hook: "onRequest",
-        parseOptions: {},
-    } satisfies FastifyCookieOptions);
+    await server.register(fastifyPlugin.signal, fastifyConfig.gracefullShutdown);
+
+    // external plugin
+    await server.register(cors, fastifyConfig.cors);
+    await server.register(cookie, fastifyConfig.cookies);
 
     await initSchemaValidatorAndSerializer(server);
 
@@ -139,6 +140,9 @@ server.ready(() => {
     console.log({
         listPlugin: {
             cors: server.hasPlugin("@fastify/cors"),
+            cookie: server.hasPlugin("@fastify/cookie"),
+            csrfProtection: server.hasPlugin("@fastify/csrf-protection"),
+            config_environmnet: server.hasDecorator("config"),
         },
     });
 });

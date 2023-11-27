@@ -88,7 +88,6 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                         subject: constant.ResourceList.token,
                     },
                 ]),
-
                 handler: handler.whoAmI,
             },
             {
@@ -130,9 +129,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 handler: handler.roteteToken,
                 schema: {
                     request: {
-                        querystring: schema.$ref(
-                            "POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"
-                        ),
+                        querystring: schema.$ref("POST_REFRESH_TOKEN_QUERY_PARAMS_SCHEMA"),
                     },
                 },
             },

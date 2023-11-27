@@ -1,27 +1,36 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 
-import * as TokenType from "@/types/token";
-import * as Type from "@/types/types";
+import * as constant from "@/common/constant";
 
 import { join } from "path";
+
 import JwtToken from "@/common/libs/token";
-import * as constant from "@/common/constant";
 import FileUtil from "@/common/utils/file.util";
 import TokenFactory from "@/domain/factory/token";
+
 import JWTException from "@/adapter/middleware/errors/jwt-error";
 import UnauthorizedException from "@/adapter/middleware/errors/unauthorized";
 import ForbiddenException from "@/adapter/middleware/errors/forbidden-exception";
 import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
 
+import type * as Type from "@/types/types";
+import type * as TokenType from "@/types/token";
+
 import type { JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import type { PostRefreshTokenParams } from "@/adapter/schema/token";
 import type { QueryWhitelistedTokenArgs } from "@/infrastructure/data-source/token.data-source";
 
+/*
+ * @TO-DO:
+ * ☐ feat: token sidejacking prevention using fingerprint: (reference: https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)
+ *
+ *
+ * */
 export default class TokenManagementService {
-    private keyId: TokenType.SupportedKeyAlgorithm = <TokenType.SupportedKeyAlgorithm>{};
-
     private verifyOptions: JWTVerifyOptions = {};
+
+    private keyId: TokenType.SupportedKeyAlgorithm = <TokenType.SupportedKeyAlgorithm>{};
 
     constructor(
         private readonly tokenRepository: Type.TokenAccessor,
@@ -38,41 +47,46 @@ export default class TokenManagementService {
     }
 
     async generate(data: TokenType.GenerateTokenArgs): Promise<Readonly<Type.Token>> {
-        const { identity, type, expiresIn, ip_address, device_id, algorithm: alg } = data;
+        const {
+            identity,
+            type,
+            expiresIn: expirationTime,
+            ip_address,
+            device_id,
+            algorithm: alg,
+            fingerprint,
+        } = data;
 
         const kid = this.getKID(alg);
         const jwt = new JwtToken(kid, {}, {});
+
         const header = TokenFactory.createHeader(alg, kid);
-        const payload = TokenFactory.createPayload(identity, type, expiresIn);
+        const payload = TokenFactory.createPayload(identity, type, expirationTime, fingerprint);
         const privateKey = this.getKeyFile({ kid, alg, name: constant.privateKeyFile });
         const signature = await jwt.createToken({ privateKey, payload, header });
-        const tokenData = TokenFactory.genereteToken(
-            signature,
-            payload,
-            header,
+
+        const tokenData = TokenFactory.genereteCompactToken({
             type,
-            expiresIn,
+            header,
+            payload,
             device_id,
-            ip_address
-        );
+            ip_address,
+            expirationTime,
+            value: signature,
+        });
 
         const result = await this.saveToken(tokenData, identity.id);
         if (!result) throw new Error("Error: cannot save token");
         return result;
     }
 
-    async saveToken(
-        token: Type.Token,
-        identityId: Type.ID
-    ): Promise<Readonly<Type.Token> | null> {
+    async saveToken(token: Type.Token, identityId: Type.ID): Promise<Readonly<Type.Token> | null> {
         const data = await this.tokenRepository.saveToken(token, identityId);
         if (!data) throw new Error("Error: cannot save new token in database!");
         return data;
     }
 
-    async getTokenHistories(
-        access_token: string
-    ): Promise<Readonly<Type.Token[]> | null> {
+    async getTokenHistories(access_token: string): Promise<Readonly<Type.Token[]> | null> {
         const token = this.splitAuthzHeader(access_token);
         const decode = JwtToken.decodeJwt(token);
         const data = await this.tokenRepository.getTokens(decode.id as string);
@@ -136,9 +150,7 @@ export default class TokenManagementService {
         return result !== null;
     }
 
-    async decodeToken(
-        token: string
-    ): Promise<Readonly<TokenType.TokenPayloadWithIdentity> | null> {
+    async decodeToken(token: string): Promise<Readonly<TokenType.TokenPayloadWithIdentity> | null> {
         const decode = JwtToken.decodeJwt(token);
 
         return <TokenType.TokenPayloadWithIdentity>{
@@ -160,7 +172,8 @@ export default class TokenManagementService {
     async rotateToken(
         params: PostRefreshTokenParams,
         ip_address: string,
-        device_id: string
+        device_id: string,
+        fingerprint?: string
     ): Promise<Readonly<Pick<Type.TokenContract, "access_token">>> {
         const { refresh_token } = params;
         const decodedRefreshToken = JwtToken.decodeJwt(refresh_token);
@@ -240,7 +253,8 @@ export default class TokenManagementService {
 
     async verifyToken(
         token: string,
-        query: QueryWhitelistedTokenArgs
+        query: QueryWhitelistedTokenArgs,
+        fingerprint?: string
     ): Promise<Readonly<Type.Token> | null> {
         const jwt = new JwtToken(this.keyId.RS256, {}, {});
 
@@ -271,12 +285,7 @@ export default class TokenManagementService {
             kid,
         });
 
-        const result = await jwt.verifyJWTByJWKS(
-            token,
-            header.alg,
-            this.verifyOptions,
-            identity
-        );
+        const result = await jwt.verifyJWTByJWKS(token, header.alg, this.verifyOptions, identity);
 
         if (!result || result instanceof Error) {
             /* const relatedToken = await this.getLinkedToken({
@@ -410,9 +419,7 @@ export default class TokenManagementService {
             case constant.TokenAlgorithm.ES256 || "ES256":
                 return this.keyId.ES256;
             default:
-                throw new Error(
-                    "Error: cannot get or select keyId from given algorithm!"
-                );
+                throw new Error("Error: cannot get or select keyId from given algorithm!");
         }
     }
 }

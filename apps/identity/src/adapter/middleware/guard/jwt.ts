@@ -16,6 +16,7 @@ class AuthenticationMiddleware {
         const { authorization } = headers;
 
         if (protectedResource.includes(routeOptions.url)) {
+            console.info("checking authorization header...");
             if (!authorization) {
                 return reply.code(401).send({
                     ok: false,

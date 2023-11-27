@@ -1,9 +1,5 @@
 import * as fs from "fs";
-import type {
-    ReadFileOptionsArgs,
-    ReadFileOptions,
-    CountingFileAndDirectory,
-} from "@/types/utils";
+import type { ReadFileOptionsArgs, ReadFileOptions, CountingFileAndDirectory } from "@/types/utils";
 
 export default class FileUtil {
     private static readonly DEFAULT_ENCODING: BufferEncoding = "utf-8";

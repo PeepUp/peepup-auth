@@ -9,8 +9,7 @@ export const clientURL = process.env.CLIENT_URL || "http://127.0.0.1:3000";
 export const serverURL = process.env.SERVER_URL || "http://127.0.0.1:4334";
 export const cwd = process.cwd();
 
-export const issuer: string =
-    `urn:server-identity:${serverURL}` || `urn:server-1:${serverURL}`;
+export const issuer: string = `urn:server-identity:${serverURL}` || `urn:server-1:${serverURL}`;
 
 export const keysPath = join(cwd, "/keys");
 export const jwksPath = "/.well-known/jwks.json";

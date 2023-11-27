@@ -1,9 +1,4 @@
-import type {
-    FastifyError,
-    FastifyInstance,
-    FastifyReply,
-    FastifyRequest,
-} from "fastify";
+import type { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
 import { ZodError } from "zod";
@@ -23,6 +18,7 @@ export async function errorHandler(
 ) {
     console.log("error handler");
     console.dir(error, { depth: Infinity });
+    console.log({ instance: error instanceof CustomError });
 
     if (error instanceof CustomError) {
         switch (true) {
