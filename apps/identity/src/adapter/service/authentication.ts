@@ -99,7 +99,7 @@ export default class AuthenticationService {
     }
 
     async logout(access_token: string): Promise<void | Error> {
-        if (!access_token) {
+        if (!access_token || access_token.length === 0) {
             throw new BadRequestException("Untracked credential, you can login again!");
         }
 
@@ -110,7 +110,7 @@ export default class AuthenticationService {
             throw new BadRequestException("Untracked credential, you can login again!");
         }
 
-        const decoded = await this.tokenManagementService.decodeToken(authorization);
+        const decoded = this.tokenManagementService.decodeToken(authorization);
 
         if (!decoded) throw new UnauthorizedException("Error: cannot validate token!");
 
@@ -133,6 +133,12 @@ export default class AuthenticationService {
         if (!userTokens) throw new UnauthorizedException("Error: cannot get token sessions!");
 
         const refreshTokens = userTokens?.filter((t) => t.type === "refresh").at(0);
+
+        console.log({
+            access: token,
+            refresh: refreshTokens,
+        });
+
         const revoked = await Promise.all([
             this.tokenManagementService.revokeToken(decoded.jti as string),
             this.tokenManagementService.revokeToken(refreshTokens?.jti as string),
@@ -144,7 +150,7 @@ export default class AuthenticationService {
             this.tokenManagementService.deleteWhitelistedToken({
                 tokenId_identityId: {
                     tokenId: refreshTokens?.jti as string,
-                    identityId: decoded.id as string,
+                    identityId: decoded?.id as string,
                 },
             }),
         ]);

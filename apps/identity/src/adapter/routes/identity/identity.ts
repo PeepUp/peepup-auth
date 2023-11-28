@@ -29,6 +29,17 @@ export default (identityService: IdentityService): Routes<IdentityRoutes> => {
             },
             {
                 method: "GET",
+                url: "/identities/me",
+                onRequest: Authorization.policy([
+                    {
+                        action: constant.Action.read,
+                        subject: "Identity",
+                    },
+                ]),
+                handler: identityHandler.getMe,
+            },
+            {
+                method: "GET",
                 url: "/identities/:id",
                 onRequest: Authorization.policy([
                     {

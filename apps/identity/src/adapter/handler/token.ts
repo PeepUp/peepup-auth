@@ -29,6 +29,10 @@ class TokenHandler {
             });
     };
 
+    // eslint-disable-next-line class-methods-use-this
+    verifyToken: RequestHandler<_, _, _, Schema.TokenQueryString> = async (request, reply) =>
+        reply.code(200).send();
+
     getTokenById: RequestHandler<_, _, _, Schema.idTokenParams> = async (request, reply) => {
         const { params } = request;
         const data = await this.tokenService.getTokenById(params.id);

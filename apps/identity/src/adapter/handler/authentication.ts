@@ -78,6 +78,6 @@ export default class AuthLocalStrategyHandler {
 
     logout: RequestHandler<_> = async (request, reply) => {
         await this.authenticationService.logout(request.headers.authorization as string);
-        return reply.status(204).send();
+        return reply.status(204).send({});
     };
 }

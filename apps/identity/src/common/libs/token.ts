@@ -60,7 +60,6 @@ class JwtToken {
                 .setSubject(payload.sub as string)
                 .setIssuedAt(payload.iat as number)
                 .setJti(payload.jti as string)
-                .setNotBefore(payload.nbf as number)
                 .setProtectedHeader(header)
                 .sign(privateKeyImport);
 
@@ -148,13 +147,8 @@ class JwtToken {
             return jose.decodeJwt(token) as DecodedToken;
         } catch (error) {
             if (error instanceof Error) {
-                throw new JWTException({
-                    message: "JWTException: Invalid token!",
-                    statusCode: 400,
-                    cause: "Invalid token signature",
-                    stack: "",
-                    rest: {},
-                });
+                console.log("error while decode token!");
+                return {} as DecodedToken;
             }
 
             return {} as DecodedToken;
@@ -410,10 +404,10 @@ class JwtToken {
             return new UnauthorizedException("Invalid token: Expired");
         }
 
-        // Check not before (nbf)
+        /* // Check not before (nbf)
         if (payload.nbf && payload.nbf > Math.floor(Date.now() / 1000)) {
             return new UnauthorizedException("Invalid token: Not yet valid");
-        }
+        } */
 
         // Check audience (aud)
         if (payload.aud && payload.aud !== options.audience) {

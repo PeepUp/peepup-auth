@@ -150,10 +150,14 @@ export default class TokenManagementService {
         return result !== null;
     }
 
-    async decodeToken(token: string): Promise<Readonly<TokenType.TokenPayloadWithIdentity> | null> {
-        const decode = JwtToken.decodeJwt(token);
+    decodeToken(token: string): Readonly<TokenType.TokenPayloadIdentity> | null {
+        const decode: TokenType.DecodedToken = JwtToken.decodeJwt(token);
 
-        return <TokenType.TokenPayloadWithIdentity>{
+        if (!decode) {
+            throw new BadRequestException("Error: cannot decode token!");
+        }
+
+        return {
             id: decode.id,
             sid: decode.sid,
             jti: decode.jti,
@@ -166,7 +170,7 @@ export default class TokenManagementService {
             resource: decode.resource,
             sub: decode.sub,
             type: decode.type,
-        };
+        } satisfies TokenType.TokenPayloadIdentity;
     }
 
     async rotateToken(

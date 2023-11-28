@@ -1,11 +1,14 @@
 import type * as Schema from "@/adapter/schema/identity";
+
 import type { RequestHandler, unknown as _ } from "@/types/types";
 import type IdentityService from "@/adapter/service/identity";
 import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
 
 import * as schema from "@/adapter/schema/identity";
 import * as schemaAuth from "@/adapter/schema/auth";
+
 import { selectQueryOption } from "../schema/db";
+import BadCredentialsException from "../middleware/errors/bad-credential-exception";
 
 class IdentityHandler {
     constructor(private readonly identitiesService: IdentityService) {}
@@ -61,6 +64,28 @@ class IdentityHandler {
                 message: "data identity record not found",
                 data,
             });
+        }
+
+        return reply.code(200).send({
+            data,
+        });
+    };
+
+    getMe: RequestHandler<_, _, _, _> = async (request, reply) => {
+        const { headers } = request;
+        const { authorization } = headers;
+
+        if (!authorization) {
+            return reply.code(401).send({
+                code: 401,
+                message: "unauthorized",
+            });
+        }
+
+        const data = await this.identitiesService.getMe(authorization);
+
+        if (!data) {
+            throw new BadCredentialsException();
         }
 
         return reply.code(200).send({
