@@ -19,6 +19,7 @@ export async function errorHandler(
     console.log("error handler");
     console.dir(error, { depth: Infinity });
     console.log({ instance: error instanceof CustomError });
+    console.log({ instance: error instanceof JWTException });
 
     if (error instanceof CustomError) {
         switch (true) {
@@ -72,16 +73,6 @@ export async function errorHandler(
                 break;
             }
 
-            case error instanceof JWTException: {
-                reply.code(error.getCode()).send({
-                    ok: false,
-                    code: error.code,
-                    description: error.description,
-                    message: error.message,
-                });
-                break;
-            }
-
             case error instanceof BadRequestException: {
                 reply.code(error.getCode()).send({
                     ok: false,
@@ -95,6 +86,15 @@ export async function errorHandler(
             default:
                 break;
         }
+    }
+
+    if (error instanceof JWTException) {
+        return reply.code(error.getCode()).send({
+            ok: false,
+            code: error.code,
+            description: error.description,
+            message: error.message,
+        });
     }
 
     if (error instanceof ZodError) {

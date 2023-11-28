@@ -21,8 +21,10 @@ export const jwksURL = new URL(join(serverURL, remoteJWKSUrl));
 export const protectedResource = [
     identityPath,
     join(localAuthPath, "logout", "api"),
+    join(identityPath, "me"),
     join(identityPath, ":id"),
     join(identityPath, ":id", "deactivate"),
+    join(tokenPath, "verify"),
     join(tokenPath, "rotate"),
     join(tokenPath, "sessions"),
     join(tokenPath, "sessions", "active"),
@@ -31,18 +33,7 @@ export const protectedResource = [
     join(tokenPath, "sessions", "whoami"),
 ];
 
-export const requiredClaims = [
-    "jti",
-    "email",
-    "id",
-    "resource",
-    "sub",
-    "aud",
-    "iss",
-    "iat",
-    "nbf",
-    "exp",
-];
+export const requiredClaims = ["jti", "email", "id", "resource", "sub", "aud", "iss", "iat", "exp"];
 
 export const privateKeyFile = "private.pem.key" as const;
 export const publicKeyFile = "public.pem.key" as const;

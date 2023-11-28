@@ -79,10 +79,25 @@ export type TokenPayloadIdentity = Required<EmailAndIdentityId> &
         ip_address?: string;
         device_id?: string;
         fingerprint?: string;
-    }>;
+    }> & { id: string };
 
 export type TokenPayloadIdentityReadonly = Readonly<TokenPayloadIdentity>;
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;
+
+export interface TokenPayloadIdentity {
+    id: string | number;
+    sid: string;
+    jti: string;
+    exp: number | Date;
+    iat: number;
+    iss: string;
+    aud: string;
+    nbf: number;
+    email: string;
+    resource: string;
+    sub: string;
+    type: string;
+}
 
 export interface JWTHeader {
     alg: string;

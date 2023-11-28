@@ -7,7 +7,7 @@ export default class CSRFGuard {
         const { headers } = request;
         const { cookies } = request;
         const cookieName = "__host_csrf_token";
-        const csrfOnCookie = cookies.get(cookieName);
+        const csrfOnCookie = cookies[cookieName];
 
         const csrf =
             (headers["x-csrf-token"] as string) ||

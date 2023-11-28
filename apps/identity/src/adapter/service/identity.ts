@@ -1,11 +1,13 @@
+import type { Identity } from "@/domain/entity/identity";
+import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
+import type IdentityRepository from "@/application/repository/identity";
+
 import type {
     GetIdentitiesQuery,
     IdentityQueryPartial,
     PutIdentityBody,
 } from "@/adapter/schema/identity";
-import type IdentityRepository from "@/application/repository/identity";
-import type { InactivatedIdentityBody } from "@/adapter/schema/auth";
-import type { Identity } from "@/domain/entity/identity";
+
 import type {
     EmailUserName,
     FindUniqeIdentityQuery,
@@ -16,14 +18,18 @@ import type {
 
 import PasswordUtil from "@/common/utils/password.util";
 import IdentityFactory from "@/domain/factory/identity";
-import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
-import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
 import BadRequestException from "@/adapter/middleware/errors/bad-request-exception";
 import BadCredentialsException from "@/adapter/middleware/errors/bad-credential-exception";
 import UnprocessableContentException from "@/adapter/middleware/errors/unprocessable-content-exception";
+import ResourceAlreadyExistException from "@/adapter/middleware/errors/resource-already-exists-execption";
+import { PUT_IDENTITY_BODY_SCHEMA } from "@/adapter/schema/identity";
+import TokenManagementService from "./tokens/token";
 
 class IdentityService {
-    constructor(private readonly identityRepository: IdentityRepository) {}
+    constructor(
+        private readonly identityRepository: IdentityRepository,
+        private readonly tokenManagementService: TokenManagementService
+    ) {}
 
     async create(payload: RegisterIdentityBody): Promise<void | Identity> {
         const { email, phoneNumber: phone_number } = payload;
@@ -71,6 +77,35 @@ class IdentityService {
 
         const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data = data;
         return result;
+    }
+
+    async getMe(authorization: string): Promise<Readonly<Identity> | null> {
+        const decoded = this.tokenManagementService.decodeToken(
+            this.tokenManagementService.splitAuthzHeader(authorization)
+        );
+
+        if (!decoded) {
+            throw new BadCredentialsException();
+        }
+
+        const data = await this.identityRepository.getIdentityById<Identity>(decoded.id);
+
+        if (!data) {
+            return null;
+        }
+
+        const {
+            password,
+            providerId,
+            phoneNumber,
+            updatedAt,
+            emailVerified,
+            createdAt,
+            ...result
+        }: typeof data = data;
+        const resultData = result as Readonly<Identity>;
+
+        return resultData ?? null;
     }
 
     async getIdentityByTraits(payload: IdentityQueryPartial): Promise<Readonly<Identity> | null> {

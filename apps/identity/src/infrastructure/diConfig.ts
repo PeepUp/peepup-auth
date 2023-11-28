@@ -19,7 +19,8 @@ const tokenManagementService = new TokenManagementService(
 );
 
 const identityService = new IdentityService(
-    new IdentityRepository(new IdentityStoreAdapter(prisma))
+    new IdentityRepository(new IdentityStoreAdapter(prisma)),
+    tokenManagementService
 );
 
 const authenticationService = new AuthenticationService(identityService, tokenManagementService);

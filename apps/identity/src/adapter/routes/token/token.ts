@@ -1,21 +1,15 @@
-import type { IdentityRoutes, Routes } from "@/types/types";
-
-import { join } from "path";
+import * as path from "path";
 import * as schema from "@/adapter/schema";
 import * as constant from "@/common/constant";
-import TokenHandler from "@/adapter/handler/token";
+
 import config from "@/application/config/api.config";
+
+import TokenHandler from "@/adapter/handler/token";
 import Authorization from "@/adapter/middleware/guard/authz";
 import TokenManagementService from "@/adapter/service/tokens/token";
 
-/**
- * @todo
- *  ☑️ clean up this mess (code smells & clean code)
- *  ☑️ add validation
- *  ☐ add error handling
- *  ☐ add logging
- *  ☐ add tests
- */
+import type { IdentityRoutes, Routes } from "@/types/types";
+
 export default (tokenService: TokenManagementService): Routes<IdentityRoutes> => {
     const handler = new TokenHandler(tokenService);
     const { paths } = config.api.paths.tokens;
@@ -24,7 +18,18 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
         routes: [
             {
                 method: "GET",
-                url: join(paths.sessions.root, "/:id"),
+                url: "/tokens/verify",
+                onRequest: Authorization.policy([
+                    {
+                        action: constant.Action.read,
+                        subject: constant.ResourceList.token,
+                    },
+                ]),
+                handler: handler.verifyToken,
+            },
+            {
+                method: "GET",
+                url: path.join(paths.sessions.root, "/:id"),
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.read,
@@ -42,7 +47,7 @@ export default (tokenService: TokenManagementService): Routes<IdentityRoutes> =>
                 /* !!! THIS WILL REVOKED THE CURRENT SESSION,
                  * NOT DELETED THE TOKEN SESSION IN DATABASE */
                 method: "DELETE",
-                url: join(paths.sessions.root, "/:id"),
+                url: path.join(paths.sessions.root, "/:id"),
                 onRequest: Authorization.policy([
                     {
                         action: constant.Action.delete,
