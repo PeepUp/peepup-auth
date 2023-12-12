@@ -10,16 +10,13 @@ export default class FileUtil {
         return fs.readFileSync(path, encoding ?? this.DEFAULT_ENCODING);
     }
 
-    public static checkDir(path: string): boolean {
-        try {
-            return fs.statSync(path).isDirectory();
-        } catch (error) {
-            if (error) {
-                console.info(`Directory in path: ${path} not found!`);
-                return false;
-            }
-            return false;
-        }
+    public static isCheckDirectoryExist(path: string): boolean {
+        return fs.existsSync(path);
+    }
+
+    public static async checkDir(path: string): Promise<boolean> {
+        const files = await fs.promises.readdir(path);
+        return files.length === 0;
     }
 
     public static checkFile(path: string): boolean {
@@ -64,5 +61,9 @@ export default class FileUtil {
             });
             fs.rmdirSync(path);
         }
+    }
+
+    public static makeDir(path: string) {
+        fs.mkdirSync(path, { recursive: true });
     }
 }

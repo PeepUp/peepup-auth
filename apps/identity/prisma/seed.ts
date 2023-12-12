@@ -17,12 +17,11 @@ const identity: Prisma.IdentityCreateInput = {
 };
 
 async function main() {
+    console.log(`---- Start dropping existing data ----`);
+    await prisma.identity.deleteMany({});
+    console.log(`---- Finish dropping existing data ----`);
     console.log(`---- Start seeding ----`);
-
-    await prisma.identity.create({
-        data: identity,
-    });
-
+    await prisma.identity.create({ data: identity });
     console.log(`---- Finish seeding ----`);
 }
 
@@ -34,49 +33,3 @@ main()
         console.error(e);
         await prisma.$disconnect();
     });
-
-/* const newuser = await prisma.account.create({
-      include: {
-         user: true,
-         roles: {
-            include: { permissions: true },
-         },
-      },
-      data: {
-         user: {
-            create: {
-               phone: "1234567890",
-               username: "john",
-               emailVerified: new Date(),
-               password: "1234567890",
-               image: "https://www.google.com",
-               name: "John Doe",
-               email: "john@gmail.com",
-            },
-         },
-         roles: {
-            create: {
-               type: "ADMIN",
-               permissions: {
-                  create: [
-                     {
-                        attribute: {
-                           canCreateUser: true,
-                           canDeleteUser: true,
-                           canInviteUser: true,
-                           canUpdateUser: true,
-                        },
-                     },
-                     {
-                        attribute: {
-                           canDeleteOrganization: true,
-                           canUpdateOrganization: true,
-                           canInviteUser: true,
-                        },
-                     },
-                  ],
-               },
-            },
-         },
-      },
-   }); */

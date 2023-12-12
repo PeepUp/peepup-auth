@@ -3,9 +3,9 @@ import type { PrismaQuery, Subjects } from "@casl/prisma";
 import type { Token } from "@/types";
 
 import { PureAbility } from "@casl/ability";
-import { Action } from "@/common/constant";
+import { action } from "@/common/constant";
 
-export type RequiredAbility = { action: Action; subject: SubjectsAbility };
+export type RequiredAbility = { action: action; subject: SubjectsAbility };
 export type SubjectsAbility =
     | Subjects<{
           Token: Token;

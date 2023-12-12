@@ -10,7 +10,6 @@ import versionRoutes from "@/adapter/routes/metadata/version";
 import identityRoutes from "@/adapter/routes/identity/identity";
 import checkhealthRoutes from "@/adapter/routes/metadata/checkhealth";
 import localIdentityRoutes from "@/adapter/routes/auth/local.identity";
-import csrfTokenRoutes from "@/adapter/routes/token/csrf";
 
 import { deviceIdHook } from "@/adapter/middleware/device-id";
 import { fingerprintHook } from "@/adapter/middleware/fingerprint";
@@ -20,19 +19,13 @@ import type { IdentityRoutes } from "@/types/types";
 import type { IncomingMessage, Server, ServerResponse } from "http";
 import type { DoneFuncWithErrOrRes, FastifyInstance } from "fastify";
 
-/**
- * @todo
- *  ☑️ clean up this mess (code smells & clean code)
- *  ☑️ destructuring routes
- *  ☑️ [SOON] may be i need to add some prefix to routes
- */
 export function routes(server: FastifyInstance<Server, IncomingMessage, ServerResponse>): {
     routes: IdentityRoutes;
 } {
     const { identityService, authenticationService, tokenManagementService } = dependencies;
 
     server.addHook("onRequest", (request, reply, done) => {
-        new AbilityGuard().abac(request, reply, done);
+        AbilityGuard.abac(request, reply, done);
     });
 
     server.addHook("onRequest", (request, reply, done: DoneFuncWithErrOrRes) =>
@@ -51,28 +44,16 @@ export function routes(server: FastifyInstance<Server, IncomingMessage, ServerRe
         securityHeaders(request, reply, done);
     });
 
-    // Routes List
-    const token = tokenRoutes(tokenManagementService).routes;
-    const localStrategy = localIdentityRoutes(authenticationService).routes;
-    const identity = identityRoutes(identityService).routes;
-    const checkhealth = checkhealthRoutes().routes;
-    const csrf = csrfTokenRoutes(tokenManagementService).routes;
-    const main = mainRoutes().routes;
-    const openapi = openapiRoutes().routes;
-    const version = versionRoutes().routes;
-    const jwks = jwksRoutes().routes;
-
     return {
         routes: [
-            ...main,
-            ...jwks,
-            ...token,
-            ...openapi,
-            ...checkhealth,
-            ...version,
-            ...identity,
-            ...localStrategy,
-            ...csrf,
+            ...tokenRoutes(tokenManagementService).routes,
+            ...localIdentityRoutes(authenticationService).routes,
+            ...identityRoutes(identityService).routes,
+            ...checkhealthRoutes().routes,
+            ...mainRoutes().routes,
+            ...openapiRoutes().routes,
+            ...versionRoutes().routes,
+            ...jwksRoutes().routes,
         ],
     };
 }

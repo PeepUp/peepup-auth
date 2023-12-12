@@ -6,7 +6,7 @@
     "scripts": {
         "build": "tsc",
         "clean": "rm -rf ./dist",
-        "dev": "dotenv -e .env.local -- npx nodemon",
+        "dev": "npx nodemon",
         "precommit": "lint-staged",
         "pretty": "prettier --write \"src/**/*.ts\"",
         "pretty:check": "prettier --check \"src/**/*.ts\"",

@@ -5,7 +5,7 @@ import type { FastifyCorsOptions } from "@fastify/cors";
 import { FastifyServerOptions } from "fastify";
 
 const cors: FastifyCorsOptions = {
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://0.0.0.0:3000"],
     methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
@@ -19,6 +19,10 @@ const cors: FastifyCorsOptions = {
         "Access-Control-Allow-Methods",
         "Access-Control-Allow-Headers",
         "Access-Control-Allow-Credentials",
+        "X-Csrf-Token",
+        "x-csrf-token",
+        "X-CSRF-TOKEN",
+        "X-CSRF-Token",
     ],
     exposedHeaders: [
         "Access-Control-Allow-Methods",
@@ -61,6 +65,15 @@ const gracefullShutdown: FastifyGracefulExitOptions = {
 const cookies: FastifyCookieOptions = {
     hook: "onRequest",
     secret: (process.env.COOKIE_SECRET_KEY as string) || "secret",
+    parseOptions: {
+        domain: "127.0.0.1",
+        expires: new Date(Date.now() + 86400000),
+        signed: false,
+        secure: true,
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+    },
 };
 
 const fastifyConfig = {

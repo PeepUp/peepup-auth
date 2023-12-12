@@ -1,11 +1,12 @@
-import type { FastifyRequest } from "fastify";
 import { ForbiddenError } from "@casl/ability";
-import type { RequiredAbility } from "@/types/ability";
 
 import ForbiddenException from "@/adapter/middleware/errors/forbidden-exception";
 
-class Authorization {
-    static policy(rules: RequiredAbility[]) {
+import type { RequiredAbility } from "@/types/ability";
+import type { FastifyRequest } from "fastify";
+
+export default class Authorization {
+    public static policy(rules: RequiredAbility[]) {
         return async (request: FastifyRequest) => {
             try {
                 rules.forEach(({ action, subject }) =>
@@ -21,5 +22,3 @@ class Authorization {
         };
     }
 }
-
-export default Authorization;

@@ -12,7 +12,8 @@ import CryptoUtil from "@/common/libs/crypto";
 import Certificate from "@/common/libs/certs";
 import FileUtil from "@/common/utils/file.util";
 
-import { mkdirSync } from "fs";
+import { join } from "path";
+import { createWriteStream, mkdirSync } from "fs";
 import { constant } from "@/common";
 import { routes } from "@/adapter/routes";
 import { schemas } from "@/adapter/schema";
@@ -20,8 +21,6 @@ import { schemas } from "@/adapter/schema";
 import { errorHandler } from "@/adapter/middleware/error.handler";
 import { notFoundHandler } from "@/adapter/middleware/not-found.handler";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
-
-import { join } from "path";
 
 import type { FastifyInstance } from "fastify";
 import type { JWTHeaderParameters } from "jose";
@@ -55,77 +54,95 @@ async function initSchemaValidatorAndSerializer(
     server.setSerializerCompiler(serializerCompiler);
 }
 
+function setupDirectoryStructure() {
+    const { keysPath, jwksPath } = constant;
+
+    const isKeysDirExist = FileUtil.isCheckDirectoryExist(keysPath);
+    const isWellKnownDirExist = FileUtil.isCheckDirectoryExist(jwksPath);
+    const isFileJwksExist = FileUtil.isCheckDirectoryExist(join(jwksPath, "jwks.json"));
+
+    if (isWellKnownDirExist && isFileJwksExist && isKeysDirExist) return;
+
+    if (!isKeysDirExist) mkdirSync(keysPath, { recursive: true });
+
+    if (!isWellKnownDirExist && !isFileJwksExist) {
+        mkdirSync(jwksPath, { recursive: true });
+        createWriteStream(join(jwksPath, "jwks.json"));
+    }
+
+    if (isWellKnownDirExist && isFileJwksExist === false) {
+        createWriteStream(join(jwksPath, "jwks.json"));
+    }
+}
+
+function isDirectoryReady() {
+    const { keysPath, jwksPath } = constant;
+
+    const isKeysDirExist = FileUtil.isCheckDirectoryExist(keysPath);
+    const isWellKnownDirExist = FileUtil.isCheckDirectoryExist(jwksPath);
+    const isFileJwksExist = FileUtil.isCheckDirectoryExist(join(jwksPath, "jwks.json"));
+
+    if (isKeysDirExist && isWellKnownDirExist && isFileJwksExist) return true;
+    return false;
+}
+
 async function initJWKS() {
-    const checkKeysDirectory = FileUtil.checkDir("keys");
-    const checkWellKnownDirectory = FileUtil.checkDir("public/.well-known");
+    let rsa256KeyId: Array<string> = [];
+    let ecsdaKeyId: Array<string> = [];
+    const isInitialized = isDirectoryReady();
+    const { keysPath, rsaKeysDirPath, ecsdaKeysDirPath, jwksPath } = constant;
 
-    const { keysPath, rsaKeysDirPath, ecsdaKeysDirPath } = constant;
+    if (!isInitialized) {
+        // need to recreate all directory structure
+        setupDirectoryStructure();
+        // new instance of certificate
+        const ecsdaCert: Certificate = new Certificate(keysPath);
+        const rsa256Cert: Certificate = new Certificate(keysPath);
 
-    console.log({
-        checkKeysDirectory,
-        checkWellKnownDirectory,
-    });
+        console.log("--- Generating JWKS KEY Certificates ---");
 
-    let rsa256KeyId: string | string[] = "";
-    let ecsdaKeyId: string | string[] = "";
+        rsa256KeyId.push(CryptoUtil.generateRandomSHA256(32));
+        ecsdaKeyId.push(CryptoUtil.generateRandomSHA256(32));
 
-    if (!checkKeysDirectory) {
-        const ecsda: Certificate = new Certificate(keysPath);
-        const rsa256: Certificate = new Certificate(keysPath);
+        FileUtil.makeDir(join(rsaKeysDirPath, rsa256KeyId[0] as string));
+        FileUtil.makeDir(join(ecsdaKeysDirPath, ecsdaKeyId[0] as string));
 
-        console.log({
-            message: "Generating RSA256 and ECSDA keys...",
-        });
+        const rsa256Certs = rsa256Cert.generateKeyPairRSA(4096);
+        rsa256Cert.saveKeyPair(rsa256Certs, keysPath + "/RSA/" + rsa256KeyId);
 
-        rsa256KeyId = CryptoUtil.generateRandomSHA256(32);
-        ecsdaKeyId = CryptoUtil.generateRandomSHA256(32);
+        const ecsdaCerts = ecsdaCert.generateKeyPairECDSA("prime256v1");
+        ecsdaCert.saveKeyPair(ecsdaCerts, keysPath + "/ECSDA/" + ecsdaKeyId);
 
-        mkdirSync(join(rsaKeysDirPath, rsa256KeyId), { recursive: true });
-        mkdirSync(join(ecsdaKeysDirPath, ecsdaKeyId), { recursive: true });
+        console.log("----- Generating JWKS KEY Certificates Successfully -----");
+        console.log({ rsa256KeyId, ecsdaKeyId });
 
-        const rsa256Certs = rsa256.generateKeyPairRSA(4096);
-        rsa256.saveKeyPair(rsa256Certs, keysPath + "/RSA/" + rsa256KeyId);
+        // generate jwks.json file
+        const jwtTokenLib = new JwtToken(rsa256KeyId[0] as string, {}, <JWTHeaderParameters>{});
+        await jwtTokenLib.buildJWKSPublicKey(rsa256KeyId[0] as string, ecsdaKeyId[0] as string);
 
-        const ecsdaCerts = ecsda.generateKeyPairECDSA("prime256v1");
-        ecsda.saveKeyPair(ecsdaCerts, keysPath + "/ECSDA/" + ecsdaKeyId);
+        console.log("----- Generating JWKS JSON File Successfully -----");
+        console.log('----- JWKS JSON File Path: "' + jwksPath + "/jwks.json" + '" -----');
+        return;
     }
 
-    if (checkKeysDirectory) {
-        rsa256KeyId = FileUtil.getDir("keys/RSA");
-        ecsdaKeyId = FileUtil.getDir("keys/ECSDA");
-        console.log({ message: "JWKS ready & ok!" });
-    }
-
-    if (!checkWellKnownDirectory) {
-        if (rsa256KeyId[0] && ecsdaKeyId[0]) {
-            console.log({ message: "Generating JWKS KEY..." });
-            console.log({ rsa256KeyId, ecsdaKeyId });
-
-            new JwtToken(rsa256KeyId[0], {}, <JWTHeaderParameters>{}).buildJWKSPublicKey(
-                rsa256KeyId[0],
-                ecsdaKeyId[0]
-            );
-
-            console.log({ message: "JWKS successfully generated" });
-        }
-    }
+    console.log("--- JWKS KEY Certificates Already Exist & ready to Run ---");
 }
 
 async function setup() {
     // internal plugin
     await server.register(fastifyPlugin.configPlugin);
     await server.register(fastifyPlugin.signal, fastifyConfig.gracefullShutdown);
-
     // external plugin
     await server.register(cors, fastifyConfig.cors);
     await server.register(cookie, fastifyConfig.cookies);
 
     await initSchemaValidatorAndSerializer(server);
-
+    await server.after();
     await initRoutes(server);
     await server.after();
 
     await initSchema(server);
+    await server.after();
     await initJWKS();
 }
 
@@ -141,7 +158,6 @@ server.ready(() => {
         listPlugin: {
             cors: server.hasPlugin("@fastify/cors"),
             cookie: server.hasPlugin("@fastify/cookie"),
-            csrfProtection: server.hasPlugin("@fastify/csrf-protection"),
             config_environmnet: server.hasDecorator("config"),
         },
     });

@@ -1,107 +1,70 @@
-import type { IdentityRoutes, Routes } from "@/types/types";
-import type IdentityService from "@/adapter/service/identity";
+import { $ref } from "@/adapter/schema";
+import { Action as Act, Resource, Method } from "@/common/constant";
 
-import * as schema from "@/adapter/schema";
-import * as constant from "@/common/constant";
 import IdentityHandler from "@/adapter/handler/identity";
 import Authorization from "@/adapter/middleware/guard/authz";
 
-export default (identityService: IdentityService): Routes<IdentityRoutes> => {
-    const identityHandler = new IdentityHandler(identityService);
+import type { IdentityRoutes, Routes } from "@/types/types";
+import type IdentityService from "@/adapter/service/identity";
+
+export default (service: IdentityService): Routes<IdentityRoutes> => {
+    const handler = new IdentityHandler(service);
 
     return {
         routes: [
             {
-                method: "GET",
+                method: Method.GET,
                 url: "/identities",
                 onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.read,
-                        subject: "Identity",
-                    },
+                    { action: Act.readAll, subject: Resource.identity },
                 ]),
-                handler: identityHandler.identities,
-                schema: {
-                    request: {
-                        querystring: schema.$ref("GET_IDENTITIES_QUERY_SCHEMA"),
-                    },
-                },
+                handler: handler.identities,
+                schema: { request: { querystring: $ref("GET_IDENTITIES_QUERY_SCHEMA") } },
             },
             {
-                method: "GET",
+                method: Method.GET,
                 url: "/identities/me",
-                onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.read,
-                        subject: "Identity",
-                    },
-                ]),
-                handler: identityHandler.getMe,
+                onRequest: Authorization.policy([{ action: Act.read, subject: Resource.identity }]),
+                handler: handler.getMe,
             },
             {
-                method: "GET",
+                method: Method.GET,
+                url: "/identities/:id",
+                onRequest: Authorization.policy([{ action: Act.read, subject: Resource.identity }]),
+                handler: handler.getIdentityById,
+                schema: { request: { params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA") } },
+            },
+            {
+                method: Method.PUT,
                 url: "/identities/:id",
                 onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.read,
-                        subject: "Identity",
-                    },
+                    { action: Act.update, subject: Resource.identity },
                 ]),
-                handler: identityHandler.getIdentityById,
+                handler: handler.updateIdentityById,
                 schema: {
                     request: {
-                        params: schema.$ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                        params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
+                        body: $ref("PUT_IDENTITY_BODY_SCHEMA"),
                     },
                 },
             },
             {
-                method: "PUT",
+                method: Method.DELETE,
                 url: "/identities/:id",
                 onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.update,
-                        subject: "Identity",
-                    },
+                    { action: Act.delete, subject: Resource.identity },
                 ]),
-                handler: identityHandler.updateIdentityById,
-                schema: {
-                    request: {
-                        params: schema.$ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
-                        body: schema.$ref("PUT_IDENTITY_BODY_SCHEMA"),
-                    },
-                },
+                handler: handler.deleteIdentityById,
+                schema: { request: { params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA") } },
             },
             {
-                method: "DELETE",
-                url: "/identities/:id",
-                onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.delete,
-                        subject: "Identity",
-                    },
-                ]),
-                handler: identityHandler.deleteIdentityById,
-                schema: {
-                    request: {
-                        params: schema.$ref("GET_IDENTITY_PARAMS_ID_SCHEMA"),
-                    },
-                },
-            },
-            {
-                method: "POST",
+                method: Method.POST,
                 url: "/identities/:id/deactivate",
                 onRequest: Authorization.policy([
-                    {
-                        action: constant.Action.update,
-                        subject: "Identity",
-                    },
+                    { action: Act.update, subject: Resource.identity },
                 ]),
-                handler: identityHandler.deactivate,
-                schema: {
-                    request: {
-                        body: schema.$ref("POST_REGISTER_IDENTITY_BODY_SCHEMA"),
-                    },
-                },
+                handler: handler.deactivate,
+                schema: { request: { body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA") } },
             },
         ],
     };

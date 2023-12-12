@@ -6,7 +6,7 @@ import JwtToken from "@/common/libs/token";
 
 class AbilityGuard {
     // eslint-disable-next-line class-methods-use-this
-    async abac(request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes) {
+    static async abac(request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes) {
         const { authorization } = request.headers;
 
         if (!constant.protectedResource.includes(request.routeOptions.url)) return done();

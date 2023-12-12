@@ -13,17 +13,17 @@ class TokenHandler {
     generateCSRFToken: RequestHandler = async (_request, reply) => {
         const csrf = CSRF.generate();
         return reply
-            .code(200)
             .cookie("__host_csrf_token", csrf, {
                 domain: "127.0.0.1",
                 expires: new Date(Date.now() + 86400000),
-                maxAge: Date.now() + 86400000,
-                secure: true,
+                maxAge: 86400000,
                 signed: true,
+                secure: true,
                 httpOnly: true,
-                sameSite: "None",
+                sameSite: "none",
                 path: "/",
             })
+            .code(200)
             .send({
                 data: csrf,
             });

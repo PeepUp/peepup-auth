@@ -11,12 +11,11 @@ export const cwd = process.cwd();
 
 export const issuer: string = `urn:server-identity:${serverURL}` || `urn:server-1:${serverURL}`;
 
-export const keysPath = join(cwd, "/keys");
-export const jwksPath = "/.well-known/jwks.json";
-export const publicDirPath = join(cwd, "/public");
+export const keysPath = join(cwd, "keys");
+export const publicDirPath = join(cwd, "public");
 export const rsaKeysDirPath = join(keysPath, "RSA");
 export const ecsdaKeysDirPath = join(keysPath, "ECSDA");
-export const jwksDirPath = join(publicDirPath, jwksPath);
+export const jwksPath = join(publicDirPath, ".well-known");
 export const jwksURL = new URL(join(serverURL, remoteJWKSUrl));
 export const protectedResource = [
     identityPath,
@@ -132,6 +131,16 @@ export enum IdentityStateTypes {
 }
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
+export enum Method {
+    GET = "GET",
+    POST = "POST",
+    PUT = "PUT",
+    DELETE = "DELETE",
+    PATCH = "PATCH",
+    OPTIONS = "OPTIONS",
+    HEAD = "HEAD",
+}
+
 export enum HttpStatusCode {
     OK = 200,
     Created = 201,
@@ -158,7 +167,7 @@ export enum HttpStatusCode {
     ServiceUnavailable = 503,
 }
 
-export enum ResourceList {
+export enum Resource {
     identity = "Identity",
     token = "Token",
 }

@@ -356,15 +356,11 @@ export default class TokenManagementService {
 
     setupKID(): void {
         const { keysPath } = constant;
-        const isRSADirectoryExist = FileUtil.checkDir(join(keysPath, "RSA"));
-        const isECSDADirectoryExist = FileUtil.checkDir(join(keysPath, "ECSDA"));
 
-        if (isRSADirectoryExist && isECSDADirectoryExist) {
-            const [ecsdaKeyId] = FileUtil.getDir(join(keysPath, "ECSDA"));
-            const [rsa256KeyId] = FileUtil.getDir(join(keysPath, "RSA"));
-            this.keyId.RS256 = rsa256KeyId as string;
-            this.keyId.ES256 = ecsdaKeyId as string;
-        }
+        const [ecsdaKeyId] = FileUtil.getDir(join(keysPath, "ECSDA"));
+        const [rsa256KeyId] = FileUtil.getDir(join(keysPath, "RSA"));
+        this.keyId.RS256 = rsa256KeyId as string;
+        this.keyId.ES256 = ecsdaKeyId as string;
     }
 
     setupVerifyOptions(): void {

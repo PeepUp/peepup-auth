@@ -37,6 +37,7 @@ class IdentityService {
         const findIdentity = await this.getIdentityByQuery({
             email,
         });
+
         if (findIdentity) {
             throw new ResourceAlreadyExistException("Error: Identity already exists!");
         }

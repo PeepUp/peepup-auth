@@ -8,7 +8,12 @@ import FileUtil from "@/common/utils/file.util";
 import type { RequestHandler, unknown as _ } from "@/types/types";
 
 class OAuthConfigurationHandler {
-    private readonly jwksCertsPath: string = join(constant.publicDirPath, constant.jwksPath);
+    private readonly jwksCertsPath: string = join(
+        process.cwd(),
+        "public",
+        ".well-known",
+        "jwks.json"
+    );
 
     // eslint-disable-line @typescript-eslint/no-unused-vars
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

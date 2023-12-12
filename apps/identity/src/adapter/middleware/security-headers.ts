@@ -6,7 +6,6 @@ export async function securityHeaders(
     done: DoneFuncWithErrOrRes
 ) {
     reply.header("Server", "dofavour_v1");
-    reply.header("Access-Control-Allow-Origin", ["http://localhost:3000"]);
     reply.header("Access-Control-Allow-Credentials", "true");
     reply.header("X-Content-Type-Options", "nosniff");
     reply.header("Cache-control", "no-cache, no-store, max-age=0, must-revalidate");
@@ -18,7 +17,7 @@ export async function securityHeaders(
     reply.header("Strict-Transport-Security", "max-age=31536000; includeSubdomains;");
     reply.header(
         "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, x-csrf-token, X-CSRF-TOKEN, X-CSRF-Token, Authorization, authorization"
+        "Origin, X-Requested-With, Content-Type, Accept, X-Csrf-Token, x-csrf-token, X-CSRF-TOKEN, X-CSRF-Token, Authorization, authorization"
     );
     reply.header("Cross-Origin-Embedder-Policy", "require-corp");
     reply.header("Access-Control-Max-Age", "86400");

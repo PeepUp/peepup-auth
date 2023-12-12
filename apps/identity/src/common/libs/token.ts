@@ -87,13 +87,16 @@ class JwtToken {
     async buildJWKSPublicKey(kid: string, ecsdaKeyId: string): Promise<void> {
         try {
             const keysList: JWK[] = [];
-            const jwksPath = path.join(cwd, "public", ".well-known");
+            const wellKnownPath = path.join(cwd, "public", ".well-known");
             const rsakeys = FileUtil.getDir(rsaKeysDirPath);
             const ecsdakeys = FileUtil.getDir(ecsdaKeysDirPath);
 
-            if (rsakeys.length === 0) return;
-            if (ecsdakeys.length === 0) return;
+            if (rsakeys.length === 0 || ecsdakeys.length === 0) {
+                console.log("RSA or ECSDA keys not found!");
+                return;
+            }
 
+            // for rsa keys
             await Promise.all(
                 rsakeys.map(async (keyId) => {
                     const jwk = await this.JWKFromPEM(
@@ -105,9 +108,11 @@ class JwtToken {
                         TokenAlgorithm.RS256
                     );
                     keysList.push(jwk);
+                    console.log({ rsa: jwk });
                 })
             );
 
+            // for ecsda keys
             await Promise.all(
                 ecsdakeys.map(async (keyId) => {
                     const jwk = await this.JWKFromPEM(
@@ -119,13 +124,15 @@ class JwtToken {
                         TokenAlgorithm.ES256
                     );
                     keysList.push(jwk);
+                    console.log({ ecsda: jwk });
                 })
             );
 
-            if (!FileUtil.checkDir(jwksPath)) fs.mkdirSync(jwksPath, { recursive: true });
-
             const jwks = JSON.stringify({ keys: keysList }, null, 2);
-            fs.writeFileSync(path.join(jwksPath, "jwks.json"), jwks);
+            console.log({ jwks });
+            const writeStream = fs.createWriteStream(path.join(wellKnownPath, "jwks.json"));
+            writeStream.write(jwks);
+            writeStream.end();
         } catch (error) {
             if (error instanceof Error) throw new Error(error.message);
         }

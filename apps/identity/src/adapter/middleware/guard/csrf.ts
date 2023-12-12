@@ -8,11 +8,15 @@ export default class CSRFGuard {
         const { cookies } = request;
         const cookieName = "__host_csrf_token";
         const csrfOnCookie = cookies[cookieName];
+        console.log("csrfOnCookie: ", csrfOnCookie);
 
         const csrf =
             (headers["x-csrf-token"] as string) ||
+            (headers["X-Csrf-Token"] as string) ||
             (headers["X-CSRF-TOKEN"] as string) ||
             (headers["X-CSRF-Token"] as string);
+
+        console.log("csrf-header: ", csrf);
 
         if (!csrf || !csrfOnCookie) {
             throw new BadRequestException(
