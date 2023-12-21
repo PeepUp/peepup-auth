@@ -1,40 +1,23 @@
 version: "3.3"
 
 services:
-    identity-service-database:
-        container_name: identity-service-db-1
+    identity-service-db:
+        container_name: identity-service-db
         image: "postgres:latest"
         restart: always
         ports:
             - 15432:5432
         env_file:
-            - ./apps/identity/.env.local
+            - ./apps/identity/.env
         networks:
             - identity-service-network
         volumes:
-            - ~/.data/postgres:/var/lib/postgresql/data/
+            - ./data/postgres:/var/lib/postgresql/data/
         logging:
             options:
                 max-size: 10m
                 max-file: "3"
-    rabbitmq-broker:
-        container_name: rabbitmq-broker
-        image: "rabbitmq:3-management"
-        env_file:
-            - .env.local
-        ports:
-            - 5672:5672
-            - 15674:15672
-        volumes:
-            - ./configs/rabbitmq/rabbitmq.conf:/etc/rabbitmq.conf:ro
-            - ./configs/rabbitmq/definitions.json:/etc/definitions.json:ro
-            - ~/.data/rabbitmq/data/:/var/lib/rabbitmq/:rw
-            - ~/.data/rabbitmq/log/:/var/log/rabbitmq:rw
-        networks:
-            - rabbitmq-broker-network
 
 networks:
     identity-service-network:
-        driver: bridge
-    rabbitmq-broker-network:
         driver: bridge

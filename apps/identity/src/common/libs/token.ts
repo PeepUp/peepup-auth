@@ -108,7 +108,6 @@ class JwtToken {
                         TokenAlgorithm.RS256
                     );
                     keysList.push(jwk);
-                    console.log({ rsa: jwk });
                 })
             );
 
@@ -124,12 +123,10 @@ class JwtToken {
                         TokenAlgorithm.ES256
                     );
                     keysList.push(jwk);
-                    console.log({ ecsda: jwk });
                 })
             );
 
             const jwks = JSON.stringify({ keys: keysList }, null, 2);
-            console.log({ jwks });
             const writeStream = fs.createWriteStream(path.join(wellKnownPath, "jwks.json"));
             writeStream.write(jwks);
             writeStream.end();
@@ -293,7 +290,6 @@ class JwtToken {
 
             if (validate instanceof Error) {
                 console.log("error while validate the payload!");
-                console.log({ validate });
                 throw new UnauthorizedException("JWTException: Invalid token signature");
             }
 

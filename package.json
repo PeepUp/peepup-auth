@@ -22,7 +22,8 @@
     "scripts": {
         "build": "turbo build",
         "clean": "turbo clean",
-        "dev": "turbo dev --no-daemon",
+        "dev": "pnpm run dev:prepare && turbo dev --no-daemon",
+        "dev:prepare": "turbo db:migrate && turbo db:seed && turbo db:generate",
         "format": "turbo db:format",
         "generate": "turbo db:generate",
         "lint": "turbo lint",

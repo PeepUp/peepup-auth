@@ -114,7 +114,6 @@ async function initJWKS() {
         ecsdaCert.saveKeyPair(ecsdaCerts, keysPath + "/ECSDA/" + ecsdaKeyId);
 
         console.log("----- Generating JWKS KEY Certificates Successfully -----");
-        console.log({ rsa256KeyId, ecsdaKeyId });
 
         // generate jwks.json file
         const jwtTokenLib = new JwtToken(rsa256KeyId[0] as string, {}, <JWTHeaderParameters>{});
