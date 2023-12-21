@@ -66,6 +66,12 @@ export default (service: IdentityService): Routes<IdentityRoutes> => {
                 handler: handler.deactivate,
                 schema: { request: { body: $ref("POST_REGISTER_IDENTITY_BODY_SCHEMA") } },
             },
+            {
+                method: Method.GET,
+                url: "/identities/:id/preview",
+                handler: handler.getIdentityPreviewById,
+                schema: { request: { params: $ref("GET_IDENTITY_PARAMS_ID_SCHEMA") } },
+            },
         ],
     };
 };

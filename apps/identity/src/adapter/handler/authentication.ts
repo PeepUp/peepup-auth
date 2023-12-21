@@ -63,8 +63,6 @@ export default class AuthLocalStrategyHandler {
         return reply.status(409).send();
     };
 
-    // 6 nov 2023 13:41
-    // last here
     registration: RequestHandler<_, _, schema.RegisterIdentityBody> = async (request, reply) => {
         const { body } = request;
         await this.authenticationService.registration(body);

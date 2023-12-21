@@ -9,9 +9,9 @@ import type {
 } from "@/adapter/schema/identity";
 
 import type {
+    ID,
     EmailUserName,
     FindUniqeIdentityQuery,
-    ID,
     RegisterIdentityBody,
     VerifyHashPasswordUtils,
 } from "@/types/types";
@@ -78,6 +78,21 @@ class IdentityService {
 
         const { password, providerId, phoneNumber, updatedAt, ...result }: typeof data = data;
         return result;
+    }
+
+    async getIdentityPreview(uid: string): Promise<Readonly<any> | null> {
+        const data = await this.identityRepository.getIdentityById<Identity>(uid);
+        if (data === null) return data;
+
+        const { id, avatar, username, firstName, lastName, ...result }: typeof data = data;
+
+        return {
+            id,
+            avatar,
+            username,
+            firstName,
+            lastName,
+        };
     }
 
     async getMe(authorization: string): Promise<Readonly<Identity> | null> {

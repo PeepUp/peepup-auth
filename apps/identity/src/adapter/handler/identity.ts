@@ -130,6 +130,44 @@ class IdentityHandler {
         });
     };
 
+    getIdentityPreviewById: RequestHandler<_, _, _, Schema.GetIdentityParamsId> = async (
+        request,
+        reply
+    ) => {
+        console.log("get identity preview by id");
+        const { id } = request.params;
+        const parseId = schema.GET_IDENTITY_PARAMS_ID_SCHEMA.safeParse(request.params);
+
+        if (!parseId.success) {
+            if (parseId.error) {
+                return reply.code(400).send({
+                    code: 400,
+                    message: "bad request",
+                    details: parseId.error.issues.map((issue) => `${issue.message} \n`),
+                });
+            }
+
+            return reply.code(400).send({
+                code: 400,
+                message: "bad request",
+            });
+        }
+
+        const data = await this.identitiesService.getIdentityPreview(id);
+
+        if (!data) {
+            return reply.code(200).send({
+                code: 404,
+                message: "data identity record not found",
+                data: [],
+            });
+        }
+
+        return reply.code(200).send({
+            data,
+        });
+    };
+
     updateIdentityById: RequestHandler<_, _, Schema.PutIdentityBody, Schema.GetIdentityParamsId> =
         async (request, reply) => {
             const { id } = request.params;
