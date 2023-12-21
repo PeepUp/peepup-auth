@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/extensions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Identity } from "@domain/entity/identity";
 import type { Prisma } from "@prisma/client";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";

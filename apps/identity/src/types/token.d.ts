@@ -1,9 +1,6 @@
-import type { Identity } from "@domain/entity/identity";
 import type { JWTPayload, JWTHeaderParameters, JWTVerifyOptions } from "jose";
 import { TokenAlgorithm } from "@/common/constant";
 import type { AccessInfo, EmailAndIdentityId, Token, TokenTypes } from "@/types";
-
-import { ID } from "./types";
 
 export type TokenPayload = EmailAndIdentityId & Pick<AccessInfo, "resource">;
 export type TokenPayloadProtected = TokenPayload & { jti: string; kid: string };
@@ -72,7 +69,9 @@ export type KeyPair = {
     publicKey: string;
 };
 
-export type TokenPayloadIdentity = Required<EmailAndIdentityId> &
+// eslint-disable @typescript-eslint/no-redeclare
+// eslint-disable import/export
+export type ITokenPayloadIdentity = Required<EmailAndIdentityId> &
     Required<Pick<AccessInfo, "resource">> &
     Required<{
         role: Pick<AccessInfo, "resource">;
@@ -84,6 +83,8 @@ export type TokenPayloadIdentity = Required<EmailAndIdentityId> &
 export type TokenPayloadIdentityReadonly = Readonly<TokenPayloadIdentity>;
 export type TokenPayloadWithIdentity = JWTPayload & TokenPayloadIdentity;
 
+// eslint-disable @typescript-eslint/no-redeclare
+// eslint-disable import/export
 export interface TokenPayloadIdentity {
     id: string | number;
     sid: string;

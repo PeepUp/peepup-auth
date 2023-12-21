@@ -77,13 +77,18 @@ declare namespace Identity {
             }
         }
 
+        // eslint-disable @typescript-eslint/no-explicit-any
         type Route = RouteOptions<
             http.Server,
             http.IncomingMessage,
             http.ServerResponse,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             any,
             FastifyBaseLogger
         >;
@@ -91,7 +96,9 @@ declare namespace Identity {
         export type Routes = Array<Route>;
 
         interface Plugin {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             plugin: any;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             options?: any;
         }
 

@@ -1,7 +1,6 @@
 import { join } from "path";
 import { existsSync } from "fs";
 
-import * as constant from "@/common/constant";
 import FileUtil from "@/common/utils/file.util";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

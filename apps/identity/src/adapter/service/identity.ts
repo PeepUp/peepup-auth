@@ -80,10 +80,12 @@ class IdentityService {
         return result;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getIdentityPreview(uid: string): Promise<Readonly<any> | null> {
         const data = await this.identityRepository.getIdentityById<Identity>(uid);
         if (data === null) return data;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, avatar, username, firstName, lastName, ...result }: typeof data = data;
 
         return {

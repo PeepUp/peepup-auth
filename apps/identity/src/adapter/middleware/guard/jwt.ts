@@ -1,5 +1,5 @@
 /* eslint-disable consistent-return */
-import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type TokenManagementService from "@/adapter/service/tokens/token";
 
 import JwtToken from "@/common/libs/token";
