@@ -44,7 +44,6 @@ pids
 .docker
 .docker/docker-compose.yml
 
-.env.*
 node_modules
 .vscode
 coverage
@@ -58,8 +57,7 @@ lib
 .nycrc
 .travis.yml
 *.log
-*.env
-*.env.*
+.env
 coverage
 README.md
 # test

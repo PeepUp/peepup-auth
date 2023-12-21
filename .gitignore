@@ -55,8 +55,6 @@ lib
 .nycrc
 .travis.yml
 *.log
-*.env
-*.env.*
 coverage
 README.md
 # test

@@ -1,6 +1,7 @@
 import { $ref } from "@/adapter/schema";
 import { Action as Act, Resource, Method } from "@/common/constant";
 
+import SocialMediaRoutes from "./social-media-link";
 import IdentityHandler from "@/adapter/handler/identity";
 import Authorization from "@/adapter/middleware/guard/authz";
 
@@ -12,6 +13,7 @@ export default (service: IdentityService): Routes<IdentityRoutes> => {
 
     return {
         routes: [
+            ...SocialMediaRoutes().routes,
             {
                 method: Method.GET,
                 url: "/identities",
