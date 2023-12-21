@@ -23,9 +23,8 @@ model Identity {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // relation fields
   whitelistedTokens WhitelistedToken[]
-  // roles             Role[]
+  socialMediaLinks SocialMediaLink[]
 
   providerId Int?
   provider   Provider? @relation(fields: [providerId], references: [id])
@@ -160,6 +159,16 @@ model WhitelistedToken {
   @@map(name: "tokens_whitelisted")
 }
 
+model SocialMediaLink {
+  id        Int      @id @default(autoincrement())
+  type      SocialMediaType
+  url       String
+  identity  Identity @relation(fields: [identityId], references: [id])
+  identityId String
+
+  @@map(name: "social_media_links")
+}
+
 model CasbinRule {
   id    Int     @id @default(autoincrement())
   ptype String
@@ -207,4 +216,13 @@ enum Action {
   update
   read
   delete
+}
+
+enum SocialMediaType {
+  threads
+  instagram
+  linkedin
+  facebook
+  github
+  twitter
 }
